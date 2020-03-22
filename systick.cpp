@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "hardware_pins.h"
-
+#include "public.h"
 
 /***
  * Global variables
@@ -64,6 +64,7 @@ void setupSystick() {
 ISR(TIMER2_COMPA_vect) {
   updateBatteryVolts();
   updateFunctionSwitch();
+  updateWallSensor();
 }
 
 void print_bat()

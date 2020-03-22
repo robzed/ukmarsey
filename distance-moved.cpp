@@ -1,8 +1,8 @@
 #include <Arduino.h>
 #include "digitalWriteFast.h"
 #include "hardware_pins.h"
+#include "public.h"
 
-#if 0
 /***
  * Global robot characteristic constants
  */
@@ -13,6 +13,7 @@ const float WHEEL_SEPARATION = 75.2;
 
 const float MM_PER_COUNT = (PI * WHEEL_DIAMETER) / (2 * COUNTS_PER_ROTATION * GEAR_RATIO);
 const float DEG_PER_COUNT = (360.0 * MM_PER_COUNT) / (PI * WHEEL_SEPARATION);
+
 /***
  * Global variables
  */
@@ -20,10 +21,9 @@ volatile int32_t encoderLeftCount;
 volatile int32_t encoderRightCount;
 int32_t encoderSum;
 int32_t encoderDifference;
-uint32_t updateTime;
-uint32_t updateInterval = 100;  // in milliseconds
 
-void setupEncoder() {
+
+void setupEncoders() {
   // left
   pinMode(ENCODER_LEFT_CLK, INPUT);
   pinMode(ENCODER_LEFT_B, INPUT);
@@ -68,37 +68,9 @@ ISR(INT1_vect) {
   oldB = newB;
 }
 
-int decodeFunctionSwitch(int functionValue) {
-  /**
-   * Typical ADC values for all function switch settings
-   */
-  const int adcReading[] = {660, 647, 630, 614, 590, 570, 545, 522, 461,
-                            429, 385, 343, 271, 212, 128, 44,  0};
 
-  if (functionValue > 1000) {
-    return 16;  // pushbutton closed
-  }
-  int result = 16;
-  for (int i = 0; i < 16; i++) {
-    if (functionValue > (adcReading[i] + adcReading[i + 1]) / 2) {
-      result = i;
-      break;
-    }
-  }
-  return result;
-}
+void print_encoder_setup() {
 
-int getFunctionSwitch() {
-  int functionValue = analogRead(FUNCTION_PIN);
-  int function = decodeFunctionSwitch(functionValue);
-  return function;
-}
-
-void setup() {
-  Serial.begin(9600);
-  setupEncoder();
-  Serial.println(F("Hello\n"));
-  updateTime = millis() + updateInterval;
   Serial.print(F("MM PER COUNT = "));
   Serial.println(MM_PER_COUNT, 5);
 
@@ -118,20 +90,17 @@ void setup() {
   Serial.print(360.0/DEG_PER_COUNT);
   Serial.println(F(" counts"));
   Serial.println();
-  Serial.println(F("Press the user button to continue..."));
-  while(getFunctionSwitch() != 16){
-    // do nothing until the pushbutton is pressed
-  }
-  Serial.println();
 }
 
-void loop() {
-  if (millis() > updateTime) {
-    updateTime += updateInterval;
-    if(getFunctionSwitch() == 16){
-        encoderLeftCount = 0;
-        encoderRightCount = 0;
-    }
+
+void zero_encoders()
+{
+  encoderLeftCount = 0;
+  encoderRightCount = 0;
+}
+
+void print_encoders()
+{
     encoderSum = encoderRightCount + encoderLeftCount;
     encoderDifference = encoderRightCount - encoderLeftCount;
     float distance = MM_PER_COUNT * encoderSum;
@@ -149,9 +118,5 @@ void loop() {
     Serial.print(angle);
     Serial.print(F(" deg"));
 
-
     Serial.println();
-  }
 }
-#endif
-

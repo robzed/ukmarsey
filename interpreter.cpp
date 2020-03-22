@@ -32,11 +32,15 @@ typedef struct {
 } cmds_t;
 
 const /*PROGMEM*/ cmds_t cmds[] = {
-    {'l', led},
-    {'?', ok},
-    {'h', ok},
-    {'b', print_bat},
-    {'s', print_switches},
+    {'l', led },
+    {'?', ok },
+    {'h', ok },
+    {'b', print_bat },
+    {'s', print_switches },
+    {'w', print_wall_sensors },
+    {'e', print_encoders },
+    {'z', zero_encoders },
+    {'r', print_encoder_setup },
     {0, 0}
 };
 

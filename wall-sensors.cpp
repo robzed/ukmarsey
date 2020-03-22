@@ -1,13 +1,9 @@
 #include <Arduino.h>
 #include "hardware_pins.h"
 
-#if 0
 /***
  * Global variables
  */
-
-uint32_t updateTime;
-uint32_t updateInterval = 40;  // (ms) do not make this smaller than 25ms for performance reasons
 
 // the default values for the front sensor when the robot is backed up to a wall
 const int FRONT_REFERENCE = 44;
@@ -44,25 +40,6 @@ void analogueSetup() {
   bitSet(ADCSRA, ADPS2);
 }
 
-/***
- * If you are interested in what all this does, the ATMega328P datasheet
- * has all the answers but it is not easy to follow until you have some
- * experience. For now just use the code as it is.
- */
-void setupSystick() {
-  // set the mode for timer 2
-  bitClear(TCCR2A, WGM20);
-  bitSet(TCCR2A, WGM21);
-  bitClear(TCCR2B, WGM22);
-  // set divisor to 128 => timer clock = 125kHz
-  bitSet(TCCR2B, CS22);
-  bitClear(TCCR2B, CS21);
-  bitSet(TCCR2B, CS20);
-  // set the timer frequency
-  OCR2A = 249;  // (16000000/128/500)-1 = 249
-  // enable the timer interrupt
-  bitSet(TIMSK2, OCIE2A);
-}
 
 void updateWallSensor() {
   // first read them dark
@@ -105,26 +82,15 @@ void updateWallSensor() {
 }
 
 
-// the systick event is an ISR attached to Timer 2
-ISR(TIMER2_COMPA_vect) {
-  updateWallSensor();
-}
-
-void setup() {
-  Serial.begin(9600);
+void wall_sensors_setup() {
   pinMode(EMITTER, OUTPUT);
   pinMode(LED_RIGHT, OUTPUT);
   pinMode(LED_LEFT, OUTPUT);
   digitalWrite(EMITTER, 0);  // be sure the emitter is off
   analogueSetup();           // increase the ADC conversion speed
-  setupSystick();
-  updateTime = millis() + updateInterval;
 }
 
-uint32_t i;
-void loop() {
-  if (millis() > updateTime) {
-    updateTime += updateInterval;
+void print_wall_sensors() {
     Serial.print(F("  Right: "));
     Serial.print(gSensorRight);
     Serial.print(F("  Front: "));
@@ -134,8 +100,4 @@ void loop() {
     Serial.print(F("  Error: "));
     Serial.print(gSensorCTE);
     Serial.println(); // sends "\r\n"
-  }
 }
-
-#endif
-
