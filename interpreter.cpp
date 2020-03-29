@@ -7,7 +7,7 @@
 
 #define MAX_INPUT_SIZE 10
 char inputString[MAX_INPUT_SIZE];         // a String to hold incoming data
-char inputIndex = 0;  // where we are on the input
+int inputIndex = 0;  // where we are on the input
 
 
 typedef struct {
@@ -24,6 +24,91 @@ void ok() { Serial.println(F("OK")); }
 
 void print_switches() { Serial.println(gFunctionSwitch); }
 
+void motor_test() {
+  
+  int function = inputString[1];
+
+  switch (function) {
+    case '0':
+      setMotorVolts(0, 0);
+      Serial.println(F("motors off"));
+      break;
+    case '1':
+      setMotorVolts(1.5, 1.5);
+      Serial.println("forward 25%");
+      break;
+    case '2':
+      setMotorVolts(3.0, 3.0);
+      Serial.println("forward 50%");
+      break;
+    case '3':
+      setMotorVolts(4.5, 4.5);
+      Serial.println("forward 75%");
+      break;
+    case '4':
+      setMotorVolts(-1.5, -1.5);
+      Serial.println("reverse 25%");
+      break;
+    case '5':
+      setMotorVolts(-3.0, -3.0);
+      Serial.println("reverse 50%");
+      break;
+    case '6':
+      setMotorVolts(-4.5, -4.5);
+      Serial.println("reverse 75%");
+      break;
+    case '7':
+      setMotorVolts(-1.5, 1.5);
+      Serial.println("spin left 25%");
+      break;
+    case '8':
+      setMotorVolts(-3.0, 3.0);
+      Serial.println("spin left 50%");
+      break;
+    case '9':
+      setMotorVolts(1.5, -1.5);
+      Serial.println("spin right 25%");
+      break;
+    case 'a':
+      setMotorVolts(3.0, -3.0);
+      Serial.println("spin right 50%");
+      break;
+    case 'b':
+      setMotorVolts(0, 1.5);
+      Serial.println("pivot left 25%");
+      break;
+    case 'c':
+      setMotorVolts(1.5, 0);
+      Serial.println("pivot right 25%");
+      break;
+    case 'd':
+      setMotorVolts(1.5, 3.0);
+      Serial.println("curve left");
+      break;
+    case 'e':
+      setMotorVolts(3.0, 1.5);
+      Serial.println("curve right");
+      break;
+    case 'f':
+      setMotorVolts(4.5, 3.0);
+      Serial.println("big curve right");
+      break;
+    default:
+      setMotorVolts(0, 0);
+      break;
+  }
+
+  uint32_t endTime = millis() + 2000;
+  while (endTime > millis()) {
+    if (gFunctionSwitch == 16) {
+      break;  // stop running if the button is pressed
+    }
+  }
+  // be sure to turn off the motors
+  setMotorVolts(0, 0);
+
+  
+}
 
 
 typedef struct {
@@ -41,6 +126,7 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'e', print_encoders },
     {'z', zero_encoders },
     {'r', print_encoder_setup },
+    {'m', motor_test },
     {0, 0}
 };
 

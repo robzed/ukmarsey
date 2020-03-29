@@ -8,6 +8,7 @@ void setup() {
   setupSystick();
   wall_sensors_setup();
   setupEncoders();
+  motorSetup();
 }
 
 void loop() {

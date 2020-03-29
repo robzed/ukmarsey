@@ -25,4 +25,10 @@ void print_encoder_setup();
 void zero_encoders();
 void print_encoders();
 
+// provided by motor_control.cpp
+void setMotorVolts(float left, float right);
+void setRightMotorVolts(float volts);
+void setLeftMotorVolts(float volts);
+void motorSetup();
+
 #endif
