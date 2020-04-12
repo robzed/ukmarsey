@@ -61,6 +61,8 @@ m = motor tests, runs for 2 seconds or until button is pressed
 
 https://www.arduino.cc/reference/en/
 
+http://www.micromouseonline.com/micromouse-book/
+
 # Credits
 
 Based on ukmarsbot examples by UK Micromouse & Robotics Society & Dr. Peter Harrison

@@ -60,7 +60,8 @@ void setupSystick() {
   bitSet(TIMSK2, OCIE2A);
 }
 
-// the systick event is an ISR attached to Timer 2
+// The systick event is an ISR attached to Timer 2
+// This currently runs at 2ms or 500Hz.
 ISR(TIMER2_COMPA_vect) {
   updateBatteryVolts();
   updateFunctionSwitch();

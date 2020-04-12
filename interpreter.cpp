@@ -68,7 +68,7 @@ void motor_test() {
     case '9':
       setMotorVolts(1.5, -1.5);
       Serial.println("spin right 25%");
-      break;
+      break;  
     case 'a':
       setMotorVolts(3.0, -3.0);
       Serial.println("spin right 50%");
