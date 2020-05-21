@@ -35,63 +35,63 @@ void motor_test() {
       break;
     case '1':
       setMotorVolts(1.5, 1.5);
-      Serial.println("forward 25%");
+      Serial.println(F("forward 25%"));
       break;
     case '2':
       setMotorVolts(3.0, 3.0);
-      Serial.println("forward 50%");
+      Serial.println(F("forward 50%"));
       break;
     case '3':
       setMotorVolts(4.5, 4.5);
-      Serial.println("forward 75%");
+      Serial.println(F("forward 75%"));
       break;
     case '4':
       setMotorVolts(-1.5, -1.5);
-      Serial.println("reverse 25%");
+      Serial.println(F("reverse 25%"));
       break;
     case '5':
       setMotorVolts(-3.0, -3.0);
-      Serial.println("reverse 50%");
+      Serial.println(F("reverse 50%"));
       break;
     case '6':
       setMotorVolts(-4.5, -4.5);
-      Serial.println("reverse 75%");
+      Serial.println(F("reverse 75%"));
       break;
     case '7':
       setMotorVolts(-1.5, 1.5);
-      Serial.println("spin left 25%");
+      Serial.println(F("spin left 25%"));
       break;
     case '8':
       setMotorVolts(-3.0, 3.0);
-      Serial.println("spin left 50%");
+      Serial.println(F("spin left 50%"));
       break;
     case '9':
       setMotorVolts(1.5, -1.5);
-      Serial.println("spin right 25%");
+      Serial.println(F("spin right 25%"));
       break;  
     case 'a':
       setMotorVolts(3.0, -3.0);
-      Serial.println("spin right 50%");
+      Serial.println(F("spin right 50%"));
       break;
     case 'b':
       setMotorVolts(0, 1.5);
-      Serial.println("pivot left 25%");
+      Serial.println(F("pivot left 25%"));
       break;
     case 'c':
       setMotorVolts(1.5, 0);
-      Serial.println("pivot right 25%");
+      Serial.println(F("pivot right 25%"));
       break;
     case 'd':
       setMotorVolts(1.5, 3.0);
-      Serial.println("curve left");
+      Serial.println(F("curve left"));
       break;
     case 'e':
       setMotorVolts(3.0, 1.5);
-      Serial.println("curve right");
+      Serial.println(F("curve right"));
       break;
     case 'f':
       setMotorVolts(4.5, 3.0);
-      Serial.println("big curve right");
+      Serial.println(F("big curve right"));
       break;
     default:
       setMotorVolts(0, 0);
