@@ -23,10 +23,10 @@ void motorSetup() {
 void setLeftMotorPWM(int pwm) {
   pwm = constrain(pwm, -255, 255);
   if (pwm < 0) {
-    digitalWrite(MOTOR_LEFT_DIR, 1);
+    digitalWrite(MOTOR_LEFT_DIR, 0);
     analogWrite(MOTOR_LEFT_PWM, -pwm);
   } else {
-    digitalWrite(MOTOR_LEFT_DIR, 0);
+    digitalWrite(MOTOR_LEFT_DIR, 1);
     analogWrite(MOTOR_LEFT_PWM, pwm);
   }
 }
@@ -34,10 +34,10 @@ void setLeftMotorPWM(int pwm) {
 void setRightMotorPWM(int pwm) {
   pwm = constrain(pwm, -255, 255);
   if (pwm < 0) {
-    digitalWrite(MOTOR_RIGHT_DIR, 0);
+    digitalWrite(MOTOR_RIGHT_DIR, 1);
     analogWrite(MOTOR_RIGHT_PWM, -pwm);
   } else {
-    digitalWrite(MOTOR_RIGHT_DIR, 1);
+    digitalWrite(MOTOR_RIGHT_DIR, 0);
     analogWrite(MOTOR_RIGHT_PWM, pwm);
   }
 }
