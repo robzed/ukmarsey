@@ -6,7 +6,8 @@
  * Global variables
  */
 
-float gBatteryVolts;
+//int raw_BatteryVolts_adcValue;
+float raw_BatteryVolts;
 byte gFunctionSwitch;
 byte gDipSwitch;
 const float batteryDividerRatio = 2.0f;
@@ -14,8 +15,14 @@ const float batteryDividerRatio = 2.0f;
 /***/
 
 void updateBatteryVolts() {
-  int adcValue = analogRead(BATTERY_VOLTS);
-  gBatteryVolts = adcValue * (5.0f * batteryDividerRatio / 1023.0f);
+  int raw_BatteryVolts_adcValue = analogRead(BATTERY_VOLTS);
+  raw_BatteryVolts = raw_BatteryVolts_adcValue * (5.0f * batteryDividerRatio / 1023.0f);
+}
+
+float get_BatteryVolts()
+{
+  return raw_BatteryVolts;
+  //return raw_BatteryVolts_adcValue * (5.0f * batteryDividerRatio / 1023.0f);
 }
 
 void updateFunctionSwitch() {
@@ -60,16 +67,31 @@ void setupSystick() {
   bitSet(TIMSK2, OCIE2A);
 }
 
+unsigned long t_systick1 = 0;
+unsigned long t_systick2 = 0;
+unsigned long t_systick3 = 0;
+
 // The systick event is an ISR attached to Timer 2
 // This currently runs at 2ms or 500Hz.
 ISR(TIMER2_COMPA_vect) {
+  unsigned long _start = micros();
   updateBatteryVolts();
+  t_systick1 = micros() - _start;
+
+  _start = micros();
   updateFunctionSwitch();
+  t_systick2 = micros() - _start;
+
+  _start = micros();
   updateWallSensor();
+  t_systick3 = micros() - _start;
+
+  //speed_control();
 }
 
 void print_bat()
 {
     Serial.print(F("Battery = "));
-    Serial.println(gBatteryVolts);
+    Serial.print(get_BatteryVolts());
+    Serial.println(F(" v"));
 }

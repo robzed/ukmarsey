@@ -3,12 +3,13 @@
 
 void interpreter();
 
+
 //
 // provided by systick.cpp
 //
 void setupSystick();
 void print_bat();
-extern float gBatteryVolts;
+float get_BatteryVolts();
 extern byte gFunctionSwitch;
 extern byte gDipSwitch;;
 
@@ -30,5 +31,20 @@ void setMotorVolts(float left, float right);
 void setRightMotorVolts(float volts);
 void setLeftMotorVolts(float volts);
 void motorSetup();
+
+// internal use
+#define MEASURE_TIMING 0
+
+typedef unsigned time_measure_t;
+#if MEASURE_TIMING
+#define TIME_START(START_VARIABLE) START_VARIABLE = micros();
+#define TIME_END(START_VARIABLE, END_VARIABLE) END_VARIABLE = micros() - START_VARIABLE;
+#define TIME_DEFINE_VARIABLE(VARIABLE) time_measure_t VARIABLE;
+#else
+#define TIME_START(START_VARIABLE)
+#define TIME_END(START_VARIABLE, END_VARIABLE)
+#define TIME_DEFINE_VARIABLE(VARIABLE) 
+#endif
+
 
 #endif

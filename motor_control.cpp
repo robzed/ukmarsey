@@ -49,13 +49,13 @@ void setMotorPWM(int left, int right) {
 
 void setLeftMotorVolts(float volts) {
   volts = constrain(volts, -MAX_MOTOR_VOLTS, MAX_MOTOR_VOLTS);
-  int motorPWM = (int)((255.0f * volts) / gBatteryVolts);
+  int motorPWM = (int)((255.0f * volts) / get_BatteryVolts());
   setLeftMotorPWM(motorPWM);
 }
 
 void setRightMotorVolts(float volts) {
   volts = constrain(volts, -MAX_MOTOR_VOLTS, MAX_MOTOR_VOLTS);
-  int motorPWM = (int)((255.0f * volts) / gBatteryVolts);
+  int motorPWM = (int)((255.0f * volts) / get_BatteryVolts());
   setRightMotorPWM(motorPWM);
 }
 
