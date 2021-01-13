@@ -22,11 +22,18 @@ void led() { digitalWrite(LED_BUILTIN, (inputString[1] == '0') ? LOW:HIGH); }
 
 void ok() { Serial.println(F("OK")); }
 
+void reset_state() {
+  // We should reset all state here. At the moment there isn't any
+  Serial.println(F("RST"));
+}
+
+void show_version() { Serial.println(F("v1.0")); }
+
 void print_switches() { Serial.println(gFunctionSwitch); }
 
 void motor_test() {
   
-  int function = inputString[1];
+  char function = inputString[1];
 
   switch (function) {
     case '0':
@@ -127,6 +134,8 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'z', zero_encoders },
     {'r', print_encoder_setup },
     {'m', motor_test },
+    {'r', reset_state },
+    {'v', show_version },
     {0, 0}
 };
 
