@@ -22,17 +22,24 @@ Nothing yet.
 
 ## Serial Commands
 
-All serial commands are lower case.
+Baud rate is 115200. 
 
-l (lower case L)    =  Led on/off       l0 = led off, l1 = led on  (Notice: this also control by wall sensor...)
-? = just print ok
-h = just print ok
-s = shows the state of the switches
-b = shows the voltage of the battery
-w = shows wall sensor readings
-e = print encoder current info
-z = zero encoders
-r = print encoder setup
+All serial commands are case sensitive. Each command needs to have a LF (10, 0x0D) at the end of it.
+
+| Cmd | Action    |
+|:---:|-----------|
+| l |  (lower case L) Led on/off, l0 = led off, l1 = led on  (Notice: this also control by wall sensor...) |
+| ? | just print ok |
+| h | just print ok |
+| s | shows the state of the switches | 
+| b | shows the voltage of the battery |
+| w | shows wall sensor readings |
+| e | print encoder current info |
+| z | zero encoders | 
+| r | print encoder setup | 
+| m | motor tests (see below) | 
+| ^ | reset state | 
+| v | show version |
 
 m = motor tests, runs for 2 seconds or until button is pressed
 
@@ -55,6 +62,10 @@ m = motor tests, runs for 2 seconds or until button is pressed
 |  me  |   14   | Curve - Left 50%, Right 25%         |
 |  mf  |   15   | Curve - Left 75%, Right 50%         |
 
+
+## Resetting and getting the Pi in sync with the Arduino.
+
+Since the longest command is 2 bytes, send ^ repeatidly with a 20ms gap until you receive a RST message. Then try ? and v looking at the responses. If they don't succeeed, then repeat the entire sequencies. 
 
 
 ## Where to find more information
