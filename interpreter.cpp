@@ -6,9 +6,33 @@
  */
 
 #define MAX_INPUT_SIZE 10
-char inputString[MAX_INPUT_SIZE];         // a String to hold incoming data
-int inputIndex = 0;  // where we are on the input
+static char inputString[MAX_INPUT_SIZE];         // a String to hold incoming data
+static int inputIndex = 0;  // where we are on the input
+static bool interpreter_echo = true;
 
+enum
+{
+  T_OK = 0,
+  T_PORT_OUT_OF_RANGE = 1,
+};
+
+
+const char* p;
+void interpreter_error(int error)
+{
+  switch(error)
+  {
+    case T_OK:
+      Serial.println(F("OK"));
+      break;
+    case T_PORT_OUT_OF_RANGE:
+      Serial.println(F("Out of range"));
+      break;
+    default:
+      Serial.println(F("Error"));
+      break;    
+  }
+}
 
 typedef struct {
     const char *nam;
@@ -20,14 +44,14 @@ typedef struct {
 //
 void led() { digitalWrite(LED_BUILTIN, (inputString[1] == '0') ? LOW:HIGH); }
 
-void ok() { Serial.println(F("OK")); }
+void ok() { interpreter_error(T_OK); }
 
 void reset_state() {
   // We should reset all state here. At the moment there isn't any
   Serial.println(F("RST"));
 }
 
-void show_version() { Serial.println(F("v1.0")); }
+void show_version() { Serial.println(F("v1.1")); }
 
 void print_switches() { Serial.println(gFunctionSwitch); }
 
@@ -117,6 +141,61 @@ void motor_test() {
   
 }
 
+//int numeric_mode = 10;
+//const char[] = "0123456789ABCDEF";    // support just upper case hex? or lower case as well?
+
+int decode_input_value_1or2char_unsigned(int index)
+{
+  int n = inputString[index++]-'0';
+  if(n < 0 or n >= 10)
+  {
+    inputIndex = index-1; 
+    return -1;
+  }
+  int n2 = inputString[index]-'0';
+  if(n2 >= 0 and n2 < 10)
+  {
+    n = n*10 + n2;
+    index++;
+  }
+  inputIndex = index;
+  return n;
+}
+
+void set_digital_output_pin()
+{
+  // D3=1
+  // D13=0
+  // Ignore spaces?
+
+  int port = decode_input_value_1or2char_unsigned(1);
+  if(port >= 0)
+  {
+    if(inputString[inputIndex] == '=')
+    {
+      // write port
+      //
+      // Could be: digitWrite(port, inputString[inputIndex+1]-'0')
+      if(inputString[inputIndex+1] == '1')
+      {
+        digitalWrite(port, HIGH);
+      }
+      else
+      {
+        digitalWrite(port, LOW);
+      }
+    }
+    else // read port
+    {
+      Serial.println(digitalRead(port));
+    }
+  }
+  else
+  {
+    interpreter_error(T_PORT_OUT_OF_RANGE);
+  }
+}
+
 
 typedef struct {
     char cmd;
@@ -134,8 +213,11 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'z', zero_encoders },
     {'r', print_encoder_setup },
     {'m', motor_test },
-    {'r', reset_state },
+    {'^', reset_state },
     {'v', show_version },
+
+    // Robot remote control
+    {'D', set_digital_output_pin },
     {0, 0}
 };
 
@@ -174,11 +256,14 @@ void parse_cmd()
     }
 }
 
+
 void interpreter()
 {
     while (Serial.available()) {
       char inChar = (char)Serial.read();      // get the new byte:
-      Serial.write(inChar);
+
+      if(interpreter_echo) { Serial.write(inChar); }
+      
       inputString[inputIndex++] = inChar;      // add it to the inputString:
       if(inputIndex == MAX_INPUT_SIZE)
       {
