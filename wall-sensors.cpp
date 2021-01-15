@@ -1,6 +1,8 @@
 #include <Arduino.h>
 #include "hardware_pins.h"
 
+#define ENABLE_SENSOR_LED_OUTPUT 0
+
 /***
  * Global variables
  */
@@ -60,9 +62,11 @@ void updateWallSensor() {
   gFrontWall = front > gFrontReference / 4;
   gLeftWall = left > gLeftReference / 2;
   gRightWall = right > gRightReference / 2;
+#if ENABLE_SENSOR_LED_OUTPUT
   digitalWrite(LED_LEFT, gLeftWall);
   digitalWrite(LED_RIGHT, gRightWall);
   digitalWrite(LED_BUILTIN, gFrontWall);
+#endif
   // calculate the alignment error - too far right is negative
   if ((left + right) > (gLeftReference + gRightReference) / 4) {
     if (left > right) {
@@ -84,8 +88,10 @@ void updateWallSensor() {
 
 void wall_sensors_setup() {
   pinMode(EMITTER, OUTPUT);
+#if ENABLE_SENSOR_LED_OUTPUT
   pinMode(LED_RIGHT, OUTPUT);
   pinMode(LED_LEFT, OUTPUT);
+#endif
   digitalWrite(EMITTER, 0);  // be sure the emitter is off
   analogueSetup();           // increase the ADC conversion speed
 }
