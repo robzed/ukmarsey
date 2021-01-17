@@ -30,6 +30,8 @@ void print_encoders();
 void setMotorVolts(float left, float right);
 void setRightMotorVolts(float volts);
 void setLeftMotorVolts(float volts);
+void setLeftMotorPWM(int pwm);
+void setRightMotorPWM(int pwm);
 void motorSetup();
 
 // internal use

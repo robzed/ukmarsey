@@ -5,7 +5,7 @@
  * Small command line interpreter
  */
 
-#define MAX_INPUT_SIZE 10
+#define MAX_INPUT_SIZE 14
 static char inputString[MAX_INPUT_SIZE];         // a String to hold incoming data
 static int inputIndex = 0;  // where we are on the input
 static bool interpreter_echo = true;
@@ -13,24 +13,50 @@ static bool interpreter_echo = true;
 enum
 {
   T_OK = 0,
-  T_PORT_OUT_OF_RANGE = 1,
+  T_OUT_OF_RANGE = 1,
+  T_READ_NOT_SUPPORTED = 2,
+  T_LINE_TOO_LONG = 3,
+  T_UNKNOWN_COMMAND = 4,
+  T_UNEXPECTED_TOKEN = 5
 };
+bool verbose_errors = true;
 
-
-const char* p;
+/** @brief  Print the interpreter error
+ *  @param  error to be printed
+ *  @return void
+ */
 void interpreter_error(int error)
 {
-  switch(error)
+  if(verbose_errors)
   {
-    case T_OK:
-      Serial.println(F("OK"));
-      break;
-    case T_PORT_OUT_OF_RANGE:
-      Serial.println(F("Out of range"));
-      break;
-    default:
-      Serial.println(F("Error"));
-      break;    
+    switch(error)
+    {
+      case T_OK:
+        Serial.println(F("OK"));
+        break;
+      case T_OUT_OF_RANGE:
+        Serial.println(F("Out of range"));
+        break;
+      case T_READ_NOT_SUPPORTED:
+        Serial.println(F("Read not supported"));
+        break;
+      case T_LINE_TOO_LONG:
+        Serial.println(F("Too long"));
+        break;
+      case T_UNKNOWN_COMMAND:
+        Serial.println(F("?"));
+        break;
+      case T_UNEXPECTED_TOKEN:
+        Serial.println(F("Unexpected"));
+        break;
+      default:
+        Serial.println(F("Error"));
+        break;    
+    }
+  }
+  else
+  {
+    Serial.println(error);
   }
 }
 
@@ -42,19 +68,49 @@ typedef struct {
 //
 // functions to run commands
 //
+
+/** @brief  Turns on and off the fixed LED
+ *  @param  
+ *  @return void
+ */
 void led() { digitalWrite(LED_BUILTIN, (inputString[1] == '0') ? LOW:HIGH); }
 
+/** @brief  Prints OK
+ *  @param  
+ *  @return void
+ */
 void ok() { interpreter_error(T_OK); }
 
+
+/** @brief  Reset the robot state to a known value
+ *          NOTE: Does not reset $ parameters.
+ *  @param  
+ *  @return void
+ */
 void reset_state() {
   // We should reset all state here. At the moment there isn't any
   Serial.println(F("RST"));
 }
 
+
+/** @brief  Show version of the program.
+ *  @param  
+ *  @return void
+ */
 void show_version() { Serial.println(F("v1.1")); }
 
+
+/** @brief  Print the decoded switch value.
+ *  @param  
+ *  @return void
+ */
 void print_switches() { Serial.println(gFunctionSwitch); }
 
+
+/** @brief  Select one of several hardware motor tests.
+ *  @param  
+ *  @return void
+ */
 void motor_test() {
   
   char function = inputString[1];
@@ -144,7 +200,14 @@ void motor_test() {
 //int numeric_mode = 10;
 //const char[] = "0123456789ABCDEF";    // support just upper case hex? or lower case as well?
 
-int decode_input_value_1or2char_unsigned(int index)
+/** @brief  Decodes a unsigned int from the input line
+ *  @param  index of where in the input should be parsed
+ *  @return int value of string
+ *          Also alters inputIndex to past float
+ */
+// Decode a three digit decimal number, e.g. from 0 to 999
+// -1 means invalid value
+int decode_input_value(int index)
 {
   int n = inputString[index++]-'0';
   if(n < 0 or n >= 10)
@@ -152,9 +215,13 @@ int decode_input_value_1or2char_unsigned(int index)
     inputIndex = index-1; 
     return -1;
   }
-  int n2 = inputString[index]-'0';
-  if(n2 >= 0 and n2 < 10)
+  while(true)
   {
+    int n2 = inputString[index]-'0';
+    if(n2 < 0 or n2 >= 10)
+    {
+      break;
+    }
     n = n*10 + n2;
     index++;
   }
@@ -162,13 +229,119 @@ int decode_input_value_1or2char_unsigned(int index)
   return n;
 }
 
-void set_digital_output_pin()
+/** @brief  Decodes a signed int from the input line
+ *  @param  index of where in the input should be parsed
+ *  @return int value of string
+ *          Also alters inputIndex to past float
+ */
+int decode_input_value_signed(int index)
+{
+  if(inputString[index]=='-')
+  {
+    int value = decode_input_value(index+1);
+    if(value < 0)
+    {
+      return 0;
+    }
+    return -value;
+  }
+  else
+  {
+    int value = decode_input_value(index);
+    if(value < 0)
+    {
+      return 0;
+    }
+    return value;
+  }
+}
+
+
+/** @brief  Decodes a fraction float (past decimal point) from the input line
+ *  @param  index of where in the input should be parsed
+ *  @param  n value of integer part of float.
+ *  @return float value of string
+ *          Also alters inputIndex to past float
+ */
+float fractional_float(int index, float n)
+{ 
+  float frac = 0.1F;
+  while(true)
+  {
+    int digit = inputString[index]-'0';
+    if(digit < 0 or digit > 9)
+    {
+      break;
+    }
+    n += digit * frac;
+    frac *= 0.1F;
+    index++;
+  }
+  inputIndex = index;
+  return n;
+}
+
+/** @brief  Decodes a float from the input line
+ *  @param  index of where in the input should be parsed
+ *  @return float value of string
+ *          Also alters inputIndex to past float
+ */
+// If invalid, return 0;
+// Differnt to atoi, etc., because updates index.
+float decode_input_value_float_unsigned(int index)
+{ 
+  float n = 0.0F;
+  while(true)
+  {
+    int digit = inputString[index];
+    if(digit < '0' or digit > '9')
+    {
+      if(digit == '.') // decimal point
+      {
+        index++;
+        return fractional_float(index, n);
+      }
+      break;
+    }
+    n = n*10 + digit-'0';
+    index++;
+  }
+  inputIndex = index;
+  return n;
+}
+
+/** @brief  Parses a float from the input line
+ *  @param  index of where in the input should be parsed
+ *  @return float value of string
+ *          Also alters inputIndex to past float
+ */
+float decode_input_value_float(int index)
+{
+  if(inputString[index]=='-')
+  {
+    float value = decode_input_value_float_unsigned(index+1);
+    if(value>0)
+    {
+      return -value;
+    }
+    return -1;
+  }
+  else
+  {
+    return decode_input_value_float_unsigned(index);
+  }
+}
+
+/** @brief Reads or writes a digital GPIO
+ *  @return Void.
+ */
+void digital_pin_control()
 {
   // D3=1
   // D13=0
   // Ignore spaces?
 
-  int port = decode_input_value_1or2char_unsigned(1);
+  int port = decode_input_value(1);
   if(port >= 0)
   {
     if(inputString[inputIndex] == '=')
@@ -192,10 +365,159 @@ void set_digital_output_pin()
   }
   else
   {
-    interpreter_error(T_PORT_OUT_OF_RANGE);
+    interpreter_error(T_OUT_OF_RANGE);
   }
 }
 
+/** @brief Reads an analogue pin or sets a PWM output.
+ *  @return Void.
+ */
+void analogue_control()
+{
+  // A2
+  // A9=255
+  int port = decode_input_value(1);
+  if(port >= 0)
+  {
+    if(inputString[inputIndex] == '=')
+    {
+      // write PWM
+      //
+      int value = decode_input_value(inputIndex+1);
+      if(value >= 0)
+      {
+        analogWrite(port, value);
+      }
+      else
+      {
+        interpreter_error(T_OUT_OF_RANGE);
+      }
+    }
+    else // read port
+    {
+      Serial.println(analogRead(port));
+    }
+  }
+  else
+  {
+    interpreter_error(T_OUT_OF_RANGE);
+  }
+}
+
+/** @brief Turns a specific motor PWM to a specific value (and also set direction)
+ *  @return Void.
+ */
+void motor_control()
+{
+  int motor = decode_input_value(1);
+  if(motor >= 0)
+  {
+    if(inputString[inputIndex] == '=')
+    {
+      // write PWM
+      //
+      int motorPWM = decode_input_value_signed(inputIndex+1);
+      if(motorPWM >= 0)
+      {
+        if(motor==1)
+        {
+          setLeftMotorPWM(motorPWM);
+        }
+        else
+        {
+          setRightMotorPWM(motorPWM);
+        }
+      }
+      else
+      {
+        interpreter_error(T_OUT_OF_RANGE);
+      }
+    }
+    else // read motor
+    {
+      interpreter_error(T_READ_NOT_SUPPORTED);
+    }
+  }
+  else
+  {
+    interpreter_error(T_OUT_OF_RANGE);
+  }
+} 
+
+/** @brief Selects the left and right motor voltages
+ *  @return Void.
+ */
+void motor_control_dual_voltage()
+{
+  float motor_left = decode_input_value_float(1);
+  if(inputString[inputIndex] == ',')
+  {
+    // write PWM
+    //
+    float motor_right = decode_input_value_float(inputIndex+1);
+    setMotorVolts(motor_left, motor_right);   // should this be float or what?
+  }
+  else // no comma
+  {
+    interpreter_error(T_UNEXPECTED_TOKEN);
+  }
+}
+
+/** @brief Turns command line interpreter verbose error messages on and off
+ *  @return Void.
+ */
+void verbose_control()
+{
+  int param = decode_input_value(1);
+  if(param == 0 or param == 1)
+  {
+    verbose_errors = param;
+  }
+  else
+  {
+    interpreter_error(T_OUT_OF_RANGE);
+  }
+}
+
+/** @brief Turns command line interpreter echo of input on and off
+ *  @return Void.
+ */
+void echo_control()
+{
+  int param = decode_input_value(1);
+  if(param == 0 or param == 1)
+  {
+    interpreter_echo = param;
+  }
+  else
+  {
+    interpreter_error(T_OUT_OF_RANGE);
+  }
+}
+
+/** @brief  Echos a number to stdout from the command line.
+ *  @return Void.
+ */
+void echo_number()
+{
+  int param = inputString[1];
+  if(param == 'F')
+  {
+    Serial.println(decode_input_value_float(2), 10);
+    return;
+  }
+  if(param == 'U')
+  {
+    Serial.println(decode_input_value(2));
+    return;
+  }
+  if(param == 'S')
+  {
+    Serial.println(decode_input_value_signed(2));
+    return;
+  }
+  Serial.println(decode_input_value_float(1), 10);
+}
 
 typedef struct {
     char cmd;
@@ -213,11 +535,20 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'z', zero_encoders },
     {'r', print_encoder_setup },
     {'m', motor_test },
+    {'=', echo_number },   // not official command, just for testing
+
+    // Interpreter Commands
     {'^', reset_state },
     {'v', show_version },
+    {'V', verbose_control },
+    {'E', echo_control },
+    
 
-    // Robot remote control
-    {'D', set_digital_output_pin },
+    // Robot I/O remote control
+    {'D', digital_pin_control },
+    {'A', analogue_control },
+    {'M', motor_control },
+    {'N', motor_control_dual_voltage },
     {0, 0}
 };
 
@@ -235,6 +566,10 @@ template <typename T> T PROGMEM_getAnything (const T * sce)
   return temp;
   }
 */
+
+/** @brief  Finds the single character command from a list.
+ *  @return Void.
+ */
 void parse_cmd()
 {
     const cmds_t* cmd_ptr = cmds;
@@ -243,7 +578,7 @@ void parse_cmd()
     {
         if( not (command = cmd_ptr->cmd) )
         {
-            Serial.println(F("?\n"));
+            interpreter_error(T_UNKNOWN_COMMAND);
             return;
         }
         
@@ -256,7 +591,12 @@ void parse_cmd()
     }
 }
 
+#define CTRL_C 0x03
+#define CTRL_X 0x18
 
+/** @brief  Command line interpreter.
+ *  @return Void.
+ */
 void interpreter()
 {
     while (Serial.available()) {
@@ -267,14 +607,25 @@ void interpreter()
       inputString[inputIndex++] = inChar;      // add it to the inputString:
       if(inputIndex == MAX_INPUT_SIZE)
       {
-          Serial.println(F("Too long"));
+          interpreter_error(T_LINE_TOO_LONG);
           inputIndex = 0;
       }
       // if the incoming character is a newline interpret it
-      else if(inChar == '\n')
+      else if(inChar <= ' ')
       {
-          parse_cmd();
+        if(inChar == '\n')
+        {
+            parse_cmd();
+            inputIndex = 0;
+        }
+        else if(inChar == CTRL_X or inChar == CTRL_C)
+        {
+          if(inChar == CTRL_X)
+          {
+            setMotorVolts(0, 0);
+          }
           inputIndex = 0;
+        }
       }
     }
 }

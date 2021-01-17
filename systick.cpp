@@ -91,7 +91,6 @@ ISR(TIMER2_COMPA_vect) {
 
 void print_bat()
 {
-    Serial.print(F("Battery = "));
     Serial.print(get_BatteryVolts());
     Serial.println(F(" v"));
 }
