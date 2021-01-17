@@ -25,6 +25,8 @@ void setupEncoders();
 void print_encoder_setup();
 void zero_encoders();
 void print_encoders();
+extern volatile int32_t encoderLeftCount;
+extern volatile int32_t encoderRightCount;
 
 // provided by motor_control.cpp
 void setMotorVolts(float left, float right);

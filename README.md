@@ -8,12 +8,14 @@ command loops of low level operations, or high-level control for less experience
 
 NOTE: Originally this project was intended as a wall follder for the UKMARSBOT robot, but it only got as far as a hardware test command line via a simple command line interpreter before it was repurposed.
 
+* Github project: https://github.com/robzed/ukmarsey
+* Hardware Designed by UK Micromouse and Robotics Society http://ukmars.org
+* Hardware details: https://github.com/ukmars/ukmarsbot
+* Examples code sketches: https://github.com/ukmars/ukmarsbot-examples
 
-Github project: https://github.com/robzed/ukmarsey
-Hardware Designed by UK Micromouse and Robotics Society http://ukmars.org
-Hardware details: https://github.com/ukmars/ukmarsbot
-Examples code sketches: https://github.com/ukmars/ukmarsbot-examples
+NOTE: This project is related to the Pi Zero for UKMARSbot project https://github.com/robzed/pizero_for_ukmarsbot
 
+This project is licensed under the MIT license.
 
 # Getting Started
 
@@ -106,6 +108,21 @@ N command also controls the motors, however it's referenced to battery which mea
 
 The advantage of this command is that it will go the same speed regardless of battery level, assuming you keep values to the range underneath the minimum battery voltage expected. 
 
+### Motor Count commands
+
+Reading an encoder counter might be more involved. It is the total so far and the range is int32 (+/- 2,147m even at 1000 counts per mm!). Result or parameter is signed.
+
+| Cmd | Action    |
+|:---:|-----------|
+| C0 | Read right wheel counter, also possible to use C2   
+| C1 | Read Left wheel counter. Might return the left wheel counter as '-3752901'. |
+| Cn=m | Set the Wheel count value, usually. m=0. |
+| z | zero encoders. No return. | 
+| e | print encoder current info - human readable NOT for machine parsing! |
+| r | print encoder setup - human readable NOT for machine parsing! | 
+
+Setting a counter using 'C' command is usually to zero but could be any legal value. Therefore a quick 'z' command is provided.
+
 
 ### High Level I/O Control
  
@@ -115,15 +132,12 @@ The advantage of this command is that it will go the same speed regardless of ba
 
 | Cmd | Action    |
 |:---:|-----------|
-| l |  (lower case L) Led on/off, l0 = led off, l1 = led on|
+| l |  (lower case L) Led on/off, l0 = led off, l1 = led on. (Short version of D13=x) |
 | ? | just prints 'OK' |
 | h | just prints 'OK' |
 | s | shows the state of the switches. Returns a single number. NOTE: the Button is '16', and overrides the 4 switches | 
 | b | shows the voltage of the battery. Example return '7.42 v' |
 | w | shows wall sensor readings - human readable NOT for machine parsing! |
-| e | print encoder current info - human readable NOT for machine parsing! |
-| z | zero encoders. No return. | 
-| r | print encoder setup - human readable NOT for machine parsing! | 
 | m | motor tests (see below) | 
 | x | Motor stop (no parameters, no return.) - and cancels any actions |
 

@@ -417,20 +417,13 @@ void motor_control()
       // write PWM
       //
       int motorPWM = decode_input_value_signed(inputIndex+1);
-      if(motorPWM >= 0)
+      if(motor==1)
       {
-        if(motor==1)
-        {
-          setLeftMotorPWM(motorPWM);
-        }
-        else
-        {
-          setRightMotorPWM(motorPWM);
-        }
+        setLeftMotorPWM(motorPWM);
       }
       else
       {
-        interpreter_error(T_OUT_OF_RANGE);
+        setRightMotorPWM(motorPWM);
       }
     }
     else // read motor
@@ -443,6 +436,49 @@ void motor_control()
     interpreter_error(T_OUT_OF_RANGE);
   }
 } 
+
+
+
+/** @brief Reads or writes the motor encoder values
+ *  @return Void.
+ */
+void encoder_values()
+{
+  int motor = decode_input_value(1);
+  if(motor >= 0)
+  {
+    if(inputString[inputIndex] == '=')
+    {
+      // write encoder
+      //
+      int32_t param = decode_input_value_signed(inputIndex+1);
+      if(motor==1)
+      {
+        encoderLeftCount = param;
+      }
+      else
+      {
+        encoderRightCount = param;
+      }
+    }
+    else // read motor
+    {
+      if(motor==1)
+      {
+        Serial.println(encoderLeftCount);
+      }
+      else
+      {
+        Serial.println(encoderRightCount);
+      }
+    }
+  }
+  else
+  {
+    interpreter_error(T_OUT_OF_RANGE);
+  }
+} 
+
 
 /** @brief Selects the left and right motor voltages
  *  @return Void.
@@ -549,6 +585,7 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'A', analogue_control },
     {'M', motor_control },
     {'N', motor_control_dual_voltage },
+    {'C', encoder_values },
     {0, 0}
 };
 
