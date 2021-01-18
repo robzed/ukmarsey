@@ -114,14 +114,47 @@ Reading an encoder counter might be more involved. It is the total so far and th
 
 | Cmd | Action    |
 |:---:|-----------|
-| C0 | Read right wheel counter, also possible to use C2   
+| C0 | Read right wheel counter, also possible to use C2 |
 | C1 | Read Left wheel counter. Might return the left wheel counter as '-3752901'. |
-| Cn=m | Set the Wheel count value, usually. m=0. |
+| C*n*=*m* | Set the Wheel count value, usually. e.g. C1=0 where n=1 and m=0. |
 | z | zero encoders. No return. | 
 | e | print encoder current info - human readable NOT for machine parsing! |
 | r | print encoder setup - human readable NOT for machine parsing! | 
 
 Setting a counter using 'C' command is usually to zero but could be any legal value. Therefore a quick 'z' command is provided.
+
+### Parameter Commands
+
+Parameters select specific characteristics of high level commands. They are stored in EEPROM so are preserved on power off, especially for human users. 
+
+| Cmd | Action    |
+|:---:|-----------|
+| $*n* | Read parameter *n* |    
+| $*n*=*f* | Write parameter *n* with value *f*. E.g. $0=1.1 |
+| $a   | Read all parameters, in the format *f*,*f*,*f* on a single line. NOTE: Will incur serial buffering and block until complete |
+
+Currently all parameters are floating point values. 
+
+A List of specific usage of each parameters is here.
+
+| Param | Action    |
+|:-----:|-----------|
+| 0 | *Undefined* |
+| 1 | *Undefined*  |
+| 2 | *Undefined*  |
+| 3 | *Undefined*  |
+| 4 | *Undefined*  |
+| 5 | *Undefined*  |
+| 6 | *Undefined*  |
+| 7 | *Undefined*  |
+| 8 | *Undefined*  |
+| 9 | *Undefined*  |
+| 10 | *Undefined*  |
+| 11 | *Undefined*  |
+| 12 | *Undefined*  |
+| 13 | *Undefined*  |
+| 14 | *Undefined*  |
+| 15 | *Undefined*  |
 
 
 ### High Level I/O Control
@@ -136,7 +169,7 @@ Setting a counter using 'C' command is usually to zero but could be any legal va
 | ? | just prints 'OK' |
 | h | just prints 'OK' |
 | s | shows the state of the switches. Returns a single number. NOTE: the Button is '16', and overrides the 4 switches | 
-| b | shows the voltage of the battery. Example return '7.42 v' |
+| b | shows the voltage of the battery. Example return '7.421' |
 | w | shows wall sensor readings - human readable NOT for machine parsing! |
 | m | motor tests (see below) | 
 | x | Motor stop (no parameters, no return.) - and cancels any actions |
@@ -190,6 +223,17 @@ enum
 };
 ```
 
+## Other messages
+Apart from the start up message, any other warning messages have a @ before them.
+For example:
+
+    @Defaulting Params         ; Shown when there was a problem loading parameters on boot.
+
+
+## Other information
+
+floating_decimal_places = 3     - Number of floating point decimal places printed.
+
 
 # Where to find more information
 
@@ -199,7 +243,7 @@ http://www.micromouseonline.com/micromouse-book/
 
 # Credits
 
-Based on ukmarsbot examples by UK Micromouse & Robotics Society & Dr. Peter Harrison
+Based on ukmarsbot examples by UK Micromouse & Robotics Society & Peter Harrison
 https://github.com/ukmars/
 
 Some code based on:

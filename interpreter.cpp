@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "public.h"
+#include <EEPROM.h>
 
 /*
  * Small command line interpreter
@@ -9,6 +10,39 @@
 static char inputString[MAX_INPUT_SIZE];         // a String to hold incoming data
 static int inputIndex = 0;  // where we are on the input
 static bool interpreter_echo = true;
+
+
+//
+// There are (NUM_STORED_PARAMS+1) * 4 bytes stored in EEPROM. NOTE: The last one is a magic number to detect an uninitialised EEPROM.
+//
+#define NUM_STORED_PARAMS 16
+#define MAGIC_ADDRESS ((NUM_STORED_PARAMS+1)*4)
+#define MAGIC_NUMBER 0xD00DCAFE
+float stored_params[NUM_STORED_PARAMS];
+static const float stored_parameters_default_values[NUM_STORED_PARAMS] = {
+
+        // Index: Usage 
+  0.0F, //  0: undefined 
+  0.0F, //  1: undefined
+  0.0F, //  2: undefined 
+  0.0F, //  3: undefined
+
+  0.0F, //  4: undefined
+  0.0F, //  5: undefined
+  0.0F, //  6: undefined
+  0.0F, //  7: undefined
+
+  0.0F, //  8: undefined
+  0.0F, //  9: undefined
+  0.0F, // 10: undefined
+  0.0F, // 11: undefined
+
+  0.0F, // 12: undefined
+  0.0F, // 13: undefined
+  0.0F, // 14: undefined
+  0.0F, // 15: undefined
+
+};
 
 enum
 {
@@ -499,6 +533,76 @@ void motor_control_dual_voltage()
   }
 }
 
+
+/** @brief Reads and writes stored parameters
+ *  @return Void.
+ */
+void stored_parameter_control()
+{
+  int param_number = decode_input_value(1);
+  if(param_number >= 0 and param_number < NUM_STORED_PARAMS)
+  {
+    if(inputString[inputIndex] == '=')
+    {
+      // write param
+      //
+      float param = decode_input_value_float(inputIndex+1);
+      stored_params[param_number] = param;
+      EEPROM.put(param_number*4, param);
+    }
+    else // read param
+    {
+        Serial.println(stored_params[param_number], floating_decimal_places);
+    }
+  }
+  else
+  {
+    if(inputString[1]=='a')
+    {
+      for(int i=0; i<NUM_STORED_PARAMS; i++)
+      {
+        Serial.println(stored_params[i], floating_decimal_places);
+      }
+    }
+    else
+    {
+      interpreter_error(T_OUT_OF_RANGE);
+    }
+  }
+}
+
+
+/** @brief Reads the parameters into RAM. If Magic number not found will default all parameters.
+ *  @return Void.
+ */
+void init_stored_parameters()
+{
+  uint32_t magic = 0;
+  EEPROM.get(MAGIC_ADDRESS, magic);
+  if(magic != MAGIC_NUMBER)
+  {
+    Serial.println("@Defaulting Params");
+    // default values here
+    const float* p = stored_parameters_default_values;
+    for(int i=0; i<NUM_STORED_PARAMS; i++)
+    {
+      // we use write here, not update
+      EEPROM.put(i*4, *p++);
+    }
+    
+    // finally write magic back
+    EEPROM.put(MAGIC_ADDRESS, MAGIC_NUMBER);
+  }
+  
+  for(int i=0; i<NUM_STORED_PARAMS; i++)
+  {
+    float f;
+    EEPROM.get(i*4, f);
+    stored_params[i] = f;
+  }
+}
+
+
 /** @brief Turns command line interpreter verbose error messages on and off
  *  @return Void.
  */
@@ -539,7 +643,7 @@ void echo_number()
   int param = inputString[1];
   if(param == 'F')
   {
-    Serial.println(decode_input_value_float(2), 10);
+    Serial.println(decode_input_value_float(2), floating_decimal_places);
     return;
   }
   if(param == 'U')
@@ -552,7 +656,7 @@ void echo_number()
     Serial.println(decode_input_value_signed(2));
     return;
   }
-  Serial.println(decode_input_value_float(1), 10);
+  Serial.println(decode_input_value_float(1), floating_decimal_places);
 }
 
 typedef struct {
@@ -586,6 +690,7 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'M', motor_control },
     {'N', motor_control_dual_voltage },
     {'C', encoder_values },
+    {'$', stored_parameter_control },
     {0, 0}
 };
 
@@ -635,7 +740,7 @@ void parse_cmd()
  *  @return Void.
  */
 void interpreter()
-{
+{    
     while (Serial.available()) {
       char inChar = (char)Serial.read();      // get the new byte:
 

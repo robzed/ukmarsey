@@ -2,7 +2,7 @@
 #define PUBLIC_H
 
 void interpreter();
-
+void init_stored_parameters();
 
 //
 // provided by systick.cpp
@@ -49,6 +49,9 @@ typedef unsigned time_measure_t;
 #define TIME_END(START_VARIABLE, END_VARIABLE)
 #define TIME_DEFINE_VARIABLE(VARIABLE) 
 #endif
+
+// Other constants
+const int floating_decimal_places = 3;
 
 
 #endif

@@ -4,11 +4,12 @@
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
-  Serial.println(F("\nHello from ukmarsey\n"));
+  Serial.println(F("\nHello from ukmarsey"));
   setupSystick();
   wall_sensors_setup();
   setupEncoders();
   motorSetup();
+  init_stored_parameters();
 }
 
 
