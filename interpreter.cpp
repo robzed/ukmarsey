@@ -753,19 +753,24 @@ void interpreter()
     while (Serial.available()) {
       char inChar = (char)Serial.read();      // get the new byte:
 
-      if(interpreter_echo) { Serial.write(inChar); }
-      
-      inputString[inputIndex++] = inChar;      // add it to the inputString:
-      if(inputIndex == MAX_INPUT_SIZE)
+      if(inChar > ' ')
       {
-          interpreter_error(T_LINE_TOO_LONG);
-          inputIndex = 0;
+        if(interpreter_echo) { Serial.write(inChar); }
+        
+        inputString[inputIndex++] = inChar;      // add it to the inputString:
+        if(inputIndex == MAX_INPUT_SIZE)
+        {
+            interpreter_error(T_LINE_TOO_LONG);
+            inputIndex = 0;
+        }
       }
-      // if the incoming character is a newline interpret it
-      else if(inChar <= ' ')
+      else
       {
+        // if the incoming character is a newline interpret it
         if(inChar == '\n')
         {
+            if(interpreter_echo) { Serial.write(inChar); }
+            inputString[inputIndex] = 0;  // zero terminate
             parse_cmd();
             inputIndex = 0;
         }
@@ -776,6 +781,7 @@ void interpreter()
             setMotorVolts(0, 0);
           }
           inputIndex = 0;
+          Serial.println("\n");
         }
       }
     }

@@ -1,12 +1,12 @@
 # UKMARSEY Command Language
 
-This is a real-time command language for the UKMARSBOT Robot. 
+This is a real-time command language for low level I/O micros of mobile robots, and first with the UKMARSBOT Robot. 
 
 The commands are terse but intended to be entered either by human via a 
 terminal or via machine, e.g. a Pi Zero. It's intention is to allow real-time 
 command loops of low level operations, or high-level control for less experienced users.
 
-NOTE: Originally this project was intended as a wall follder for the UKMARSBOT robot, but it only got as far as a hardware test command line via a simple command line interpreter before it was repurposed.
+NOTE: Originally this project was intended as a wall follower for the UKMARSBOT robot, but it only got as far as a hardware test command line via a simple command line interpreter before it was repurposed.
 
 * Github project: https://github.com/robzed/ukmarsey
 * Hardware Designed by UK Micromouse and Robotics Society http://ukmars.org
@@ -19,11 +19,14 @@ This project is licensed under the MIT license.
 
 # Getting Started
 
-Loads into Arduino via serial lead from the Arduino IDE. You can issue commands to get it to do things.
+Loads into Arduino via serial lead from the Arduino IDE. You can issue commands to get the robot to do things.
 
-# Summary of Interpereter
+As well as directly commanding the robot over the serial port, it's designed to be controlled from a host CPU which can be anything 
+but we've been using it with the Raspberry Pi.
 
-NOTICE: This reflects version 1.1 of the interpreter.
+# Summary of Interpreter Usage
+
+NOTICE: This document reflects version 1.1 of the interpreter.
 
 ## Serial Connection and Command Entry
 
@@ -33,25 +36,25 @@ Once connected you should get a prompt like on reset:
 
     Hello from ukmarsey
 
-No spaces, tabs or other control characters (below value 32 space) are allowed in commands, except for those mentioed below in 'Special Control Characters' below - the use. (Technically UTF-8 characters are ok, but none are currently used in commands).
+No spaces, tabs or other control characters (below value 32) are allowed in commands, except for those mentioned below in 'Special Control Characters' below, and their use is undefined and may change in future versions of the interpreter. (Technically UTF-8 characters are ok, but none are currently used in commands).
 
 All serial commands are case sensitive. Each command needs to have a LF (10, 0x0D) at the end of it. 
 
 Values are in decimal, but if the value is out of range then interpreter will either issue an error, ignore extra values or interpret this in an undefined way. This last two options are considered undefined operation - and future changes of the interpreter might change the behaviour. Examples are D11= (no value), D11=2 (out of range setting of an I/O port, might throw an error.), D11=100 (out of range, might ignore 00) or D1=-3 (unexpected minus, probably error).
 
-Any commands that return values is done on a seperate line per command.
+Any commands that return values is done on a seperate line per command. The ends of these lines returned from the interpreter contain a CR LF (0x0D 0x0A).
 
 ## Special Control Characters
 
-Control-X (0x18) - Soft-Reset - same as Control-C, but stops motors. 
-Control-C (0x03) - Abort entry of line. NOTICE: Character subsequent to this character will be 
-
-Line Feed (LF, 0x13) - Finish line entry and send to the interpreter. 
+* Control-X (0x18) - Soft-Reset - same as Control-C, but stops motors. 
+* Control-C (0x03) - Abort entry of line. NOTICE: Character subsequent to this character will be 
+* Line Feed (LF, 0x10) - Finish line entry and send to the interpreter. 
+* Carriage Return (CR, 0x13) - Ignored by interpreter.
 
 
 ## Serial Commands List
 
-Note: 'x' command stops the motors in the case of runaway, but requires a newline afterwards. If you are using a serial terminal emulator (as opposed to Arduino Serial Monitor) you can also use Control-X to stop a runaway.
+Note: 'x' command stops the motors in the case of runaway, but requires a newline (LF/0x10) afterwards. If you are using a serial terminal emulator (as opposed to Arduino Serial Monitor) you can also use Control-X to stop a runaway.
 
 
 ### Interpreter Control Commands
@@ -60,8 +63,16 @@ Note: 'x' command stops the motors in the case of runaway, but requires a newlin
 |:---:|-----------|
 | ^ | reset state | 
 | v | show version |
-| V | Verbose error code, 1=verbose, 0=numeric - see below |
+| V | Verbose error code, 1=verbose (default), 0=numeric - see below.  |
 | E | Serial echo of input 0=off, 1=on (default). Generally should be turned off for machines |
+
+
+Examples:
+
+    V0      Verbose off (numeric error codes)
+    V1      Verbose on (text error codes)
+    E0      Echo input back (for humans with serial terminals)
+    E1      Don't echo input back (for machines, or for use with Arduino Serial monitor)
 
 
 ### Low Level I/O Control Commands
@@ -203,7 +214,7 @@ m = motor tests, runs for 2 seconds or until button is pressed.
 
 ## Resetting and getting the Pi in sync with the Arduino.
 
-Since the longest command is 6 bytes, send ^ repeatidly with a 20ms gap until you receive a RST message. Then try ? and v looking at the responses. If they don't succeeed, then repeat the entire sequencies. 
+Send Control-C (or Control-X) followed by ^ repeatidly with a 20ms gap until you receive a RST message. Then try ? and v looking at the responses. If they don't succeeed, then repeat the entire sequence. 
 
 This is under review. 
 
@@ -225,15 +236,19 @@ enum
 ```
 
 ## Other messages
-Apart from the start up message, any other warning messages have a @ before them.
+Apart from the start up message, any other messages **that are not caused by a command** have a @ before them and are on a seperate line.
 For example:
 
-    @Defaulting Params         ; Shown when there was a problem loading parameters on boot.
+|Message| Cause                               |
+|-------|-------------------------------------|
+| @Defaulting Params | Shown when there was a problem loading parameters on boot. |
 
 
-## Other information
+## Other internal settings and hidden information
 
-floating_decimal_places = 3     - Number of floating point decimal places printed.
+| Setting | Cause                               |
+|---------|-------------------------------------|
+|floating_decimal_places = 3 | Number of floating point decimal places printed. |
 
 
 # Where to find more information
@@ -243,6 +258,10 @@ https://www.arduino.cc/reference/en/
 http://www.micromouseonline.com/micromouse-book/
 
 # Credits
+
+This interpreter was written by Rob Probin, Jan 2021, with help and code from Peter Harrison, with many suggestions and input from UK Micromouse and Robotics Society members.
+
+Code and this README Copyright (c) 2021 Rob Probin, except where noted in code or documentation. All licensed via MIT License. See LICENSE file.
 
 Based on ukmarsbot examples by UK Micromouse & Robotics Society & Peter Harrison
 https://github.com/ukmars/
@@ -257,7 +276,7 @@ It bares some resemblance in some places to G-code (and implementations like grb
 
 Since this runs on an ATMEG328P Arduino Nano, there is not much Flash or RAM, so things like help and extended error messages have been minimised. 
 
-We aim to have shortened the amount of bytes requiring to be transmitted in order to maximise the bandwidth across the serial link, while still allowing for human entry via a text terminal.
+We aim to have shortened the amount of bytes requiring to be transmitted in order to maximise the bandwidth across the serial link, while still allowing for easy human entry via a text terminal.
 
 
 # Dev Notes
