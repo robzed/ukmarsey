@@ -132,6 +132,7 @@ Parameters select specific characteristics of high level commands. They are stor
 | $*n* | Read parameter *n* |    
 | $*n*=*f* | Write parameter *n* with value *f*. E.g. $0=1.1 |
 | $a   | Read all parameters, in the format *f*,*f*,*f* on a single line. NOTE: Will incur serial buffering and block until complete |
+| $d   | Default all parameters. |
 
 Currently all parameters are floating point values. 
 

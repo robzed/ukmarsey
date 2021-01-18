@@ -564,6 +564,15 @@ void stored_parameter_control()
         Serial.println(stored_params[i], floating_decimal_places);
       }
     }
+    else if(inputString[1]=='d')
+    {
+      const float* p = stored_parameters_default_values;
+      for(int i=0; i<NUM_STORED_PARAMS; i++)
+      {
+        EEPROM.put(i*4, *p);
+        stored_params[i] = *p++;
+      }
+    }
     else
     {
       interpreter_error(T_OUT_OF_RANGE);
