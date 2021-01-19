@@ -509,9 +509,13 @@ void encoder_values()
   }
   else if (inputString[1] == 0)
   {
-    Serial.print(encoderLeftCount);
+    // read both encoder values ahead of time so print time doesn't offset.
+    int32_t left = encoderLeftCount;
+    int32_t right = encoderRightCount;
+    
+    Serial.print(left);
     Serial.print(",");
-    Serial.println(encoderRightCount);
+    Serial.println(right);
   }
   else
   {
