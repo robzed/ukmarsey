@@ -668,6 +668,15 @@ void echo_number()
   Serial.println(decode_input_value_float(1), floating_decimal_places);
 }
 
+/** @brief  Stops both motors
+ *  @return Void.
+ */
+void stop_motors_and_everything_command()
+{
+  setMotorVolts(0, 0);
+  // add action stop here as well
+}
+
 typedef struct {
     char cmd;
     void (*func)();
@@ -700,6 +709,7 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'N', motor_control_dual_voltage },
     {'C', encoder_values },
     {'$', stored_parameter_control },
+    {'x', stop_motors_and_everything_command },
     {0, 0}
 };
 
@@ -779,7 +789,7 @@ void interpreter()
         {
           if(inChar == CTRL_X)
           {
-            setMotorVolts(0, 0);
+            stop_motors_and_everything_command();
           }
           inputIndex = 0;
           Serial.println("\n");

@@ -46,7 +46,7 @@ Any commands that return values is done on a seperate line per command. The ends
 
 ## Special Control Characters
 
-* Control-X (0x18) - Soft-Reset - same as Control-C, but stops motors. 
+* Control-X (0x18) - Soft-Reset - same as Control-C, but stops motors, and any active commands. (Same as 'x' command). 
 * Control-C (0x03) - Abort entry of line. NOTICE: Character subsequent to this character will be 
 * Line Feed (LF, 0x10) - Finish line entry and send to the interpreter. 
 * Carriage Return (CR, 0x13) - Ignored by interpreter.
