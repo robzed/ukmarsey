@@ -1,12 +1,12 @@
 #include <Arduino.h>
 #include "hardware_pins.h"
 #include "public.h"
+#include "robot_config.h"
 
 /***
  * Global variables
  */
 
-const float MAX_MOTOR_VOLTS = 6.0f;
 
 
 void motorSetup() {
@@ -15,18 +15,18 @@ void motorSetup() {
   pinMode(MOTOR_LEFT_PWM, OUTPUT);
   pinMode(MOTOR_RIGHT_PWM, OUTPUT);
   digitalWrite(MOTOR_LEFT_PWM, 0);
-  digitalWrite(MOTOR_LEFT_DIR, 0);
+  digitalWrite(MOTOR_LEFT_DIR, LEFT_MOTOR_DIRECTION_FORWARD);
   digitalWrite(MOTOR_RIGHT_PWM, 0);
-  digitalWrite(MOTOR_RIGHT_DIR, 0);
+  digitalWrite(MOTOR_RIGHT_DIR, RIGHT_MOTOR_DIRECTION_FORWARD);
 }
 
 void setLeftMotorPWM(int pwm) {
   pwm = constrain(pwm, -255, 255);
   if (pwm < 0) {
-    digitalWrite(MOTOR_LEFT_DIR, 0);
+    digitalWrite(MOTOR_LEFT_DIR, LEFT_MOTOR_DIRECTION_BACKWARD);
     analogWrite(MOTOR_LEFT_PWM, -pwm);
   } else {
-    digitalWrite(MOTOR_LEFT_DIR, 1);
+    digitalWrite(MOTOR_LEFT_DIR, LEFT_MOTOR_DIRECTION_FORWARD);
     analogWrite(MOTOR_LEFT_PWM, pwm);
   }
 }
@@ -34,10 +34,10 @@ void setLeftMotorPWM(int pwm) {
 void setRightMotorPWM(int pwm) {
   pwm = constrain(pwm, -255, 255);
   if (pwm < 0) {
-    digitalWrite(MOTOR_RIGHT_DIR, 1);
+    digitalWrite(MOTOR_RIGHT_DIR, RIGHT_MOTOR_DIRECTION_BACKWARD);
     analogWrite(MOTOR_RIGHT_PWM, -pwm);
   } else {
-    digitalWrite(MOTOR_RIGHT_DIR, 0);
+    digitalWrite(MOTOR_RIGHT_DIR, RIGHT_MOTOR_DIRECTION_FORWARD);
     analogWrite(MOTOR_RIGHT_PWM, pwm);
   }
 }

@@ -24,6 +24,20 @@ Loads into Arduino via serial lead from the Arduino IDE. You can issue commands 
 As well as directly commanding the robot over the serial port, it's designed to be controlled from a host CPU which can be anything 
 but we've been using it with the Raspberry Pi.
 
+# Robot Configuration
+
+Even though the UKMarsBot is a standard design, there are several options:
+
+1. The gearbox ratio
+2. The wiring of left and right motors
+3. The wiring of the encoders
+4. The wheel size.
+
+These can be configured in the file 'robot_config.h'. See that file and make appropriate adjustments.
+
+(If you are using low level control from a Raspberry Pi, you might be able to adjust for these in the Raspberry Pi. But if you are using any mid- or high-level control, you will definitely need to adjust this file!)
+
+
 # Summary of Interpreter Usage
 
 NOTICE: This document reflects version 1.1 of the interpreter.

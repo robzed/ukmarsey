@@ -2,17 +2,8 @@
 #include "digitalWriteFast.h"
 #include "hardware_pins.h"
 #include "public.h"
+#include "robot_config.h"
 
-/***
- * Global robot characteristic constants
- */
-const int COUNTS_PER_ROTATION = 12;
-const float GEAR_RATIO = 19.5;
-const float WHEEL_DIAMETER = 32.5f;
-const float WHEEL_SEPARATION = 75.2;
-
-const float MM_PER_COUNT = (PI * WHEEL_DIAMETER) / (2 * COUNTS_PER_ROTATION * GEAR_RATIO);
-const float DEG_PER_COUNT = (360.0 * MM_PER_COUNT) / (PI * WHEEL_SEPARATION);
 
 /***
  * Global variables
@@ -49,9 +40,17 @@ ISR(INT0_vect) {
   bool newB = bool(digitalReadFast(ENCODER_LEFT_B));
   bool newA = bool(digitalReadFast(ENCODER_LEFT_CLK)) ^ newB;
   if (newA == oldB) {
-    encoderLeftCount--;
-  } else {
+#if ENCODER_LEFT_POLARITY
     encoderLeftCount++;
+#else
+    encoderLeftCount--;
+#endif
+  } else {
+#if ENCODER_LEFT_POLARITY
+    encoderLeftCount--;
+#else
+    encoderLeftCount++;
+#endif
   }
   oldB = newB;
 }
@@ -61,9 +60,17 @@ ISR(INT1_vect) {
   bool newB = bool(digitalReadFast(ENCODER_RIGHT_B));
   bool newA = bool(digitalReadFast(ENCODER_RIGHT_CLK)) ^ newB;
   if (newA == oldB) {
+#if ENCODER_RIGHT_POLARITY
     encoderRightCount++;
-  } else {
+#else
     encoderRightCount--;
+#endif
+  } else {
+#if ENCODER_RIGHT_POLARITY
+    encoderRightCount--;
+#else
+    encoderRightCount++;
+#endif
   }
   oldB = newB;
 }
