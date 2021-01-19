@@ -50,7 +50,7 @@ Any commands that return values is done on a seperate line per command. The ends
 * Control-C (0x03) - Abort entry of line. NOTICE: Character subsequent to this character will be 
 * Line Feed (LF, 0x10) - Finish line entry and send to the interpreter. 
 * Carriage Return (CR, 0x13) - Ignored by interpreter.
-
+* Backspace (0x08) - Removes one character from input buffer, assuming input buffer has any characters in. Generates "\x08 \x08" which should step back, erase, then step back. However on some serial terminal emulators this might need to be enabled (e.g. on CoolTerm this option is 'Handle BS and Del Characters').
 
 ## Serial Commands List
 

@@ -743,6 +743,7 @@ void parse_cmd()
 }
 
 #define CTRL_C 0x03
+#define BACKSPACE 0x08
 #define CTRL_X 0x18
 
 /** @brief  Command line interpreter.
@@ -782,6 +783,14 @@ void interpreter()
           }
           inputIndex = 0;
           Serial.println("\n");
+        }
+        else if(inChar == BACKSPACE and inputIndex != 0)
+        {
+            inputIndex--;
+
+            // This sequence depends on terminal emulator
+            Serial.print("\x08 \x08");
+            //Serial.print("\x08");
         }
       }
     }
