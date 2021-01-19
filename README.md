@@ -128,6 +128,7 @@ Reading an encoder counter might be more involved. It is the total so far and th
 | C0 | Read right wheel counter, also possible to use C2 |
 | C1 | Read Left wheel counter. Might return the left wheel counter as '-3752901'. |
 | C*n*=*m* | Set the Wheel count value, usually. e.g. C1=0 where n=1 and m=0. |
+| C  | Alone with no parameters - prints both encoders as 'left,right' |
 | z | zero encoders. No return. | 
 | e | print encoder current info - human readable NOT for machine parsing! |
 | r | print encoder setup - human readable NOT for machine parsing! | 

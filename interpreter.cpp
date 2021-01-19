@@ -507,6 +507,12 @@ void encoder_values()
       }
     }
   }
+  else if (inputString[1] == 0)
+  {
+    Serial.print(encoderLeftCount);
+    Serial.print(",");
+    Serial.println(encoderRightCount);
+  }
   else
   {
     interpreter_error(T_OUT_OF_RANGE);
