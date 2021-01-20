@@ -149,6 +149,28 @@ Reading an encoder counter might be more involved. It is the total so far and th
 
 Setting a counter using 'C' command is usually to zero but could be any legal value. Therefore a quick 'z' command is provided.
 
+
+### Sensor Processing commands
+
+It's sometimes necessary, with Infra-red sensors, to read the IR sensor 'dark', turn on IR illumination, take another IR sensor reading ('light') then turn the IR illumination off. 
+
+These commands provide the ability to specify up to three output ports for IR illumination, and read up to size sensors. 
+
+By default this is set up to read A0, A1, A2, A3 as sensors and use D12 to turn on the IR illumination with a logic 1 , which will work for the standard line and wall followers of the UKMARSBot (although the wall follower doesn't use A3).
+
+| Cmd | Action    |
+|:---:|-----------|
+|  S  | Read sensors dark values then light values seperated by commas, followed by an optional * |
+
+NOTE: * indicates that the result was changed during the values being read.
+
+Examples of output:
+
+0,0,0,142,28,32,486,352         <- wall close
+
+0,0,0,4,28,13,15,11*            <- no wall, but data changed during read
+
+
 ### Parameter Commands
 
 Parameters select specific characteristics of high level commands. They are stored in EEPROM so are preserved on power off, especially for human users. 
@@ -197,7 +219,6 @@ A List of specific usage of each parameters is here.
 | h | just prints 'OK' |
 | s | shows the state of the switches. Returns a single number. NOTE: the Button is '16', and overrides the 4 switches | 
 | b | shows the voltage of the battery. Example return '7.421' |
-| w | shows wall sensor readings - human readable NOT for machine parsing! |
 | m | motor tests (see below) | 
 | x | Motor stop (no parameters, no return.) - and cancels any actions |
 

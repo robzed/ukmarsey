@@ -698,7 +698,7 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'h', ok },
     {'b', print_bat },
     {'s', print_switches },
-    {'w', print_wall_sensors },
+    //{'w', print_wall_sensors },
     {'e', print_encoders },
     {'z', zero_encoders },
     {'r', print_encoder_setup },
@@ -720,6 +720,7 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'C', encoder_values },
     {'$', stored_parameter_control },
     {'x', stop_motors_and_everything_command },
+    {'S', print_sensors_control },
     {0, 0}
 };
 

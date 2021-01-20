@@ -14,11 +14,16 @@ extern byte gFunctionSwitch;
 extern byte gDipSwitch;;
 
 //
-// provided by wall-sensors.cpp
+// provided by wall_sensors.cpp
 //
-void wall_sensors_setup();
-void print_wall_sensors();
-void updateWallSensor();  // usually called from sysTick interrupt
+//void wall_sensors_setup();
+//void print_wall_sensors();
+//void updateWallSensor();  // usually called from sysTick interrupt
+
+// provided by sensors_control.cpp
+void sensors_control_setup();
+void print_sensors_control();
+void update_sensors_control();
 
 // provided by distance-moved.cpp
 void setupEncoders();

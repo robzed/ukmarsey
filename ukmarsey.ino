@@ -6,7 +6,8 @@ void setup() {
   Serial.begin(115200);
   Serial.println(F("\nHello from ukmarsey"));
   setupSystick();
-  wall_sensors_setup();
+  //wall_sensors_setup();
+  sensors_control_setup();
   setupEncoders();
   motorSetup();
   init_stored_parameters();

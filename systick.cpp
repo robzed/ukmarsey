@@ -74,17 +74,18 @@ unsigned long t_systick3 = 0;
 // The systick event is an ISR attached to Timer 2
 // This currently runs at 2ms or 500Hz.
 ISR(TIMER2_COMPA_vect) {
-  unsigned long _start = micros();
+  //unsigned long _start = micros();
   updateBatteryVolts();
-  t_systick1 = micros() - _start;
+  //t_systick1 = micros() - _start;
 
-  _start = micros();
+  //_start = micros();
   updateFunctionSwitch();
-  t_systick2 = micros() - _start;
+  //t_systick2 = micros() - _start;
 
-  _start = micros();
-  updateWallSensor();
-  t_systick3 = micros() - _start;
+  //_start = micros();
+  //updateWallSensor();
+  update_sensors_control();
+  //t_systick3 = micros() - _start;
 
   //speed_control();
 }

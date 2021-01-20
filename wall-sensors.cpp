@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "hardware_pins.h"
 
+#if 0     // disabled for now - replace with generic sensor system (under development).
 #define ENABLE_SENSOR_LED_OUTPUT 0
 
 /***
@@ -107,3 +108,4 @@ void print_wall_sensors() {
     Serial.print(gSensorCTE);
     Serial.println(); // sends "\r\n"
 }
+#endif
