@@ -36,42 +36,24 @@ void setupEncoders() {
 }
 
 ISR(INT0_vect) {
+  static bool oldA = 0;
   static bool oldB = 0;
-  bool newB = bool(digitalReadFast(ENCODER_LEFT_B));
-  bool newA = bool(digitalReadFast(ENCODER_LEFT_CLK)) ^ newB;
-  if (newA == oldB) {
-#if ENCODER_LEFT_POLARITY
-    encoderLeftCount++;
-#else
-    encoderLeftCount--;
-#endif
-  } else {
-#if ENCODER_LEFT_POLARITY
-    encoderLeftCount--;
-#else
-    encoderLeftCount++;
-#endif
-  }
+  bool newB = digitalRead(ENCODER_LEFT_B);
+  bool newA = digitalRead(ENCODER_LEFT_CLK) ^ newB;
+  int delta = ENCODER_LEFT_POLARITY * ((oldA ^ newB) - (newA ^ oldB));
+  encoderLeftCount += delta;
+  oldA = newA;
   oldB = newB;
 }
 
 ISR(INT1_vect) {
+  static bool oldA = 0;
   static bool oldB = 0;
-  bool newB = bool(digitalReadFast(ENCODER_RIGHT_B));
-  bool newA = bool(digitalReadFast(ENCODER_RIGHT_CLK)) ^ newB;
-  if (newA == oldB) {
-#if ENCODER_RIGHT_POLARITY
-    encoderRightCount++;
-#else
-    encoderRightCount--;
-#endif
-  } else {
-#if ENCODER_RIGHT_POLARITY
-    encoderRightCount--;
-#else
-    encoderRightCount++;
-#endif
-  }
+  bool newB = digitalRead(ENCODER_RIGHT_B);
+  bool newA = digitalRead(ENCODER_RIGHT_CLK) ^ newB;
+  int delta = ENCODER_RIGHT_POLARITY * ((oldA ^ newB) - (newA ^ oldB));
+  encoderRightCount += delta;
+  oldA = newA;
   oldB = newB;
 }
 

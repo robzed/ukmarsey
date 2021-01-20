@@ -15,29 +15,29 @@ void motorSetup() {
   pinMode(MOTOR_LEFT_PWM, OUTPUT);
   pinMode(MOTOR_RIGHT_PWM, OUTPUT);
   digitalWrite(MOTOR_LEFT_PWM, 0);
-  digitalWrite(MOTOR_LEFT_DIR, LEFT_MOTOR_DIRECTION_FORWARD);
+  digitalWrite(MOTOR_LEFT_DIR, 0);
   digitalWrite(MOTOR_RIGHT_PWM, 0);
-  digitalWrite(MOTOR_RIGHT_DIR, RIGHT_MOTOR_DIRECTION_FORWARD);
+  digitalWrite(MOTOR_RIGHT_DIR, 0);
 }
 
 void setLeftMotorPWM(int pwm) {
-  pwm = constrain(pwm, -255, 255);
+  pwm = MOTOR_LEFT_POLARITY * constrain(pwm, -255, 255);
   if (pwm < 0) {
-    digitalWrite(MOTOR_LEFT_DIR, LEFT_MOTOR_DIRECTION_BACKWARD);
+    digitalWrite(MOTOR_LEFT_DIR, 1);
     analogWrite(MOTOR_LEFT_PWM, -pwm);
   } else {
-    digitalWrite(MOTOR_LEFT_DIR, LEFT_MOTOR_DIRECTION_FORWARD);
+    digitalWrite(MOTOR_LEFT_DIR, 0);
     analogWrite(MOTOR_LEFT_PWM, pwm);
   }
 }
 
 void setRightMotorPWM(int pwm) {
-  pwm = constrain(pwm, -255, 255);
+  pwm = MOTOR_RIGHT_POLARITY * constrain(pwm, -255, 255);
   if (pwm < 0) {
-    digitalWrite(MOTOR_RIGHT_DIR, RIGHT_MOTOR_DIRECTION_BACKWARD);
+    digitalWrite(MOTOR_RIGHT_DIR, 1);
     analogWrite(MOTOR_RIGHT_PWM, -pwm);
   } else {
-    digitalWrite(MOTOR_RIGHT_DIR, RIGHT_MOTOR_DIRECTION_FORWARD);
+    digitalWrite(MOTOR_RIGHT_DIR, 0);
     analogWrite(MOTOR_RIGHT_PWM, pwm);
   }
 }

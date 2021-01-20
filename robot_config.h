@@ -7,22 +7,17 @@
 // Depending on how you wired up your motor and encoders, you might need to tweak these values
 // 
 
-// These define which way is forward for each motor.
-// Set to 1 or 0, depending upon your wiring.
-// NOTE: Since the one motor has to turn the opposite way, then it's often the case that
-// one is reversed compared to another unless the wiring is reversed.
-#define LEFT_MOTOR_DIRECTION_FORWARD 1
-#define LEFT_MOTOR_DIRECTION_BACKWARD (1-LEFT_MOTOR_DIRECTION_FORWARD)
 
-#define RIGHT_MOTOR_DIRECTION_FORWARD 0
-#define RIGHT_MOTOR_DIRECTION_BACKWARD (1-RIGHT_MOTOR_DIRECTION_FORWARD)
-
-// These define the encoders.
-// Set these to 0 or 1
+// Encoder polarity is either 1 or -1 and is used to account for reversal of the encoder phases
 // The encoders should count up when the robot is moving forward.
-// NOTE: Since one motor goes int he opposite direction, it is frequently the case that they are differnet.
-#define ENCODER_LEFT_POLARITY 1
-#define ENCODER_RIGHT_POLARITY 0
+#define ENCODER_LEFT_POLARITY (1)
+#define ENCODER_RIGHT_POLARITY (-1)
+
+// Similarly, the motors may be wired with different polarity and that is defined here so that
+// Setting a positive voltage always moves the robot forwards
+#define MOTOR_LEFT_POLARITY (-1)
+#define MOTOR_RIGHT_POLARITY (1)
+
 
 /***
  * Global robot characteristic constants
