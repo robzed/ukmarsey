@@ -91,12 +91,13 @@ Examples:
 
 ### Low Level I/O Control Commands
 
-| Cmd | Action    |
-|:---:|-----------|
-| D | set or read digital pin |
-| A | read analogue pin, or write PWM pin |
-| M | motor control, using PWM value. 1 = left motor, 0 or 2 = right motor. PWM value -255 to 255, with 0 as stop. |
-| N | Dual motor control specifying a battery voltage | 
+| Cmd | Params     | Action    |
+|:---:|------------|-----------|
+|  D  | Dp or Dp=n | Set or read digital pin |
+|  A  | Aa or Ap=n | Read analogue pin, or write PWM pin |
+|  M  | Mm=p       | Motor control, using PWM value. 1 = left motor, 0 or 2 = right motor. PWM value -255 to 255, with 0 as stop. |
+|  N  | Nm,n       | Dual motor control specifying a battery voltage | 
+|  P  | Pp=d       | PinMode - Set up GPIO pins; p is pin, d is I(input) or O(output) or U(Pull Up Input)  |
 
 Examples:
 
@@ -133,6 +134,24 @@ N command also controls the motors, however it's referenced to battery which mea
 
 The advantage of this command is that it will go the same speed regardless of battery level, assuming you keep values to the range underneath the minimum battery voltage expected. 
 
+The Pin mode commands allows the user to configure pins.
+
+    P6=O            Configure right LED on wall follower board to Output
+    P11=O           Configure left LED on wall follower board to Output
+
+You can how turn the left and right LEDs on and off:
+
+    D11=1
+    D11=0
+    D6=0
+    D6=1
+
+To switch them back to inputs:
+
+    P6=I            Stop driving the right LED
+    P11=I           Stop driving the led LED
+
+
 ### Motor Count commands
 
 Reading an encoder counter might be more involved. It is the total so far and the range is int32 (+/- 2,147m even at 1000 counts per mm!). Result or parameter is signed.
@@ -166,9 +185,9 @@ NOTE: * indicates that the result was changed during the values being read.
 
 Examples of output:
 
-0,0,0,142,28,32,486,352         <- wall close
+    0,0,0,142,28,32,486,352         <- wall close
 
-0,0,0,4,28,13,15,11*            <- no wall, but data changed during read
+    0,0,0,4,28,13,15,11*            <- no wall, but data changed during read
 
 
 ### Parameter Commands
@@ -341,5 +360,6 @@ We aim to have shortened the amount of bytes requiring to be transmitted in orde
 
 # Dev Notes
 
-Currently this code has a wall sensor reading in the background. This needs to be changed to be more general! Some generic illumination/reading system should be added.
+There are three subsystems running all the time currently: battery reading, function switch reading and update sensors control. This shoudl be changed so these subsystems are optional. 
+
 

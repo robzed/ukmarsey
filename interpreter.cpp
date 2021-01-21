@@ -823,6 +823,48 @@ void echo_number()
   Serial.println(decode_input_value_float(1), floating_decimal_places);
 }
 
+/** @brief  Allows configuration of the Pin Mode from the command line.
+ *  @return Void.
+ */
+void pinMode_command()
+{
+  int pin_number = decode_input_value(1);
+  if(pin_number >= 0)
+  {
+    if(inputString[inputIndex] == '=')
+    {
+      // write PWM
+      //
+      char mode = inputString[inputIndex+1];
+      if(mode == 'I')
+      {
+        pinMode(pin_number, INPUT);
+      }
+      else if(mode == 'O')
+      {
+        pinMode(pin_number, OUTPUT);
+      }
+      else if(mode == 'U')
+      {
+        pinMode(pin_number, INPUT_PULLUP);
+      }
+      else
+      {
+        interpreter_error(T_UNEXPECTED_TOKEN);
+      }
+    }
+    else // read?
+    {
+      interpreter_error(T_READ_NOT_SUPPORTED);
+    }
+  }
+  else
+  {
+    interpreter_error(T_OUT_OF_RANGE);
+  }
+}
+
+
 /** @brief  Stops both motors
  *  @return Void.
  */
@@ -862,6 +904,7 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'A', analogue_control },
     {'M', motor_control },
     {'N', motor_control_dual_voltage },
+    {'P', pinMode_command },
     {'C', encoder_values },
     {'$', stored_parameter_control },
     {'x', stop_motors_and_everything_command },
