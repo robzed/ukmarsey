@@ -35,7 +35,7 @@ Even though the UKMarsBot is a standard design, there are several options:
 
 These can be configured in the file 'robot_config.h'. See that file and make appropriate adjustments.
 
-(If you are using low level control from a Raspberry Pi, you might be able to adjust for these in the Raspberry Pi. But if you are using any mid- or high-level control, you will definitely need to adjust this file!)
+(If you are using low level control from a Raspberry Pi, you might be able to adjust for these in the Raspberry Pi. But if you are using any mid- or high-level control, you will definitely need§ to adjust this file!)
 
 
 # Summary of Interpreter Usage
@@ -179,8 +179,11 @@ Parameters select specific characteristics of high level commands. They are stor
 |:---:|-----------|
 | $*n* | Read parameter *n* |    
 | $*n*=*f* | Write parameter *n* with value *f*. E.g. $0=1.1 |
-| $a   | Read all parameters, in the format *f*,*f*,*f* on a single line. NOTE: Will incur serial buffering and block until complete |
+| $a   | Read all floating parameters seperate lines per parameter. |
+| $b   | Read all boolean (bit) parameters, as 32 seperate lines. |
 | $d   | Default all parameters. |
+
+NOTE: $a and $b will incur serial buffering and block until complete 
 
 Currently all parameters are floating point values. 
 
@@ -204,6 +207,27 @@ A List of specific usage of each parameters is here.
 | 13 | *Undefined*  |
 | 14 | *Undefined*  |
 | 15 | *Undefined*  |
+
+There are also 32 boolean ('bit') parameters. The first 16 are listed here. Current all are undefined.
+
+| Param | Action    |
+|:-----:|-----------|
+| 100 | *Undefined* |
+| 101 | *Undefined*  |
+| 102 | *Undefined*  |
+| 103 | *Undefined*  |
+| 104 | *Undefined*  |
+| 105 | *Undefined*  |
+| 106 | *Undefined*  |
+| 107 | *Undefined*  |
+| 108 | *Undefined*  |
+| 109 | *Undefined*  |
+| 110 | *Undefined*  |
+| 111 | *Undefined*  |
+| 112 | *Undefined*  |
+| 113 | *Undefined*  |
+| 114 | *Undefined*  |
+| 115 | *Undefined*  |
 
 
 ### High Level I/O Control

@@ -48,11 +48,10 @@ static bool interpreter_echo = true;
 
 
 //
-// There are (NUM_STORED_PARAMS+1) * 4 bytes stored in EEPROM. NOTE: The last one is a magic number to detect an uninitialised EEPROM.
+// There are (NUM_STORED_PARAMS+2) * 4 bytes stored in EEPROM. NOTE: The last one is a magic number to detect an uninitialised EEPROM.
 //
 #define NUM_STORED_PARAMS 16
-#define MAGIC_ADDRESS ((NUM_STORED_PARAMS+1)*4)
-#define MAGIC_NUMBER 0xD00DCAFE
+
 float stored_params[NUM_STORED_PARAMS];
 static const float stored_parameters_default_values[NUM_STORED_PARAMS] = {
 
@@ -79,6 +78,78 @@ static const float stored_parameters_default_values[NUM_STORED_PARAMS] = {
 
 };
 
+#define NUMBER_OF_BITFIELD_STORED_PARAMS 32
+static const uint32_t bitfield_default_values = 
+// Default 0UL/1UL  Index: Usage 
+  (0UL << 31) +  // 131: undefined
+  (0UL << 30) +  // 130: undefined
+  (0UL << 29) +  // 129: undefined
+  (0UL << 28) +  // 128: undefined
+  (0UL << 27) +  // 127: undefined
+  (0UL << 26) +  // 126: undefined
+  (0UL << 25) +  // 125: undefined
+  (0UL << 24) +  // 124: undefined
+
+  (0UL << 23) +  // 123: undefined
+  (0UL << 22) +  // 122: undefined
+  (0UL << 21) +  // 121: undefined
+  (0UL << 20) +  // 120: undefined
+  (0UL << 19) +  // 119: undefined
+  (0UL << 18) +  // 118: undefined
+  (0UL << 17) +  // 117: undefined
+  (0UL << 16) +  // 116: undefined
+  
+  (0UL << 15) +  // 115: undefined
+  (0UL << 14) +  // 114: undefined
+  (0UL << 13) +  // 113: undefined
+  (0UL << 12) +  // 112: undefined
+  (0UL << 11) +  // 111: undefined
+  (0UL << 10) +  // 110: undefined
+  (0UL <<  9) +  // 109: undefined
+  (0UL <<  8) +  // 108: undefined
+
+  (0UL <<  7) +  // 107: undefined 
+  (0UL <<  6) +  // 106: undefined
+  (0UL <<  5) +  // 105: undefined
+  (0UL <<  4) +  // 104: undefined
+  (0UL <<  3) +  // 103: undefined
+  (0UL <<  2) +  // 102: undefined
+  (0UL <<  1) +  // 101: undefined
+  (0UL      ) ;  // 100: undefined
+//
+// actual data storage
+//
+uint32_t bitfield_stored_params = bitfield_default_values;
+
+// Addresses
+#define BITFIELD_ADDRESS ((NUM_STORED_PARAMS+1)*4) 
+#define MAGIC_ADDRESS (BITFIELD_ADDRESS+sizeof(bitfield_stored_params))
+
+// Magic to detect uninitialised space
+#define MAGIC_NUMBER 0xD00DCAFE
+
+
+/** @brief  Access a stored parameter
+ *  @param  Index of parameter
+ *  @return stored_param, or 0 if that parameter doesn't exist.
+ */
+float get_float_param(int param_index)
+{
+  if(param_index < 0 or param_index > NUM_STORED_PARAMS) { return 0; }
+  return stored_params[param_index];
+}
+
+/** @brief  Access a stored bool parameter
+ *  @param  Index of parameter
+ *  @return stored_param, or false if that parameter doesn't exist.
+ */
+bool get_bool_param(int param_index)
+{
+  if(param_index < 100 or param_index > NUMBER_OF_BITFIELD_STORED_PARAMS) { return false; }
+  return bitfield_stored_params & (1<<(param_index-100));
+}
+
+// ------------------------------------------
 enum
 {
   T_OK = 0,
@@ -600,6 +671,28 @@ void stored_parameter_control()
         Serial.println(stored_params[param_number], floating_decimal_places);
     }
   }
+  else if(param_number >= 100 and param_number < (100+NUMBER_OF_BITFIELD_STORED_PARAMS))
+  {
+    uint8_t shift = param_number-100;
+    if(inputString[inputIndex] == '=')
+    {
+      uint32_t mask = 1UL << shift;
+      uint32_t bit_value = decode_input_value(inputIndex+1);
+      if(bit_value)
+      {
+        bitfield_stored_params |= mask;
+      }
+      else
+      {
+        bitfield_stored_params &= ~mask;
+      }
+      EEPROM.put(BITFIELD_ADDRESS, bitfield_stored_params);
+    }
+    else
+    {
+        Serial.println((bitfield_stored_params >> shift) & 1);
+    }
+  }
   else
   {
     if(inputString[1]=='a')
@@ -607,6 +700,13 @@ void stored_parameter_control()
       for(int i=0; i<NUM_STORED_PARAMS; i++)
       {
         Serial.println(stored_params[i], floating_decimal_places);
+      }
+    }
+    else if(inputString[1]=='b')
+    {
+      for(int i=0; i<NUMBER_OF_BITFIELD_STORED_PARAMS; i++)
+      {
+        Serial.println((bitfield_stored_params & (1UL<<i))?1:0);
       }
     }
     else if(inputString[1]=='d')
@@ -617,6 +717,8 @@ void stored_parameter_control()
         EEPROM.put(i*4, *p);
         stored_params[i] = *p++;
       }
+      EEPROM.put(BITFIELD_ADDRESS, bitfield_default_values);
+      bitfield_stored_params = bitfield_default_values;
     }
     else
     {
@@ -643,7 +745,7 @@ void init_stored_parameters()
       // we use write here, not update
       EEPROM.put(i*4, *p++);
     }
-    
+    EEPROM.put(BITFIELD_ADDRESS, bitfield_default_values);
     // finally write magic back
     EEPROM.put(MAGIC_ADDRESS, MAGIC_NUMBER);
   }
@@ -654,6 +756,7 @@ void init_stored_parameters()
     EEPROM.get(i*4, f);
     stored_params[i] = f;
   }
+  EEPROM.get(BITFIELD_ADDRESS, bitfield_stored_params);
 }
 
 

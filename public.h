@@ -1,8 +1,11 @@
 #ifndef PUBLIC_H
 #define PUBLIC_H
 
+// provided by interpreter.cpp
 void interpreter();
 void init_stored_parameters();
+float get_float_param(int param_index);
+bool get_bool_param(int param_index);
 
 //
 // provided by systick.cpp
