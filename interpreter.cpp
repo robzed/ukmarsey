@@ -125,8 +125,15 @@ uint32_t bitfield_stored_params = bitfield_default_values;
 #define BITFIELD_ADDRESS ((NUM_STORED_PARAMS+1)*4) 
 #define MAGIC_ADDRESS (BITFIELD_ADDRESS+sizeof(bitfield_stored_params))
 
+//
+// Version number for parameter configuration in EEPROM
+//
+// If the parameter configuration in EEPROM changes, increase this number
+// and new versions will get a clean set of defaults. 
+#define PARAMETER_EEPROM_VERSION 1
+
 // Magic to detect uninitialised space
-#define MAGIC_NUMBER 0xD00DCAFE
+#define MAGIC_NUMBER ((0x00CAFE00) ^ (PARAMETER_EEPROM_VERSION))
 
 
 /** @brief  Access a stored parameter
