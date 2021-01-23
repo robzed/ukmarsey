@@ -99,6 +99,8 @@ Examples:
 |  N  | Nm,n       | Dual motor control specifying a battery voltage | 
 |  P  | Pp=d       | PinMode - Set up GPIO pins; p is pin, d is I(input) or O(output) or U(Pull Up Input)  |
 
+Regarding analogue readings, (A command), please see the information in 'Dev Notes'.
+
 Examples:
 
 Setting digital output pins requires no response. It is assumed to simply 'work'.
@@ -362,4 +364,5 @@ We aim to have shortened the amount of bytes requiring to be transmitted in orde
 
 There are three subsystems running all the time currently: battery reading, function switch reading and update sensors control. This shoudl be changed so these subsystems are optional. 
 
+NOTE: The battery reading, function switch reading and update sensors control use analogue-to-digital converter (ADC). The Arduino Nano has one 10-bit analogue-to-digital converter (ADC). Therefore, it is not practical to use the ADC from the converter and from the interrupts. You therefore either need to turn off the interrupt usage, or avoid using the ADC directly from the command line interpreter (CLI).
 
