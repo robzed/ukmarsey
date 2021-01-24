@@ -83,7 +83,7 @@ void updateWallSensor() {
   int front = analogRead(A1);
   int left = analogRead(A2);
   // light them up
-  digitalWrite(EMITTER, 1);
+  digitalWriteFast(EMITTER, 1);
   // wait until all the detectors are stable
   delayMicroseconds(50);
   // now find the differences
@@ -91,15 +91,15 @@ void updateWallSensor() {
   front = analogRead(A1) - front;
   left = analogRead(A2) - left;
   // and go dark again.
-  digitalWrite(EMITTER, 0);
+  digitalWriteFast(EMITTER, 0);
 
   gFrontWall = front > gFrontReference / 4;
   gLeftWall = left > gLeftReference / 2;
   gRightWall = right > gRightReference / 2;
 #if ENABLE_SENSOR_LED_OUTPUT
-  digitalWrite(LED_LEFT, gLeftWall);
-  digitalWrite(LED_RIGHT, gRightWall);
-  digitalWrite(LED_BUILTIN, gFrontWall);
+  digitalWriteFast(LED_LEFT, gLeftWall);
+  digitalWriteFast(LED_RIGHT, gRightWall);
+  digitalWriteFast(LED_BUILTIN, gFrontWall);
 #endif
   // calculate the alignment error - too far right is negative
   if ((left + right) > (gLeftReference + gRightReference) / 4) {
@@ -126,7 +126,7 @@ void wall_sensors_setup() {
   pinMode(LED_RIGHT, OUTPUT);
   pinMode(LED_LEFT, OUTPUT);
 #endif
-  digitalWrite(EMITTER, 0);  // be sure the emitter is off
+  digitalWriteFast(EMITTER, 0);  // be sure the emitter is off
   analogueSetup();           // increase the ADC conversion speed
 }
 

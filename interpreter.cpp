@@ -34,6 +34,7 @@
   SOFTWARE.
 */
 #include <Arduino.h>
+#include "digitalWriteFast.h"
 #include "public.h"
 #include <EEPROM.h>
 
@@ -220,7 +221,7 @@ typedef struct {
  *  @param  
  *  @return void
  */
-void led() { digitalWrite(LED_BUILTIN, (inputString[1] == '0') ? LOW:HIGH); }
+void led() { digitalWriteFast(LED_BUILTIN, (inputString[1] == '0') ? LOW:HIGH); }
 
 /** @brief  Prints OK
  *  @param  
@@ -498,16 +499,16 @@ void digital_pin_control()
       // Could be: digitWrite(port, inputString[inputIndex+1]-'0')
       if(inputString[inputIndex+1] == '1')
       {
-        digitalWrite(port, HIGH);
+        digitalWriteFast(port, HIGH);
       }
       else
       {
-        digitalWrite(port, LOW);
+        digitalWriteFast(port, LOW);
       }
     }
     else // read port
     {
-      Serial.println(digitalRead(port));
+      Serial.println(digitalReadFast(port));
     }
   }
   else

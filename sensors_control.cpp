@@ -32,6 +32,7 @@
   SOFTWARE.
 */
 #include <Arduino.h>
+#include "digitalWriteFast.h"
 #include "hardware_pins.h"
 
 
@@ -64,7 +65,7 @@ void update_sensors_control() {
   int a2 = analogRead(A2);
   int a3 = analogRead(A3);
   // light them up
-  digitalWrite(EMITTER, 1);
+  digitalWriteFast(EMITTER, 1);
   // wait until all the detectors are stable
   delayMicroseconds(50);
   
@@ -74,7 +75,7 @@ void update_sensors_control() {
   int a2_ = analogRead(A2);
   int a3_ = analogRead(A3);
   // and go dark again.
-  digitalWrite(EMITTER, 0);
+  digitalWriteFast(EMITTER, 0);
 
   // make the results available to the rest of the program
   gSensorA0_dark = a0;
@@ -91,7 +92,7 @@ void update_sensors_control() {
 
 void sensors_control_setup() {
   pinMode(EMITTER, OUTPUT);
-  digitalWrite(EMITTER, 0);  // be sure the emitter is off
+  digitalWriteFast(EMITTER, 0);  // be sure the emitter is off
   analogueSetup();           // increase the ADC conversion speed
 }
 
