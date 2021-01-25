@@ -39,16 +39,15 @@
  * Global variables
  */
 
-//int raw_BatteryVolts_adcValue;
+int raw_BatteryVolts_adcValue;
 float raw_BatteryVolts;
-byte gFunctionSwitch;
-byte gDipSwitch;
+int Switch_ADC_value;
 const float batteryDividerRatio = 2.0f;
 
 /***/
 
 void updateBatteryVolts() {
-  int raw_BatteryVolts_adcValue = analogRead(BATTERY_VOLTS);
+  raw_BatteryVolts_adcValue = analogRead(BATTERY_VOLTS);
   raw_BatteryVolts = raw_BatteryVolts_adcValue * (5.0f * batteryDividerRatio / 1023.0f);
 }
 
@@ -58,26 +57,33 @@ float get_BatteryVolts()
   //return raw_BatteryVolts_adcValue * (5.0f * batteryDividerRatio / 1023.0f);
 }
 
+
+/** @brief  Read the raw switch reading
+ *  @return void
+ */
 void updateFunctionSwitch() {
   /**
    * Typical ADC values for all function switch settings
    */
+  Switch_ADC_value = analogRead(FUNCTION_PIN);
+}
+
+/** @brief  Convert the switch ADC reading into a switch reading.
+ *  @return void
+ */
+int readFunctionSwitch() {
   const int adcReading[] = {660, 647, 630, 614, 590, 570, 545, 522, 461,
                             429, 385, 343, 271, 212, 128, 44,  0};
 
-  int adcValue = analogRead(FUNCTION_PIN);
-  if(adcValue > 1000){
-    gFunctionSwitch = 16;  // pushbutton closed
-    return;
+  if(Switch_ADC_value > 1000){
+    return 16;
   }
   for (int i = 0; i < 16; i++) {
-    if (adcValue > (adcReading[i] + adcReading[i + 1]) / 2) {
-      gFunctionSwitch = i;
-      gDipSwitch = i;
-      break;
+    if (Switch_ADC_value > (adcReading[i] + adcReading[i + 1]) / 2) {
+      return i;
     }
   }
-
+  return 15;   // should never get here... but if we do show 15
 }
 
 /***

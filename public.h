@@ -13,8 +13,7 @@ bool get_bool_param(int param_index);
 void setupSystick();
 void print_bat();
 float get_BatteryVolts();
-extern byte gFunctionSwitch;
-extern byte gDipSwitch;;
+int readFunctionSwitch();
 
 //
 // provided by wall_sensors.cpp

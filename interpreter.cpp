@@ -252,7 +252,7 @@ void show_version() { Serial.println(F("v1.1")); }
  *  @param  
  *  @return void
  */
-void print_switches() { Serial.println(gFunctionSwitch); }
+void print_switches() { Serial.println(readFunctionSwitch()); }
 
 
 /** @brief  Select one of several hardware motor tests.
@@ -335,7 +335,7 @@ void motor_test() {
 
   uint32_t endTime = millis() + 2000;
   while (endTime > millis()) {
-    if (gFunctionSwitch == 16) {
+    if (readFunctionSwitch() == 16) {
       break;  // stop running if the button is pressed
     }
   }
