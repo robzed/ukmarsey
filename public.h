@@ -26,6 +26,7 @@ int readFunctionSwitch();
 void sensors_control_setup();
 void print_sensors_control();
 void update_sensors_control();
+extern char emitter_on;
 
 // provided by distance-moved.cpp
 void setupEncoders();

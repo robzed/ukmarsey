@@ -800,6 +800,22 @@ void echo_control()
   }
 }
 
+/** @brief Turns the main emitter LED on and off.
+ *  @return Void.
+ */
+void emitter_control()
+{
+  int param = decode_input_value(1);
+  if(param == 0 or param == 1)
+  {
+    emitter_on = param;
+  }
+  else
+  {
+    interpreter_error(T_OUT_OF_RANGE);
+  }
+}
+
 /** @brief  Echos a number to stdout from the command line.
  *  @return Void.
  */
@@ -910,6 +926,7 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'$', stored_parameter_control },
     {'x', stop_motors_and_everything_command },
     {'S', print_sensors_control },
+    {'*', emitter_control },
     {0, 0}
 };
 

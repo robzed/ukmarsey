@@ -56,6 +56,7 @@ void analogueSetup() {
   bitClear(ADCSRA, ADPS1);
   bitSet(ADCSRA, ADPS2);
 }
+char emitter_on = 1;
 
 
 void update_sensors_control() {
@@ -64,18 +65,27 @@ void update_sensors_control() {
   int a1 = analogRead(A1);
   int a2 = analogRead(A2);
   int a3 = analogRead(A3);
-  // light them up
-  digitalWriteFast(EMITTER, 1);
-  // wait until all the detectors are stable
-  delayMicroseconds(50);
+  int a0_ = a0;
+  int a1_ = a1;
+  int a2_ = a2;
+  int a3_ = a3;  // they should read as the same if emitter is off.
   
-  // now find the differences
-  int a0_ = analogRead(A0);
-  int a1_ = analogRead(A1);
-  int a2_ = analogRead(A2);
-  int a3_ = analogRead(A3);
-  // and go dark again.
-  digitalWriteFast(EMITTER, 0);
+  if(emitter_on)
+  {
+    // light them up
+    digitalWriteFast(EMITTER, 1);
+    
+    // wait until all the detectors are stable
+    delayMicroseconds(50);
+    
+    // now find the differences
+    a0_ = analogRead(A0);
+    a1_ = analogRead(A1);
+    a2_ = analogRead(A2);
+    a3_ = analogRead(A3);
+    // and go dark again.
+    digitalWriteFast(EMITTER, 0);
+  }
 
   // make the results available to the rest of the program
   gSensorA0_dark = a0;
