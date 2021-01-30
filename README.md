@@ -305,7 +305,7 @@ m = motor tests, runs for 2 seconds or until button is pressed.
 
 ## Resetting and getting the Pi in sync with the Arduino.
 
-Send Control-C (or Control-X) followed by ^ repeatidly with a 20ms gap until you receive a RST message. Then try ? and v looking at the responses. If they don't succeeed, then repeat the entire sequence. 
+Send Control-C (or Control-X) followed by ^ repeatedly with a 20ms gap until you receive a RST message. Then try ? and v looking at the responses. If they don't succeeed, then repeat the entire sequence. 
 
 This is under review. 
 
