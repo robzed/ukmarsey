@@ -177,6 +177,10 @@ void interpreter_error(int error)
 {
   if(verbose_errors)
   {
+    if (error != T_OK)
+    {
+      Serial.print("@Error:");
+    }
     switch(error)
     {
       case T_OK:
@@ -192,7 +196,7 @@ void interpreter_error(int error)
         Serial.println(F("Too long"));
         break;
       case T_UNKNOWN_COMMAND:
-        Serial.println(F("?"));
+        Serial.println(F("Unknown"));
         break;
       case T_UNEXPECTED_TOKEN:
         Serial.println(F("Unexpected"));
@@ -204,6 +208,7 @@ void interpreter_error(int error)
   }
   else
   {
+    Serial.print("@Error:");
     Serial.println(error);
   }
 }
@@ -245,7 +250,7 @@ void reset_state() {
  *  @param  
  *  @return void
  */
-void show_version() { Serial.println(F("v1.1")); }
+void show_version() { Serial.println(F("v1.2")); }
 
 
 /** @brief  Print the decoded switch value.
