@@ -138,7 +138,7 @@ void print_sensors_control() {
       changed = changed != count;
     }
     
-    const char* comma = ",";
+    const char comma = ',';
     Serial.print(gSensorA0_dark_);
     Serial.print(comma);
     Serial.print(gSensorA1_dark_);
