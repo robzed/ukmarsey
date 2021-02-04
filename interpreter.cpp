@@ -824,7 +824,7 @@ void emitter_control()
 /** @brief  Echos a number to stdout from the command line.
  *  @return Void.
  */
-void echo_number()
+void echo_command()
 {
   int param = inputString[1];
   if(param == 'F')
@@ -840,6 +840,11 @@ void echo_number()
   if(param == 'S')
   {
     Serial.println(decode_input_value_signed(2));
+    return;
+  }
+  if(param == '*')
+  {
+    Serial.println(inputString);
     return;
   }
   Serial.println(decode_input_value_float(1), floating_decimal_places);
@@ -912,7 +917,6 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'z', zero_encoders },
     {'r', print_encoder_setup },
     {'m', motor_test },
-    {'=', echo_number },   // not official command, just for testing
 
     // Interpreter Commands
     {'^', reset_state },
@@ -932,6 +936,9 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'x', stop_motors_and_everything_command },
     {'S', print_sensors_control },
     {'*', emitter_control },
+
+    // keep this as the last command for testing
+    {'=', echo_command },   // not official command, just for testing
     {0, 0}
 };
 
