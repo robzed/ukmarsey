@@ -7,7 +7,7 @@
        https://ukmars.org/
        https://github.com/ukmars/ukmarsbot
        https://github.com/robzed/pizero_for_ukmarsbot
-       
+
   MIT License
 
   Copyright (c) 2020-2021 Rob Probin & Peter Harrison
@@ -35,7 +35,6 @@
 #include "digitalWriteFast.h"
 #include "hardware_pins.h"
 
-
 /***
  * Global variables
  */
@@ -58,7 +57,6 @@ void analogueSetup() {
 }
 char emitter_on = 1;
 
-
 void update_sensors_control() {
   // first read them dark
   int a0 = analogRead(A0);
@@ -69,15 +67,14 @@ void update_sensors_control() {
   int a1_ = a1;
   int a2_ = a2;
   int a3_ = a3;  // they should read as the same if emitter is off.
-  
-  if(emitter_on)
-  {
+
+  if (emitter_on) {
     // light them up
     digitalWriteFast(EMITTER, 1);
-    
+
     // wait until all the detectors are stable
     delayMicroseconds(50);
-    
+
     // now find the differences
     a0_ = analogRead(A0);
     a1_ = analogRead(A1);
@@ -99,64 +96,61 @@ void update_sensors_control() {
   count++;
 }
 
-
 void sensors_control_setup() {
   pinMode(EMITTER, OUTPUT);
   digitalWriteFast(EMITTER, 0);  // be sure the emitter is off
-  analogueSetup();           // increase the ADC conversion speed
+  analogueSetup();               // increase the ADC conversion speed
 }
 
 void print_sensors_control() {
-    int changed = count;
-    // Reduce chance of changing by reading ahead of printing time (since printing takes much longer). Otherwise we got a change about 25% of the time.
-    // With this change, change alone the change appears less than 5%. Based on a Python app, running over 20000 times fail rate was <0.2%.
-    // With the change below (re-read) the problem was not seem on the Python test app. However,the detection here and in the 
-    // Python test app was maintained.
-    int gSensorA0_dark_ = gSensorA0_dark;
-    int gSensorA1_dark_ = gSensorA1_dark;
-    int gSensorA2_dark_ = gSensorA2_dark;
-    int gSensorA3_dark_ = gSensorA3_dark;
-    int gSensorA0_light_ = gSensorA0_light;
-    int gSensorA1_light_ = gSensorA1_light;
-    int gSensorA2_light_ = gSensorA2_light;
-    int gSensorA3_light_ = gSensorA3_light;
-    changed = changed != count;
+  int changed = count;
+  // Reduce chance of changing by reading ahead of printing time (since printing takes much longer). Otherwise we got a change about 25% of the time.
+  // With this change, change alone the change appears less than 5%. Based on a Python app, running over 20000 times fail rate was <0.2%.
+  // With the change below (re-read) the problem was not seem on the Python test app. However,the detection here and in the
+  // Python test app was maintained.
+  int gSensorA0_dark_ = gSensorA0_dark;
+  int gSensorA1_dark_ = gSensorA1_dark;
+  int gSensorA2_dark_ = gSensorA2_dark;
+  int gSensorA3_dark_ = gSensorA3_dark;
+  int gSensorA0_light_ = gSensorA0_light;
+  int gSensorA1_light_ = gSensorA1_light;
+  int gSensorA2_light_ = gSensorA2_light;
+  int gSensorA3_light_ = gSensorA3_light;
+  changed = changed != count;
 
-    // If the count has just changed, then we shouldn't get another 2ms tick immediately, and should get an unchanged reading
-    // We still flag a change in case something has happened (e.g. multiple long duration interrupts).
-    if(changed)
-    {
-      changed = count;
-      gSensorA0_dark_ = gSensorA0_dark;
-      gSensorA1_dark_ = gSensorA1_dark;
-      gSensorA2_dark_ = gSensorA2_dark;
-      gSensorA3_dark_ = gSensorA3_dark;
-      gSensorA0_light_ = gSensorA0_light;
-      gSensorA1_light_ = gSensorA1_light;
-      gSensorA2_light_ = gSensorA2_light;
-      gSensorA3_light_ = gSensorA3_light;
-      changed = changed != count;
-    }
-    
-    const char comma = ',';
-    Serial.print(gSensorA0_dark_);
-    Serial.print(comma);
-    Serial.print(gSensorA1_dark_);
-    Serial.print(comma);
-    Serial.print(gSensorA2_dark_);
-    Serial.print(comma);
-    Serial.print(gSensorA3_dark_);
-    Serial.print(comma);
-    Serial.print(gSensorA0_light_);
-    Serial.print(comma);
-    Serial.print(gSensorA1_light_);
-    Serial.print(comma);
-    Serial.print(gSensorA2_light_);
-    Serial.print(comma);
-    Serial.print(gSensorA3_light_);
-    if(changed)
-    {
-      Serial.print("*");
-    }
-    Serial.println(); // sends "\r\n"
+  // If the count has just changed, then we shouldn't get another 2ms tick immediately, and should get an unchanged reading
+  // We still flag a change in case something has happened (e.g. multiple long duration interrupts).
+  if (changed) {
+    changed = count;
+    gSensorA0_dark_ = gSensorA0_dark;
+    gSensorA1_dark_ = gSensorA1_dark;
+    gSensorA2_dark_ = gSensorA2_dark;
+    gSensorA3_dark_ = gSensorA3_dark;
+    gSensorA0_light_ = gSensorA0_light;
+    gSensorA1_light_ = gSensorA1_light;
+    gSensorA2_light_ = gSensorA2_light;
+    gSensorA3_light_ = gSensorA3_light;
+    changed = changed != count;
+  }
+
+  const char comma = ',';
+  Serial.print(gSensorA0_dark_);
+  Serial.print(comma);
+  Serial.print(gSensorA1_dark_);
+  Serial.print(comma);
+  Serial.print(gSensorA2_dark_);
+  Serial.print(comma);
+  Serial.print(gSensorA3_dark_);
+  Serial.print(comma);
+  Serial.print(gSensorA0_light_);
+  Serial.print(comma);
+  Serial.print(gSensorA1_light_);
+  Serial.print(comma);
+  Serial.print(gSensorA2_light_);
+  Serial.print(comma);
+  Serial.print(gSensorA3_light_);
+  if (changed) {
+    Serial.print('*');
+  }
+  Serial.println();  // sends "\r\n"
 }
