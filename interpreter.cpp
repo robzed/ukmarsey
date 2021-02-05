@@ -901,6 +901,41 @@ void stop_motors_and_everything_command()
   // add action stop here as well
 }
 
+
+#define SERIAL_IN_CAPTURE 0
+#if SERIAL_IN_CAPTURE
+char serial_capture_read_buff[256]; // circular buffer
+uint8_t serial_capture_read_index = 0;
+char hex[] = "0123456789ABCDEF";
+
+/** @brief  Allows logging of input data for analysis.
+ *  @return Void.
+ */
+void print_serial_capture_read_buff()
+{
+  for(int i=0; i< 256; i+= 16)
+  {
+    for(int j=0; j<16; j++)
+    {
+      uint8_t offset = serial_capture_read_index + j + i;
+      char c = serial_capture_read_buff[offset];
+      if (c< 32 or c > 126) {
+        Serial.print(hex[c>>4]);
+        Serial.print(hex[c&0xF]);
+      }
+      else
+      {
+        Serial.print(' ');
+        Serial.print(c);
+      }
+    }
+    Serial.println("");
+  }
+}
+#endif
+
+
+
 typedef struct {
     char cmd;
     void (*func)();
@@ -937,6 +972,9 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'S', print_sensors_control },
     {'*', emitter_control },
 
+#if SERIAL_IN_CAPTURE
+   {'\\', print_serial_capture_read_buff },
+#endif
     // keep this as the last command for testing
     {'=', echo_command },   // not official command, just for testing
     {0, 0}
@@ -985,6 +1023,8 @@ void parse_cmd()
 #define BACKSPACE 0x08
 #define CTRL_X 0x18
 
+
+
 /** @brief  Command line interpreter.
  *  @return Void.
  */
@@ -992,6 +1032,9 @@ void interpreter()
 {    
     while (Serial.available()) {
       char inChar = (char)Serial.read();      // get the new byte:
+#if SERIAL_IN_CAPTURE
+  serial_capture_read_buff[serial_capture_read_index++]=inChar;
+#endif
 
       if(inChar > ' ')
       {
