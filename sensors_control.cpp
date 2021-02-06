@@ -34,6 +34,7 @@
 #include <Arduino.h>
 #include "digitalWriteFast.h"
 #include "hardware_pins.h"
+#include <util/atomic.h>
 
 /***
  * Global variables
@@ -102,24 +103,20 @@ void sensors_control_setup() {
   analogueSetup();               // increase the ADC conversion speed
 }
 
-void print_sensors_control() {
-  int changed = count;
-  
-  // read the sensors
-  int gSensorA0_dark_ = gSensorA0_dark;
-  int gSensorA1_dark_ = gSensorA1_dark;
-  int gSensorA2_dark_ = gSensorA2_dark;
-  int gSensorA3_dark_ = gSensorA3_dark;
-  int gSensorA0_light_ = gSensorA0_light;
-  int gSensorA1_light_ = gSensorA1_light;
-  int gSensorA2_light_ = gSensorA2_light;
-  int gSensorA3_light_ = gSensorA3_light;
-  changed = changed != count;
 
-  // If the count has just changed, then we shouldn't get another 2ms tick immediately, and should get an unchanged reading
-  // We still flag a change in case something has happened (e.g. multiple long duration interrupts).
-  if (changed) {
-    changed = count;
+void print_sensors_control()
+{
+  int gSensorA0_dark_;
+  int gSensorA1_dark_;
+  int gSensorA2_dark_;
+  int gSensorA3_dark_;
+  int gSensorA0_light_;
+  int gSensorA1_light_;
+  int gSensorA2_light_;
+  int gSensorA3_light_;
+
+  // read the sensors
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
     gSensorA0_dark_ = gSensorA0_dark;
     gSensorA1_dark_ = gSensorA1_dark;
     gSensorA2_dark_ = gSensorA2_dark;
