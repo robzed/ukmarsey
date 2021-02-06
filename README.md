@@ -181,16 +181,15 @@ By default this is set up to read A0, A1, A2, A3 as sensors and use D12 to turn 
 
 | Cmd | Action    |
 |:---:|-----------|
-|  S  | Read sensors dark values then light values seperated by commas, followed by an optional * |
+|  S  | Read sensors dark values then light values seperated by commas. |
 |  *  | Enable/Disable emitter LED Control. Used to save power. |
 
-NOTE: * indicates that the result was changed during the values being read.
 
 Examples of output:
 
     0,0,0,142,28,32,486,352         <- wall close
 
-    0,0,0,4,28,13,15,11*            <- no wall, but data changed during read
+    0,0,0,4,28,13,15,11            <- no wall
 
 
 Examples of Emitter control:

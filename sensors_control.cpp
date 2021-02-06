@@ -104,10 +104,8 @@ void sensors_control_setup() {
 
 void print_sensors_control() {
   int changed = count;
-  // Reduce chance of changing by reading ahead of printing time (since printing takes much longer). Otherwise we got a change about 25% of the time.
-  // With this change, change alone the change appears less than 5%. Based on a Python app, running over 20000 times fail rate was <0.2%.
-  // With the change below (re-read) the problem was not seem on the Python test app. However,the detection here and in the
-  // Python test app was maintained.
+  
+  // read the sensors
   int gSensorA0_dark_ = gSensorA0_dark;
   int gSensorA1_dark_ = gSensorA1_dark;
   int gSensorA2_dark_ = gSensorA2_dark;
@@ -130,7 +128,6 @@ void print_sensors_control() {
     gSensorA1_light_ = gSensorA1_light;
     gSensorA2_light_ = gSensorA2_light;
     gSensorA3_light_ = gSensorA3_light;
-    changed = changed != count;
   }
 
   const char comma = ',';
@@ -149,8 +146,5 @@ void print_sensors_control() {
   Serial.print(gSensorA2_light_);
   Serial.print(comma);
   Serial.print(gSensorA3_light_);
-  if (changed) {
-    Serial.print('*');
-  }
   Serial.println();  // sends "\r\n"
 }
