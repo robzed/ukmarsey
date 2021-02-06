@@ -522,6 +522,19 @@ void digital_pin_control()
   }
 }
 
+static volatile int* pointers_to_ADC_readings[] = 
+{
+  &gSensorA0_dark, // SENSOR_RIGHT_MARK = A0;
+  &gSensorA1_dark, // SENSOR_1 = A1;
+  &gSensorA2_dark, // SENSOR_2 = A2;
+  &gSensorA3_dark, // SENSOR_3 = A3;
+  &gSensorA4_light, // SENSOR_4 = A4;
+  &gSensorA5_light, // SENSOR_LEFT_MARK = A5;
+  &Switch_ADC_value, // FUNCTION_PIN = A6;
+  &raw_BatteryVolts_adcValue, // BATTERY_VOLTS = A7;
+};
+
+
 /** @brief Reads an analogue pin or sets a PWM output.
  *  @return Void.
  */
@@ -548,7 +561,14 @@ void analogue_control()
     }
     else // read port
     {
-      Serial.println(analogRead(port));
+      if(port >= 0 or port <= 7)
+      {
+        Serial.println(*(pointers_to_ADC_readings[port]));
+      }
+      else
+      {
+        interpreter_error(T_OUT_OF_RANGE);
+      }
     }
   }
   else

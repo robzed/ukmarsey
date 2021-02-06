@@ -99,7 +99,7 @@ Examples:
 |  N  | Nm,n       | Dual motor control specifying a battery voltage | 
 |  P  | Pp=d       | PinMode - Set up GPIO pins; p is pin, d is I(input) or O(output) or U(Pull Up Input)  |
 
-Regarding analogue readings, (A command), please see the information in 'Dev Notes'.
+Regarding analogue readings, (A command), these are read off interrupts, so can be up to 2ms old.
 
 Examples:
 
@@ -400,7 +400,28 @@ We aim to have shortened the amount of bytes requiring to be transmitted in orde
 
 # Dev Notes
 
-There are three subsystems running all the time currently: battery reading, function switch reading and update sensors control. This shoudl be changed so these subsystems are optional. 
+## ADC 
+There are three subsystems running all the time currently on the system tick interrupt that runs every 2ms: battery reading, function switch reading and update sensors control. The analogue command (e.g. A0) uses these subsystems to read the ADCs (partially to avoid conflicts since there is only one ADC unit).
 
-NOTE: The battery reading, function switch reading and update sensors control use analogue-to-digital converter (ADC). The Arduino Nano has one 10-bit analogue-to-digital converter (ADC). Therefore, it is not practical to use the ADC from the converter and from the interrupts. You therefore either need to turn off the interrupt usage, or avoid using the ADC directly from the command line interpreter (CLI).
+## Serial Buffering
+
+The Arduino Nano has a 64 byte input buffer and a 64 byte output buffer. Transmission to and from the Arduino needs to be carefully designed not to overrun these buffers. 
+
+If you overrun the 64 byte output buffer the print commands will start waiting inside the Arduino Nano (the commands will take longer to complete). The could cause several affects - once of which could potentially be commands stacking up in the input buffer. It only requires, for instance perhaps three 'Sr' commands to cause the output buffer to be filled.
+
+If you overrun the 64 byte input buffer, then old characters will be dropped. This is bad for several reasons - one of which includes partial comamnds - which could cause an error or action you don't intend.
+
+There are several techniques possible - for instance avoid sending a long stream of commands without any commanbds with a reply. Having a long stream of no-reply commands means the host program cannot track how far through the input buffer the interpreter has got, therefore estimate how many bytes are currently queued.
+
+## Baud rate
+
+If you are changing the baud rate from 56700, care must be taken to choose a baud rate that both end can generate accurately. If the total error exceeds of both sides exceeds around 2% then you are likely to get byte errors. Ideally you want to be within 1%.
+
+One such baud rate table for the AVR on the Arduino Nano inclides: https://trolsoft.ru/en/uart-calc
+
+Remeber to add on the error rate of the other side as well - whehter that be a Rasberry Pi, USB-Serial converter, or other serial port. Sometimes you can get lucky. If they are both, say +3% of the target, then the baud rates will match. But a -1.6% on one end, and a +1.6% on the other end gives 3.2% error, and this will cause problems. (Although errors rates up to 5% would theoretically work before it meets an edge, the reality of sampling mechanisms, slew rate and other factors means that realistic error rates are well under half of this.)
+
+Sometimes these cannot be simply looked up from microcontroller or microprocessor data sheets - crystals tend to be accurate, but devices with resonators or internal RC oscillators tend to have large tolerance between devices themselves - and this needs to be taken into account. 
+
+NOTE: We tried 115200, which is listed (with U2Xn=1) as +2.1%, and while is worked initially, we had data errors on testing automated commands of data over the USB-serial converter. It seems that 76800 is another good baud rate for the Arduino Nano with a 16MHz crystal - but we didn't make this standard because most terminal emulators used for testing don't generally provide this as a standard setting.
 

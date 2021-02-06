@@ -39,9 +39,9 @@
  * Global variables
  */
 
-int raw_BatteryVolts_adcValue;
+volatile int raw_BatteryVolts_adcValue;
 float raw_BatteryVolts;
-int Switch_ADC_value;
+volatile int Switch_ADC_value;
 const float batteryDividerRatio = 2.0f;
 
 /***/

@@ -15,6 +15,16 @@ void print_bat();
 float get_BatteryVolts();
 int readFunctionSwitch();
 
+// ADC channels
+extern volatile int raw_BatteryVolts_adcValue;
+extern volatile int Switch_ADC_value;
+extern volatile int gSensorA0_dark;
+extern volatile int gSensorA1_dark;
+extern volatile int gSensorA2_dark;
+extern volatile int gSensorA3_dark;
+extern volatile int gSensorA4_light;
+extern volatile int gSensorA5_light;
+
 //
 // provided by wall_sensors.cpp
 //
