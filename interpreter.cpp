@@ -646,19 +646,42 @@ void encoder_values()
       }
     }
   }
-  else if (inputString[1] == 0)
-  {
-    // read both encoder values ahead of time so print time doesn't offset.
-    int32_t left = encoderLeftCount;
-    int32_t right = encoderRightCount;
-    
-    Serial.print(left);
-    Serial.print(",");
-    Serial.println(right);
-  }
   else
   {
-    interpreter_error(T_OUT_OF_RANGE);
+    char c = inputString[1];
+    if (c == 'h')
+    {
+      // read both encoder values ahead of time so print time doesn't offset.
+      int32_t left = encoderLeftCount;
+      int32_t right = encoderRightCount;
+      if (inputString[2] == 'z')
+      {
+        encoderLeftCount = 0;
+        encoderRightCount = 0;
+      }
+      
+      Serial.print(left, HEX);
+      Serial.print(",");
+      Serial.println(right, HEX);
+    }
+    else if (c == 0 or c == 'z')
+    {
+      // read both encoder values ahead of time so print time doesn't offset.
+      int32_t left = encoderLeftCount;
+      int32_t right = encoderRightCount;
+      if (c == 'z')
+      {
+        encoderLeftCount = 0;
+        encoderRightCount = 0;
+      }
+      Serial.print(left);
+      Serial.print(",");
+      Serial.println(right);
+    }
+    else
+    {
+      interpreter_error(T_OUT_OF_RANGE);
+    }
   }
 } 
 

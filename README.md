@@ -164,11 +164,32 @@ Reading an encoder counter might be more involved. It is the total so far and th
 | C1 | Read Left wheel counter. Might return the left wheel counter as '-3752901'. |
 | C*n*=*m* | Set the Wheel count value, usually. e.g. C1=0 where n=1 and m=0. |
 | C  | Alone with no parameters - prints both encoders as 'left,right' |
+| Cz | Same as C, but also zeros encoders immediately after reading |
+| Ch | Same as C, but values in Hex |
+| ChZ| Same as Ch, but also zeros encoders immediately after reading |
 | z | zero wheel encoder counters. No return. | 
 | e | print wheel current info - human readable NOT for machine parsing! |
 | r | print encoder setup - human readable NOT for machine parsing! | 
 
 Setting a counter using 'C' command is usually to zero but could be any legal value. Therefore a quick 'z' command is provided.
+
+Examples:
+    C
+        98514,98181
+    C
+        -5075,129406
+
+    Cz
+        8487,-8186
+    Cz
+        0,0
+
+    Ch
+        5C65,FFFFA6D8
+    Chz
+        B507,FFFF50CE
+    Ch
+        21E4,FFFFDEBE
 
 
 ### Sensor Processing commands
