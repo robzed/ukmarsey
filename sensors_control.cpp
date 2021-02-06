@@ -48,7 +48,6 @@ volatile int gSensorA0_light;
 volatile int gSensorA1_light;
 volatile int gSensorA2_light;
 volatile int gSensorA3_light;
-volatile int count = 0;
 void analogueSetup() {
   // increase speed of ADC conversions to 28us each
   // by changing the clock prescaler from 128 to 16
@@ -94,7 +93,6 @@ void update_sensors_control() {
   gSensorA1_light = a1_;
   gSensorA2_light = a2_;
   gSensorA3_light = a3_;
-  count++;
 }
 
 void sensors_control_setup() {
