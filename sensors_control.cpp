@@ -102,7 +102,7 @@ void sensors_control_setup() {
 }
 
 
-void print_sensors_control()
+void print_sensors_control(char mode)
 {
   int gSensorA0_dark_;
   int gSensorA1_dark_;
@@ -126,20 +126,48 @@ void print_sensors_control()
   }
 
   const char comma = ',';
-  Serial.print(gSensorA0_dark_);
-  Serial.print(comma);
-  Serial.print(gSensorA1_dark_);
-  Serial.print(comma);
-  Serial.print(gSensorA2_dark_);
-  Serial.print(comma);
-  Serial.print(gSensorA3_dark_);
-  Serial.print(comma);
-  Serial.print(gSensorA0_light_);
-  Serial.print(comma);
-  Serial.print(gSensorA1_light_);
-  Serial.print(comma);
-  Serial.print(gSensorA2_light_);
-  Serial.print(comma);
-  Serial.print(gSensorA3_light_);
+  if(mode == 'd')
+  {
+    Serial.print(gSensorA0_light_ - gSensorA0_dark_);
+    Serial.print(comma);
+    Serial.print(gSensorA1_light_ - gSensorA1_dark_);
+    Serial.print(comma);
+    Serial.print(gSensorA2_light_ - gSensorA2_dark_);
+    Serial.print(comma);
+    Serial.print(gSensorA3_light_ - gSensorA3_dark_);
+  }
+  else if(mode == 'h')
+  {
+    gSensorA0_light_ = min(gSensorA0_light_-gSensorA0_dark_, 255);
+    if(gSensorA0_light_ < 0x10) { Serial.print('0'); }
+    Serial.print(gSensorA0_light_, HEX);
+    gSensorA1_light_ = min(gSensorA1_light_-gSensorA1_dark_, 255);
+    if(gSensorA1_light_ < 0x10) { Serial.print('0'); }
+    Serial.print(gSensorA1_light_, HEX);
+    gSensorA2_light_ = min(gSensorA2_light_-gSensorA2_dark_, 255);
+    if(gSensorA2_light_ < 0x10) { Serial.print('0'); }
+    Serial.print(gSensorA2_light_, HEX);
+    gSensorA3_light_ = min(gSensorA3_light_-gSensorA3_dark_, 255);
+    if(gSensorA3_light_ < 0x10) { Serial.print('0'); }
+    Serial.print(gSensorA3_light_, HEX);
+  }
+  else if(mode == 'r')
+  {
+    Serial.print(gSensorA0_dark_);
+    Serial.print(comma);
+    Serial.print(gSensorA1_dark_);
+    Serial.print(comma);
+    Serial.print(gSensorA2_dark_);
+    Serial.print(comma);
+    Serial.print(gSensorA3_dark_);
+    Serial.print(comma);
+    Serial.print(gSensorA0_light_);
+    Serial.print(comma);
+    Serial.print(gSensorA1_light_);
+    Serial.print(comma);
+    Serial.print(gSensorA2_light_);
+    Serial.print(comma);
+    Serial.print(gSensorA3_light_);
+  }
   Serial.println();  // sends "\r\n"
 }

@@ -901,6 +901,29 @@ void stop_motors_and_everything_command()
   // add action stop here as well
 }
 
+/** @brief  Prints the sensors (in various formats)
+ *  @return Void.
+ */
+void print_sensors_control_command()
+{
+  int mode = inputString[1];
+  if (mode == 'h')
+  {
+    print_sensors_control('h'); // hex
+  }
+  else if (mode == 0)
+  {
+    print_sensors_control('d'); // decimal
+  }
+  else  if (mode == 'r')
+  {
+    print_sensors_control('r'); // raw light and dark
+  }
+  else
+  {
+    interpreter_error(T_UNEXPECTED_TOKEN);
+  }
+}
 
 #define SERIAL_IN_CAPTURE 0
 #if SERIAL_IN_CAPTURE
@@ -969,7 +992,7 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'C', encoder_values },
     {'$', stored_parameter_control },
     {'x', stop_motors_and_everything_command },
-    {'S', print_sensors_control },
+    {'S', print_sensors_control_command },
     {'*', emitter_control },
 
 #if SERIAL_IN_CAPTURE

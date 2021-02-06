@@ -181,11 +181,24 @@ By default this is set up to read A0, A1, A2, A3 as sensors and use D12 to turn 
 
 | Cmd | Action    |
 |:---:|-----------|
-|  S  | Read sensors dark values then light values seperated by commas. |
+|  S  | Read sensors - gives difference between dark and light - which is what you normal what you need |
+|  Sr | Read sensors 'raw' format - dark values then light values seperated by commas. |
+|  Sh | As per S, but in hex from 0-FF without commas. You can get more data samples per second in this format. |
 |  *  | Enable/Disable emitter LED Control. Used to save power. |
 
+Examples of output of 'S':
 
-Examples of output:
+    S
+        398,104,19,6
+
+Examples of output of 'Sh':
+
+    Sh
+    FF691306
+    Sh
+    FF681307
+
+Examples of output of 'Sr':
 
     0,0,0,142,28,32,486,352         <- wall close
 
@@ -195,10 +208,10 @@ Examples of output:
 Examples of Emitter control:
 
     *1
-    S
+    Sr
         0,0,0,131,135,25,440,318
     *0
-    S
+    Sr
         0,0,0,1,0,0,0,1
 
 ### Parameter Commands
