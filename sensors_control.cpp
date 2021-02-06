@@ -173,5 +173,5 @@ void print_sensors_control(char mode)
     Serial.print(comma);
     Serial.print(gSensorA3_light_);
   }
-  Serial.println();  // sends "\r\n"
+  Serial.println();
 }

@@ -1107,7 +1107,7 @@ void interpreter()
             stop_motors_and_everything_command();
           }
           inputIndex = 0;
-          Serial.println("\n");
+          Serial.println();
         }
         else if(inChar == BACKSPACE and inputIndex != 0)
         {

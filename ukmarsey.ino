@@ -39,7 +39,7 @@
 void setup() {
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(57600);
-  Serial.println(F("\nHello from ukmarsey"));
+  Serial.println(F("Hello from ukmarsey"));
   setupSystick();
   //wall_sensors_setup();
   sensors_control_setup();
