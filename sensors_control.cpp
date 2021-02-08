@@ -132,26 +132,26 @@ void print_sensors_control(char mode)
   const char comma = ',';
   if(mode == 'd')
   {
-    Serial.print(gSensorA0_light_ - gSensorA0_dark_);
+    Serial.print(max(gSensorA0_light_ - gSensorA0_dark_, 0));
     Serial.print(comma);
-    Serial.print(gSensorA1_light_ - gSensorA1_dark_);
+    Serial.print(max(gSensorA1_light_ - gSensorA1_dark_, 0));
     Serial.print(comma);
-    Serial.print(gSensorA2_light_ - gSensorA2_dark_);
+    Serial.print(max(gSensorA2_light_ - gSensorA2_dark_, 0));
     Serial.print(comma);
-    Serial.print(gSensorA3_light_ - gSensorA3_dark_);
+    Serial.print(max(gSensorA3_light_ - gSensorA3_dark_, 0));
   }
   else if(mode == 'h')
   {
-    gSensorA0_light_ = min(gSensorA0_light_-gSensorA0_dark_, 255);
+    gSensorA0_light_ = constrain(gSensorA0_light_-gSensorA0_dark_, 0, 255);
     if(gSensorA0_light_ < 0x10) { Serial.print('0'); }
     Serial.print(gSensorA0_light_, HEX);
-    gSensorA1_light_ = min(gSensorA1_light_-gSensorA1_dark_, 255);
+    gSensorA1_light_ = constrain(gSensorA1_light_-gSensorA1_dark_, 0, 255);
     if(gSensorA1_light_ < 0x10) { Serial.print('0'); }
     Serial.print(gSensorA1_light_, HEX);
-    gSensorA2_light_ = min(gSensorA2_light_-gSensorA2_dark_, 255);
+    gSensorA2_light_ = constrain(gSensorA2_light_-gSensorA2_dark_, 0, 255);
     if(gSensorA2_light_ < 0x10) { Serial.print('0'); }
     Serial.print(gSensorA2_light_, HEX);
-    gSensorA3_light_ = min(gSensorA3_light_-gSensorA3_dark_, 255);
+    gSensorA3_light_ = constrain(gSensorA3_light_-gSensorA3_dark_, 0, 255);
     if(gSensorA3_light_ < 0x10) { Serial.print('0'); }
     Serial.print(gSensorA3_light_, HEX);
   }
