@@ -34,6 +34,7 @@
 #include <Arduino.h>
 #include "digitalWriteFast.h"
 #include "hardware_pins.h"
+#include <util/atomic.h>
 
 /***
  * Global variables
@@ -47,7 +48,8 @@ volatile int gSensorA0_light;
 volatile int gSensorA1_light;
 volatile int gSensorA2_light;
 volatile int gSensorA3_light;
-volatile int count = 0;
+volatile int gSensorA4_light;
+volatile int gSensorA5_light;
 void analogueSetup() {
   // increase speed of ADC conversions to 28us each
   // by changing the clock prescaler from 128 to 16
@@ -80,6 +82,8 @@ void update_sensors_control() {
     a1_ = analogRead(A1);
     a2_ = analogRead(A2);
     a3_ = analogRead(A3);
+    gSensorA4_light = analogRead(A4);
+    gSensorA5_light = analogRead(A5);
     // and go dark again.
     digitalWriteFast(EMITTER, 0);
   }
@@ -93,7 +97,6 @@ void update_sensors_control() {
   gSensorA1_light = a1_;
   gSensorA2_light = a2_;
   gSensorA3_light = a3_;
-  count++;
 }
 
 void sensors_control_setup() {
@@ -102,26 +105,20 @@ void sensors_control_setup() {
   analogueSetup();               // increase the ADC conversion speed
 }
 
-void print_sensors_control() {
-  int changed = count;
-  // Reduce chance of changing by reading ahead of printing time (since printing takes much longer). Otherwise we got a change about 25% of the time.
-  // With this change, change alone the change appears less than 5%. Based on a Python app, running over 20000 times fail rate was <0.2%.
-  // With the change below (re-read) the problem was not seem on the Python test app. However,the detection here and in the
-  // Python test app was maintained.
-  int gSensorA0_dark_ = gSensorA0_dark;
-  int gSensorA1_dark_ = gSensorA1_dark;
-  int gSensorA2_dark_ = gSensorA2_dark;
-  int gSensorA3_dark_ = gSensorA3_dark;
-  int gSensorA0_light_ = gSensorA0_light;
-  int gSensorA1_light_ = gSensorA1_light;
-  int gSensorA2_light_ = gSensorA2_light;
-  int gSensorA3_light_ = gSensorA3_light;
-  changed = changed != count;
 
-  // If the count has just changed, then we shouldn't get another 2ms tick immediately, and should get an unchanged reading
-  // We still flag a change in case something has happened (e.g. multiple long duration interrupts).
-  if (changed) {
-    changed = count;
+void print_sensors_control(char mode)
+{
+  int gSensorA0_dark_;
+  int gSensorA1_dark_;
+  int gSensorA2_dark_;
+  int gSensorA3_dark_;
+  int gSensorA0_light_;
+  int gSensorA1_light_;
+  int gSensorA2_light_;
+  int gSensorA3_light_;
+
+  // read the sensors
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
     gSensorA0_dark_ = gSensorA0_dark;
     gSensorA1_dark_ = gSensorA1_dark;
     gSensorA2_dark_ = gSensorA2_dark;
@@ -130,27 +127,51 @@ void print_sensors_control() {
     gSensorA1_light_ = gSensorA1_light;
     gSensorA2_light_ = gSensorA2_light;
     gSensorA3_light_ = gSensorA3_light;
-    changed = changed != count;
   }
 
   const char comma = ',';
-  Serial.print(gSensorA0_dark_);
-  Serial.print(comma);
-  Serial.print(gSensorA1_dark_);
-  Serial.print(comma);
-  Serial.print(gSensorA2_dark_);
-  Serial.print(comma);
-  Serial.print(gSensorA3_dark_);
-  Serial.print(comma);
-  Serial.print(gSensorA0_light_);
-  Serial.print(comma);
-  Serial.print(gSensorA1_light_);
-  Serial.print(comma);
-  Serial.print(gSensorA2_light_);
-  Serial.print(comma);
-  Serial.print(gSensorA3_light_);
-  if (changed) {
-    Serial.print('*');
+  if(mode == 'd')
+  {
+    Serial.print(max(gSensorA0_light_ - gSensorA0_dark_, 0));
+    Serial.print(comma);
+    Serial.print(max(gSensorA1_light_ - gSensorA1_dark_, 0));
+    Serial.print(comma);
+    Serial.print(max(gSensorA2_light_ - gSensorA2_dark_, 0));
+    Serial.print(comma);
+    Serial.print(max(gSensorA3_light_ - gSensorA3_dark_, 0));
   }
-  Serial.println();  // sends "\r\n"
+  else if(mode == 'h')
+  {
+    gSensorA0_light_ = constrain(gSensorA0_light_-gSensorA0_dark_, 0, 255);
+    if(gSensorA0_light_ < 0x10) { Serial.print('0'); }
+    Serial.print(gSensorA0_light_, HEX);
+    gSensorA1_light_ = constrain(gSensorA1_light_-gSensorA1_dark_, 0, 255);
+    if(gSensorA1_light_ < 0x10) { Serial.print('0'); }
+    Serial.print(gSensorA1_light_, HEX);
+    gSensorA2_light_ = constrain(gSensorA2_light_-gSensorA2_dark_, 0, 255);
+    if(gSensorA2_light_ < 0x10) { Serial.print('0'); }
+    Serial.print(gSensorA2_light_, HEX);
+    gSensorA3_light_ = constrain(gSensorA3_light_-gSensorA3_dark_, 0, 255);
+    if(gSensorA3_light_ < 0x10) { Serial.print('0'); }
+    Serial.print(gSensorA3_light_, HEX);
+  }
+  else if(mode == 'r')
+  {
+    Serial.print(gSensorA0_dark_);
+    Serial.print(comma);
+    Serial.print(gSensorA1_dark_);
+    Serial.print(comma);
+    Serial.print(gSensorA2_dark_);
+    Serial.print(comma);
+    Serial.print(gSensorA3_dark_);
+    Serial.print(comma);
+    Serial.print(gSensorA0_light_);
+    Serial.print(comma);
+    Serial.print(gSensorA1_light_);
+    Serial.print(comma);
+    Serial.print(gSensorA2_light_);
+    Serial.print(comma);
+    Serial.print(gSensorA3_light_);
+  }
+  Serial.println();
 }

@@ -139,6 +139,6 @@ void print_wall_sensors() {
     Serial.print(gSensorLeft);
     Serial.print(F("  Error: "));
     Serial.print(gSensorCTE);
-    Serial.println(); // sends "\r\n"
+    Serial.println();
 }
 #endif

@@ -522,6 +522,19 @@ void digital_pin_control()
   }
 }
 
+static volatile int* pointers_to_ADC_readings[] = 
+{
+  &gSensorA0_dark, // SENSOR_RIGHT_MARK = A0;
+  &gSensorA1_dark, // SENSOR_1 = A1;
+  &gSensorA2_dark, // SENSOR_2 = A2;
+  &gSensorA3_dark, // SENSOR_3 = A3;
+  &gSensorA4_light, // SENSOR_4 = A4;
+  &gSensorA5_light, // SENSOR_LEFT_MARK = A5;
+  &Switch_ADC_value, // FUNCTION_PIN = A6;
+  &raw_BatteryVolts_adcValue, // BATTERY_VOLTS = A7;
+};
+
+
 /** @brief Reads an analogue pin or sets a PWM output.
  *  @return Void.
  */
@@ -548,7 +561,14 @@ void analogue_control()
     }
     else // read port
     {
-      Serial.println(analogRead(port));
+      if(port >= 0 or port <= 7)
+      {
+        Serial.println(*(pointers_to_ADC_readings[port]));
+      }
+      else
+      {
+        interpreter_error(T_OUT_OF_RANGE);
+      }
     }
   }
   else
@@ -626,19 +646,42 @@ void encoder_values()
       }
     }
   }
-  else if (inputString[1] == 0)
-  {
-    // read both encoder values ahead of time so print time doesn't offset.
-    int32_t left = encoderLeftCount;
-    int32_t right = encoderRightCount;
-    
-    Serial.print(left);
-    Serial.print(",");
-    Serial.println(right);
-  }
   else
   {
-    interpreter_error(T_OUT_OF_RANGE);
+    char c = inputString[1];
+    if (c == 'h')
+    {
+      // read both encoder values ahead of time so print time doesn't offset.
+      int32_t left = encoderLeftCount;
+      int32_t right = encoderRightCount;
+      if (inputString[2] == 'z')
+      {
+        encoderLeftCount = 0;
+        encoderRightCount = 0;
+      }
+      
+      Serial.print(left, HEX);
+      Serial.print(",");
+      Serial.println(right, HEX);
+    }
+    else if (c == 0 or c == 'z')
+    {
+      // read both encoder values ahead of time so print time doesn't offset.
+      int32_t left = encoderLeftCount;
+      int32_t right = encoderRightCount;
+      if (c == 'z')
+      {
+        encoderLeftCount = 0;
+        encoderRightCount = 0;
+      }
+      Serial.print(left);
+      Serial.print(",");
+      Serial.println(right);
+    }
+    else
+    {
+      interpreter_error(T_OUT_OF_RANGE);
+    }
   }
 } 
 
@@ -901,6 +944,64 @@ void stop_motors_and_everything_command()
   // add action stop here as well
 }
 
+/** @brief  Prints the sensors (in various formats)
+ *  @return Void.
+ */
+void print_sensors_control_command()
+{
+  int mode = inputString[1];
+  if (mode == 'h')
+  {
+    print_sensors_control('h'); // hex
+  }
+  else if (mode == 0)
+  {
+    print_sensors_control('d'); // decimal
+  }
+  else  if (mode == 'r')
+  {
+    print_sensors_control('r'); // raw light and dark
+  }
+  else
+  {
+    interpreter_error(T_UNEXPECTED_TOKEN);
+  }
+}
+
+#define SERIAL_IN_CAPTURE 0
+#if SERIAL_IN_CAPTURE
+char serial_capture_read_buff[256]; // circular buffer
+uint8_t serial_capture_read_index = 0;
+char hex[] = "0123456789ABCDEF";
+
+/** @brief  Allows logging of input data for analysis.
+ *  @return Void.
+ */
+void print_serial_capture_read_buff()
+{
+  for(int i=0; i< 256; i+= 16)
+  {
+    for(int j=0; j<16; j++)
+    {
+      uint8_t offset = serial_capture_read_index + j + i;
+      char c = serial_capture_read_buff[offset];
+      if (c< 32 or c > 126) {
+        Serial.print(hex[c>>4]);
+        Serial.print(hex[c&0xF]);
+      }
+      else
+      {
+        Serial.print(' ');
+        Serial.print(c);
+      }
+    }
+    Serial.println("");
+  }
+}
+#endif
+
+
+
 typedef struct {
     char cmd;
     void (*func)();
@@ -934,9 +1035,12 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {'C', encoder_values },
     {'$', stored_parameter_control },
     {'x', stop_motors_and_everything_command },
-    {'S', print_sensors_control },
+    {'S', print_sensors_control_command },
     {'*', emitter_control },
 
+#if SERIAL_IN_CAPTURE
+   {'\\', print_serial_capture_read_buff },
+#endif
     // keep this as the last command for testing
     {'=', echo_command },   // not official command, just for testing
     {0, 0}
@@ -985,6 +1089,8 @@ void parse_cmd()
 #define BACKSPACE 0x08
 #define CTRL_X 0x18
 
+
+
 /** @brief  Command line interpreter.
  *  @return Void.
  */
@@ -992,6 +1098,9 @@ void interpreter()
 {    
     while (Serial.available()) {
       char inChar = (char)Serial.read();      // get the new byte:
+#if SERIAL_IN_CAPTURE
+  serial_capture_read_buff[serial_capture_read_index++]=inChar;
+#endif
 
       if(inChar > ' ')
       {
@@ -1021,7 +1130,7 @@ void interpreter()
             stop_motors_and_everything_command();
           }
           inputIndex = 0;
-          Serial.println("\n");
+          Serial.println();
         }
         else if(inChar == BACKSPACE and inputIndex != 0)
         {

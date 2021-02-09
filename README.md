@@ -99,7 +99,7 @@ Examples:
 |  N  | Nm,n       | Dual motor control specifying a battery voltage | 
 |  P  | Pp=d       | PinMode - Set up GPIO pins; p is pin, d is I(input) or O(output) or U(Pull Up Input)  |
 
-Regarding analogue readings, (A command), please see the information in 'Dev Notes'.
+Regarding analogue readings, (A command), these are read off interrupts, so can be up to 2ms old.
 
 Examples:
 
@@ -164,11 +164,32 @@ Reading an encoder counter might be more involved. It is the total so far and th
 | C1 | Read Left wheel counter. Might return the left wheel counter as '-3752901'. |
 | C*n*=*m* | Set the Wheel count value, usually. e.g. C1=0 where n=1 and m=0. |
 | C  | Alone with no parameters - prints both encoders as 'left,right' |
+| Cz | Same as C, but also zeros encoders immediately after reading |
+| Ch | Same as C, but values in Hex |
+| ChZ| Same as Ch, but also zeros encoders immediately after reading |
 | z | zero wheel encoder counters. No return. | 
 | e | print wheel current info - human readable NOT for machine parsing! |
 | r | print encoder setup - human readable NOT for machine parsing! | 
 
 Setting a counter using 'C' command is usually to zero but could be any legal value. Therefore a quick 'z' command is provided.
+
+Examples:
+    C
+        98514,98181
+    C
+        -5075,129406
+
+    Cz
+        8487,-8186
+    Cz
+        0,0
+
+    Ch
+        5C65,FFFFA6D8
+    Chz
+        B507,FFFF50CE
+    Ch
+        21E4,FFFFDEBE
 
 
 ### Sensor Processing commands
@@ -181,25 +202,37 @@ By default this is set up to read A0, A1, A2, A3 as sensors and use D12 to turn 
 
 | Cmd | Action    |
 |:---:|-----------|
-|  S  | Read sensors dark values then light values seperated by commas, followed by an optional * |
+|  S  | Read sensors - gives difference between dark and light - which is what you normal what you need |
+|  Sr | Read sensors 'raw' format - dark values then light values seperated by commas. |
+|  Sh | As per S, but in hex from 0-FF without commas. You can get more data samples per second in this format. |
 |  *  | Enable/Disable emitter LED Control. Used to save power. |
 
-NOTE: * indicates that the result was changed during the values being read.
+Examples of output of 'S':
 
-Examples of output:
+    S
+        398,104,19,6
+
+Examples of output of 'Sh':
+
+    Sh
+    FF691306
+    Sh
+    FF681307
+
+Examples of output of 'Sr':
 
     0,0,0,142,28,32,486,352         <- wall close
 
-    0,0,0,4,28,13,15,11*            <- no wall, but data changed during read
+    0,0,0,4,28,13,15,11            <- no wall
 
 
 Examples of Emitter control:
 
     *1
-    S
+    Sr
         0,0,0,131,135,25,440,318
     *0
-    S
+    Sr
         0,0,0,1,0,0,0,1
 
 ### Parameter Commands
@@ -388,7 +421,28 @@ We aim to have shortened the amount of bytes requiring to be transmitted in orde
 
 # Dev Notes
 
-There are three subsystems running all the time currently: battery reading, function switch reading and update sensors control. This shoudl be changed so these subsystems are optional. 
+## ADC 
+There are three subsystems running all the time currently on the system tick interrupt that runs every 2ms: battery reading, function switch reading and update sensors control. The analogue command (e.g. A0) uses these subsystems to read the ADCs (partially to avoid conflicts since there is only one ADC unit).
 
-NOTE: The battery reading, function switch reading and update sensors control use analogue-to-digital converter (ADC). The Arduino Nano has one 10-bit analogue-to-digital converter (ADC). Therefore, it is not practical to use the ADC from the converter and from the interrupts. You therefore either need to turn off the interrupt usage, or avoid using the ADC directly from the command line interpreter (CLI).
+## Serial Buffering
+
+The Arduino Nano has a 64 byte input buffer and a 64 byte output buffer. Transmission to and from the Arduino needs to be carefully designed not to overrun these buffers. 
+
+If you overrun the 64 byte output buffer the print commands will start waiting inside the Arduino Nano (the commands will take longer to complete). The could cause several affects - once of which could potentially be commands stacking up in the input buffer. It only requires, for instance perhaps three 'Sr' commands to cause the output buffer to be filled.
+
+If you overrun the 64 byte input buffer, then old characters will be dropped. This is bad for several reasons - one of which includes partial comamnds - which could cause an error or action you don't intend.
+
+There are several techniques possible - for instance avoid sending a long stream of commands without any commanbds with a reply. Having a long stream of no-reply commands means the host program cannot track how far through the input buffer the interpreter has got, therefore estimate how many bytes are currently queued.
+
+## Baud rate
+
+If you are changing the baud rate from 56700, care must be taken to choose a baud rate that both end can generate accurately. If the total error exceeds of both sides exceeds around 2% then you are likely to get byte errors. Ideally you want to be within 1%.
+
+One such baud rate table for the AVR on the Arduino Nano inclides: https://trolsoft.ru/en/uart-calc
+
+Remeber to add on the error rate of the other side as well - whehter that be a Rasberry Pi, USB-Serial converter, or other serial port. Sometimes you can get lucky. If they are both, say +3% of the target, then the baud rates will match. But a -1.6% on one end, and a +1.6% on the other end gives 3.2% error, and this will cause problems. (Although errors rates up to 5% would theoretically work before it meets an edge, the reality of sampling mechanisms, slew rate and other factors means that realistic error rates are well under half of this.)
+
+Sometimes these cannot be simply looked up from microcontroller or microprocessor data sheets - crystals tend to be accurate, but devices with resonators or internal RC oscillators tend to have large tolerance between devices themselves - and this needs to be taken into account. 
+
+NOTE: We tried 115200, which is listed (with U2Xn=1) as +2.1%, and while is worked initially, we had data errors on testing automated commands of data over the USB-serial converter. It seems that 76800 is another good baud rate for the Arduino Nano with a 16MHz crystal - but we didn't make this standard because most terminal emulators used for testing don't generally provide this as a standard setting.
 
