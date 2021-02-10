@@ -34,17 +34,61 @@
 #include <Arduino.h>
 #include "hardware_pins.h"
 #include "public.h"
+#include "digitalWriteFast.h"
+#include <wiring_private.h>
+#include <pins_arduino.h>
 
 /***
  * Global variables
  */
 
 volatile int raw_BatteryVolts_adcValue;
-float raw_BatteryVolts;
+volatile float raw_BatteryVolts;
 volatile int Switch_ADC_value;
 const float batteryDividerRatio = 2.0f;
 
-/***/
+/***
+ * Locals
+*/
+static uint8_t systick_state = 0;
+
+/***
+ * NOTE: Manual analogue conversions
+ * All channels will be converted by systick nut conversions must be 
+ * performed manually. That is, AnalogueRead will block during a conversion
+ * and that is not good
+ */
+
+static uint8_t analog_reference = DEFAULT;
+
+void start_adc(uint8_t pin){
+
+	if (pin >= 14) pin -= 14; // allow for channel or pin numbers
+	// set the analog reference (high two bits of ADMUX) and select the
+	// channel (low 4 bits).  this also sets ADLAR (left-adjust result)
+	// to 0 (the default).
+#if defined(ADMUX)
+	ADMUX = (analog_reference << 6) | (pin & 0x07);
+#endif
+	// start the conversion
+	sbi(ADCSRA, ADSC);
+}
+
+
+int get_adc_result(){
+	// ADSC is cleared when the conversion finishes
+	// while (bit_is_set(ADCSRA, ADSC));
+
+	// we have to read ADCL first; doing so locks both ADCL
+	// and ADCH until ADCH is read.  reading ADCL second would
+	// cause the results of each conversion to be discarded,
+	// as ADCL and ADCH would be locked when it completed.
+	uint8_t low  = ADCL;
+	uint8_t high = ADCH;
+
+	// combine the two bytes
+	return (high << 8) | low;
+}
 
 void updateBatteryVolts() {
   raw_BatteryVolts_adcValue = analogRead(BATTERY_VOLTS);
@@ -100,8 +144,15 @@ void setupSystick() {
   bitSet(TCCR2B, CS22);
   bitClear(TCCR2B, CS21);
   bitSet(TCCR2B, CS20);
+  
+  // set divisor to 32 => timer clock = 500kHz
+  bitClear(TCCR2B, CS22);
+  bitSet(TCCR2B, CS21);
+  bitSet(TCCR2B, CS20);
+
   // set the timer frequency
   OCR2A = 249;  // (16000000/128/500)-1 = 249
+  OCR2A = 49;  // (16000000/32/10000)-1 = 49
   // enable the timer interrupt
   bitSet(TIMSK2, OCIE2A);
 }
@@ -110,16 +161,107 @@ unsigned long t_systick1 = 0;
 unsigned long t_systick2 = 0;
 unsigned long t_systick3 = 0;
 
+int a0_dark;
+int a1_dark;
+int a2_dark;
+int a3_dark;
+int a4_dark;
+int a5_dark;
+int a0_lit;
+int a1_lit;
+int a2_lit;
+int a3_lit;
+int a4_lit;
+int a5_lit;
 // The systick event is an ISR attached to Timer 2
 // This currently runs at 2ms or 500Hz.
 ISR(TIMER2_COMPA_vect) {
-  //unsigned long _start = micros();
-  updateBatteryVolts();
-  //t_systick1 = micros() - _start;
-
-  //_start = micros();
-  updateFunctionSwitch();
-  //t_systick2 = micros() - _start;
+  digitalWriteFast(LED_BUILTIN,1);
+  systick_state++;
+  if (systick_state >= 20) {
+    systick_state = 0;
+  }
+  switch (systick_state) {
+    case 0:
+      // always start conversions as soon as  possible so they get a full 100us to convert
+      start_adc(BATTERY_VOLTS);
+      delayMicroseconds(40); // just a marker for now
+      break;
+    case 1:
+      raw_BatteryVolts_adcValue = get_adc_result();
+      start_adc(FUNCTION_PIN);
+      // TODO find a magic voltage divider ratio that makes this a single multiply for millivolts  
+      raw_BatteryVolts = (raw_BatteryVolts_adcValue * 2 * 5) / 1024;
+      break;
+    case 2:
+      Switch_ADC_value = get_adc_result();
+      start_adc(A0);
+      break;
+    case 3:
+      a0_dark = get_adc_result();
+      start_adc(A1);
+      break;
+    case 4:
+      a1_dark = get_adc_result();
+      start_adc(A2);
+      break;
+    case 5:
+      a2_dark = get_adc_result();
+      start_adc(A3);
+      break;
+    case 6:
+      a3_dark = get_adc_result();
+      start_adc(A4);
+      break;
+    case 7:
+      a4_dark = get_adc_result();
+      start_adc(A5);
+      break;
+    case 8:
+      a5_dark = get_adc_result();
+      // got all the dark ones
+      digitalWriteFast(EMITTER,1);
+      break;
+    case 9:
+      start_adc(A0);
+      break;
+    case 10:
+      a0_lit = get_adc_result();
+      start_adc(A1);
+      break;
+    case 11:
+      a1_lit = get_adc_result();
+      start_adc(A2);
+      break;
+    case 12:
+      a2_lit = get_adc_result();
+      start_adc(A3);
+      break;
+    case 13:
+      a3_lit = get_adc_result();
+      start_adc(A4);
+      break;
+    case 14:
+      a4_dark = get_adc_result();
+      start_adc(A5);
+      break;
+    case 15:
+      a5_dark = get_adc_result();
+      digitalWriteFast(EMITTER,0);
+      break;
+    case 16:
+      break;
+    case 17:
+      break;
+    case 18:
+      break;
+    case 19:
+      break;
+    default:
+      break;
+  }
+  digitalWriteFast(LED_BUILTIN,0);
+  return;
 
   //_start = micros();
   //updateWallSensor();
