@@ -35,15 +35,19 @@
 #include "digitalWriteFast.h"
 #include "hardware_pins.h"
 #include <util/atomic.h>
-
+#include "public.h"
 /***
  * Global variables
  */
 // the current value of the sensors
+
 volatile int gSensorA0_dark;
 volatile int gSensorA1_dark;
 volatile int gSensorA2_dark;
 volatile int gSensorA3_dark;
+volatile int gSensorA4_dark;
+volatile int gSensorA5_dark;
+
 volatile int gSensorA0_light;
 volatile int gSensorA1_light;
 volatile int gSensorA2_light;
@@ -105,73 +109,108 @@ void sensors_control_setup() {
   analogueSetup();               // increase the ADC conversion speed
 }
 
+void print_hex2(int value) {
+  value = constrain(value, 0, 255);
+  Serial.print(value / 16, HEX);
+  Serial.print(value % 16, HEX);
+}
 
 void print_sensors_control(char mode)
 {
-  int gSensorA0_dark_;
-  int gSensorA1_dark_;
-  int gSensorA2_dark_;
-  int gSensorA3_dark_;
-  int gSensorA0_light_;
-  int gSensorA1_light_;
-  int gSensorA2_light_;
-  int gSensorA3_light_;
+  int a0_dark;
+  int a1_dark;
+  int a2_dark;
+  int a3_dark;
+  int a4_dark;
+  int a5_dark;
+  int a0_lit;
+  int a1_lit;
+  int a2_lit;
+  int a3_lit;
+  int a4_lit;
+  int a5_lit;
+  const char comma = ',';
+while(readFunctionSwitch() != 16){
 
   // read the sensors
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
-    gSensorA0_dark_ = gSensorA0_dark;
-    gSensorA1_dark_ = gSensorA1_dark;
-    gSensorA2_dark_ = gSensorA2_dark;
-    gSensorA3_dark_ = gSensorA3_dark;
-    gSensorA0_light_ = gSensorA0_light;
-    gSensorA1_light_ = gSensorA1_light;
-    gSensorA2_light_ = gSensorA2_light;
-    gSensorA3_light_ = gSensorA3_light;
+    a0_dark = gSensorA0_dark;
+    a0_lit = gSensorA0_light;
   }
-
-  const char comma = ',';
-  if(mode == 'd')
-  {
-    Serial.print(max(gSensorA0_light_ - gSensorA0_dark_, 0));
-    Serial.print(comma);
-    Serial.print(max(gSensorA1_light_ - gSensorA1_dark_, 0));
-    Serial.print(comma);
-    Serial.print(max(gSensorA2_light_ - gSensorA2_dark_, 0));
-    Serial.print(comma);
-    Serial.print(max(gSensorA3_light_ - gSensorA3_dark_, 0));
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
+    a1_dark = gSensorA1_dark;
+    a1_lit = gSensorA1_light;
   }
-  else if(mode == 'h')
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
+    a2_dark = gSensorA2_dark;
+    a2_lit = gSensorA2_light;
+  }
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
+    a3_dark = gSensorA3_dark;
+    a3_lit = gSensorA3_light;
+  }
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
+    a4_dark = gSensorA4_dark;
+    a4_lit = gSensorA4_light;
+  }
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
+    a5_dark = gSensorA5_dark;
+    a5_lit = gSensorA5_light;
+  }
+  
+  if(mode == 'd') // the default
   {
-    gSensorA0_light_ = constrain(gSensorA0_light_-gSensorA0_dark_, 0, 255);
-    if(gSensorA0_light_ < 0x10) { Serial.print('0'); }
-    Serial.print(gSensorA0_light_, HEX);
-    gSensorA1_light_ = constrain(gSensorA1_light_-gSensorA1_dark_, 0, 255);
-    if(gSensorA1_light_ < 0x10) { Serial.print('0'); }
-    Serial.print(gSensorA1_light_, HEX);
-    gSensorA2_light_ = constrain(gSensorA2_light_-gSensorA2_dark_, 0, 255);
-    if(gSensorA2_light_ < 0x10) { Serial.print('0'); }
-    Serial.print(gSensorA2_light_, HEX);
-    gSensorA3_light_ = constrain(gSensorA3_light_-gSensorA3_dark_, 0, 255);
-    if(gSensorA3_light_ < 0x10) { Serial.print('0'); }
-    Serial.print(gSensorA3_light_, HEX);
+    Serial.print(max(a0_lit - a0_dark, 0));
+    Serial.print(comma);
+    Serial.print(max(a1_lit - a1_dark, 0));
+    Serial.print(comma);
+    Serial.print(max(a2_lit - a2_dark, 0));
+    Serial.print(comma);
+    Serial.print(max(a3_lit - a3_dark, 0));
+    Serial.print(comma);
+    Serial.print(max(a4_lit - a4_dark, 0));
+    Serial.print(comma);
+    Serial.print(max(a5_lit - a5_dark, 0));
+  }
+  else if(mode == 'h') // display as hex values
+  {
+    uint8_t diff;
+    print_hex2(a0_lit-a0_dark);
+    print_hex2(a1_lit-a1_dark);
+    print_hex2(a2_lit-a2_dark);
+    print_hex2(a3_lit-a3_dark);
+    print_hex2(a4_lit-a4_dark);
+    print_hex2(a5_lit-a5_dark);
   }
   else if(mode == 'r')
   {
-    Serial.print(gSensorA0_dark_);
+    Serial.print(a0_dark);
     Serial.print(comma);
-    Serial.print(gSensorA1_dark_);
+    Serial.print(a1_dark);
     Serial.print(comma);
-    Serial.print(gSensorA2_dark_);
+    Serial.print(a2_dark);
     Serial.print(comma);
-    Serial.print(gSensorA3_dark_);
+    Serial.print(a3_dark);
     Serial.print(comma);
-    Serial.print(gSensorA0_light_);
+    Serial.print(a4_dark);
     Serial.print(comma);
-    Serial.print(gSensorA1_light_);
+    Serial.print(a5_dark);
     Serial.print(comma);
-    Serial.print(gSensorA2_light_);
+    Serial.print(' ');
+    Serial.print(' ');
+    Serial.print(a0_lit);
     Serial.print(comma);
-    Serial.print(gSensorA3_light_);
+    Serial.print(a1_lit);
+    Serial.print(comma);
+    Serial.print(a2_lit);
+    Serial.print(comma);
+    Serial.print(a3_lit);
+    Serial.print(comma);
+    Serial.print(a4_lit);
+    Serial.print(comma);
+    Serial.print(a5_lit);
   }
   Serial.println();
+  delay(100);
+}
 }

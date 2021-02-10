@@ -50,7 +50,7 @@ const float batteryDividerRatio = 2.0f;
 /***
  * Locals
 */
-static uint8_t systick_state = 0;
+static uint8_t systick_phase = 0;
 
 /***
  * NOTE: Manual analogue conversions
@@ -140,19 +140,14 @@ void setupSystick() {
   bitClear(TCCR2A, WGM20);
   bitSet(TCCR2A, WGM21);
   bitClear(TCCR2B, WGM22);
-  // set divisor to 128 => timer clock = 125kHz
-  bitSet(TCCR2B, CS22);
-  bitClear(TCCR2B, CS21);
-  bitSet(TCCR2B, CS20);
-  
+
   // set divisor to 32 => timer clock = 500kHz
   bitClear(TCCR2B, CS22);
   bitSet(TCCR2B, CS21);
   bitSet(TCCR2B, CS20);
 
   // set the timer frequency
-  OCR2A = 249;  // (16000000/128/500)-1 = 249
-  OCR2A = 49;  // (16000000/32/10000)-1 = 49
+  OCR2A = 24;  // (16000000/32/20000)-1 = 24
   // enable the timer interrupt
   bitSet(TIMSK2, OCIE2A);
 }
@@ -161,36 +156,51 @@ unsigned long t_systick1 = 0;
 unsigned long t_systick2 = 0;
 unsigned long t_systick3 = 0;
 
-int a0_dark;
-int a1_dark;
-int a2_dark;
-int a3_dark;
-int a4_dark;
-int a5_dark;
-int a0_lit;
-int a1_lit;
-int a2_lit;
-int a3_lit;
-int a4_lit;
-int a5_lit;
-// The systick event is an ISR attached to Timer 2
-// This currently runs at 2ms or 500Hz.
+
+/***
+ * This is the systick event - an ISR connected to Timer 2
+ * It currently runs at 20kHz so that the emitter on duty
+ * is low.
+ * There are 40 possible time-slots, or phases, if the systick
+ * is intended to be synchronous with the main control loop
+ * running every 2 milliseconds. 
+ * Each tick is called every 50us so that an analogue conversion 
+ * started in one phase will be completed ready for the next phase. 
+ * This technique avoids having the processor sitting idle
+ * during conversions and while waiting for the sensors to respond.
+ * So that high-speed encoder interrupts are not missed each phase
+ * should ideally last no more than 10us.
+ * 
+ * The reason fo rthis apparently arcane technique is that the 
+ * ATMEGA328P does not have nested interrupts. At top speed, the 
+ * encoders may generate interrupt at more than 20kHz and we cannot
+ * afford to miss one. Also, received serial characters must be serviced
+ * as they arrive or they will be lost. Having a single systick event
+ * that does everything but takes many tens of microseconds risks
+ * lost serial data and encoder pulses.
+ *  
+ * For testing, the built-in LED is turned on at the start of the interrupt
+ * and off again at the end. This can be used to measure system load.
+ * Disable the feature if you want to use the built-in LED for some other 
+ * purpose.
+ */ 
 ISR(TIMER2_COMPA_vect) {
-  digitalWriteFast(LED_BUILTIN,1);
-  systick_state++;
-  if (systick_state >= 20) {
-    systick_state = 0;
+  digitalWriteFast(LED_BUILTIN, 1);
+  systick_phase++;
+  if (systick_phase >= 40) {
+    systick_phase = 0;
   }
-  switch (systick_state) {
+  switch (systick_phase) {
     case 0:
-      // always start conversions as soon as  possible so they get a full 100us to convert
+      // always start conversions as soon as  possible so they get a 
+      // full 50us to convert
       start_adc(BATTERY_VOLTS);
-      delayMicroseconds(40); // just a marker for now
+      delayMicroseconds(40);  // just a long marker for the oscilloscope.
       break;
     case 1:
       raw_BatteryVolts_adcValue = get_adc_result();
       start_adc(FUNCTION_PIN);
-      // TODO find a magic voltage divider ratio that makes this a single multiply for millivolts  
+      // TODO find a magic voltage divider ratio that makes this a single multiply for millivolts
       raw_BatteryVolts = (raw_BatteryVolts_adcValue * 2 * 5) / 1024;
       break;
     case 2:
@@ -198,77 +208,74 @@ ISR(TIMER2_COMPA_vect) {
       start_adc(A0);
       break;
     case 3:
-      a0_dark = get_adc_result();
+      gSensorA0_dark = get_adc_result();
       start_adc(A1);
       break;
     case 4:
-      a1_dark = get_adc_result();
+      gSensorA1_dark = get_adc_result();
       start_adc(A2);
       break;
     case 5:
-      a2_dark = get_adc_result();
+      gSensorA2_dark = get_adc_result();
       start_adc(A3);
       break;
     case 6:
-      a3_dark = get_adc_result();
+      gSensorA3_dark = get_adc_result();
       start_adc(A4);
       break;
     case 7:
-      a4_dark = get_adc_result();
+      gSensorA4_dark = get_adc_result();
       start_adc(A5);
       break;
     case 8:
-      a5_dark = get_adc_result();
-      // got all the dark ones
-      digitalWriteFast(EMITTER,1);
+      gSensorA5_dark = get_adc_result();
+      // got all the dark ones so light them up
+      if (emitter_on) {
+        digitalWriteFast(EMITTER, 1);
+      }
+      // wait at least one cycle for the detectors to respond
       break;
     case 9:
       start_adc(A0);
       break;
     case 10:
-      a0_lit = get_adc_result();
+      gSensorA0_light = get_adc_result();
       start_adc(A1);
       break;
     case 11:
-      a1_lit = get_adc_result();
+      gSensorA1_light = get_adc_result();
       start_adc(A2);
       break;
     case 12:
-      a2_lit = get_adc_result();
+      gSensorA2_light = get_adc_result();
       start_adc(A3);
       break;
     case 13:
-      a3_lit = get_adc_result();
+      gSensorA3_light = get_adc_result();
       start_adc(A4);
       break;
     case 14:
-      a4_dark = get_adc_result();
+      gSensorA4_light = get_adc_result();
       start_adc(A5);
       break;
     case 15:
-      a5_dark = get_adc_result();
-      digitalWriteFast(EMITTER,0);
-      break;
-    case 16:
-      break;
-    case 17:
-      break;
-    case 18:
-      break;
-    case 19:
+      gSensorA5_light = get_adc_result();
+      if (emitter_on) {
+        digitalWriteFast(EMITTER, 0);
+      }
       break;
     default:
       break;
   }
-  digitalWriteFast(LED_BUILTIN,0);
-  return;
-
-  //_start = micros();
-  //updateWallSensor();
-  update_sensors_control();
-  //t_systick3 = micros() - _start;
-
-  //speed_control();
+  digitalWriteFast(LED_BUILTIN, 0);
+  /***
+   * Speed control may now need to happen either in short sections here
+   * or at the top level of the code. A flag, set in one phase
+   * of systick could tell the higher level code that it is time to
+   * update the controllers. Or they could just use the millis()
+   * counter, or hey could get around to it as often as possible and
+   * make use of the elapsed time in the calculations
+   */
 }
 
 void print_bat()
