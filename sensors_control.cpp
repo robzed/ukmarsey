@@ -118,8 +118,7 @@ void print_sensors_control(char mode) {
     a5_lit = gSensorA5_light;
   }
 
-  if (mode == 'd')  // the default
-  {
+  if (mode == 'd') {  // the default is decimal differences
     Serial.print(max(a0_lit - a0_dark, 0));
     Serial.print(comma);
     Serial.print(max(a1_lit - a1_dark, 0));
@@ -131,15 +130,14 @@ void print_sensors_control(char mode) {
     Serial.print(max(a4_lit - a4_dark, 0));
     Serial.print(comma);
     Serial.print(max(a5_lit - a5_dark, 0));
-  } else if (mode == 'h')  // display as hex values
-  {
+  } else if (mode == 'h') {  // display differences as hex values
     print_hex2(a0_lit - a0_dark);
     print_hex2(a1_lit - a1_dark);
     print_hex2(a2_lit - a2_dark);
     print_hex2(a3_lit - a3_dark);
     print_hex2(a4_lit - a4_dark);
     print_hex2(a5_lit - a5_dark);
-  } else if (mode == 'r') { // 
+  } else if (mode == 'r') { // display both dark and lit values
     Serial.print(a0_dark);
     Serial.print(comma);
     Serial.print(a1_dark);
