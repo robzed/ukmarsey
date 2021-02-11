@@ -1046,6 +1046,133 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {0, 0}
 };
 
+#define NO_FUNCTION 0
+
+typedef void (*fptr)();
+
+const /*PROGMEM*/ fptr cmd2[] = 
+{
+  NO_FUNCTION, // ' ' 
+  NO_FUNCTION, // '!' 
+  NO_FUNCTION, // '"' 
+  NO_FUNCTION, // '#' 
+  NO_FUNCTION, // '$' 
+  NO_FUNCTION, // '%' 
+  NO_FUNCTION, // '&' 
+  NO_FUNCTION, // ''' 
+  NO_FUNCTION, // '(' 
+  NO_FUNCTION, // ')' 
+  NO_FUNCTION, // '*' 
+  NO_FUNCTION, // '+' 
+  NO_FUNCTION, // ',' 
+  NO_FUNCTION, // '-' 
+  NO_FUNCTION, // '.' 
+  NO_FUNCTION, // '/' 
+  NO_FUNCTION, // '0' 
+  NO_FUNCTION, // '1' 
+  NO_FUNCTION, // '2' 
+  NO_FUNCTION, // '3' 
+  NO_FUNCTION, // '4' 
+  NO_FUNCTION, // '5' 
+  NO_FUNCTION, // '6' 
+  NO_FUNCTION, // '7' 
+  NO_FUNCTION, // '8' 
+  NO_FUNCTION, // '9' 
+  NO_FUNCTION, // ':' 
+  NO_FUNCTION, // ';' 
+  NO_FUNCTION, // '<' 
+  echo_command, // '=' 
+  NO_FUNCTION, // '>' 
+  ok, // '?' 
+  NO_FUNCTION, // '@' 
+  NO_FUNCTION, // 'A' 
+  NO_FUNCTION, // 'B' 
+  NO_FUNCTION, // 'C' 
+  NO_FUNCTION, // 'D' 
+  NO_FUNCTION, // 'E' 
+  NO_FUNCTION, // 'F' 
+  NO_FUNCTION, // 'G' 
+  NO_FUNCTION, // 'H' 
+  NO_FUNCTION, // 'I' 
+  NO_FUNCTION, // 'J' 
+  NO_FUNCTION, // 'K' 
+  NO_FUNCTION, // 'L' 
+  NO_FUNCTION, // 'M' 
+  NO_FUNCTION, // 'N' 
+  NO_FUNCTION, // 'O' 
+  NO_FUNCTION, // 'P' 
+  NO_FUNCTION, // 'Q' 
+  NO_FUNCTION, // 'R' 
+  NO_FUNCTION, // 'S' 
+  NO_FUNCTION, // 'T' 
+  NO_FUNCTION, // 'U' 
+  NO_FUNCTION, // 'V' 
+  NO_FUNCTION, // 'W' 
+  NO_FUNCTION, // 'X' 
+  NO_FUNCTION, // 'Y' 
+  NO_FUNCTION, // 'Z' 
+  NO_FUNCTION, // '[' 
+  NO_FUNCTION, // '\' 
+  NO_FUNCTION, // ']' 
+  NO_FUNCTION, // '^' 
+  NO_FUNCTION, // '_' 
+  NO_FUNCTION, // '`' 
+  NO_FUNCTION, // 'a' 
+  NO_FUNCTION, // 'b' 
+  NO_FUNCTION, // 'c' 
+  NO_FUNCTION, // 'd' 
+  NO_FUNCTION, // 'e' 
+  NO_FUNCTION, // 'f' 
+  NO_FUNCTION, // 'g' 
+  ok, // 'h' 
+  NO_FUNCTION, // 'i' 
+  NO_FUNCTION, // 'j' 
+  NO_FUNCTION, // 'k' 
+  led, // 'l' 
+  NO_FUNCTION, // 'm' 
+  NO_FUNCTION, // 'n' 
+  NO_FUNCTION, // 'o' 
+  NO_FUNCTION, // 'p' 
+  NO_FUNCTION, // 'q' 
+  NO_FUNCTION, // 'r' 
+  NO_FUNCTION, // 's' 
+  NO_FUNCTION, // 't' 
+  NO_FUNCTION, // 'u' 
+  NO_FUNCTION, // 'v' 
+  NO_FUNCTION, // 'w' 
+  NO_FUNCTION, // 'x' 
+  NO_FUNCTION, // 'y' 
+  NO_FUNCTION, // 'z' 
+  NO_FUNCTION, // '{' 
+  NO_FUNCTION, // '|' 
+  NO_FUNCTION, // '}' 
+};
+int cmd2_size = sizeof(cmd2) / sizeof(fptr);
+
+void parse_cmd2()
+{
+   unsigned long _start = micros();
+   int command = inputString[0] - ' ';
+   fptr f = 0;
+   if(command <= cmd2_size)
+   {
+     f = cmd2[command];
+   }
+   if(not f)
+   {
+        interpreter_error(T_UNKNOWN_COMMAND);
+        return;
+   }
+   else
+    {
+        unsigned long timing = micros() - _start;
+        Serial.println(timing);
+        f();
+        return;
+    }
+}
+
+
 /*
 // templates from:  https://arduino.stackexchange.com/questions/13545/using-progmem-to-store-array-of-structs
 template <typename T> void PROGMEM_readAnything (const T * sce, T& dest)
