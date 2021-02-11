@@ -436,13 +436,12 @@ There are several techniques possible - for instance avoid sending a long stream
 
 ## Baud rate
 
-If you are changing the baud rate from 56700, care must be taken to choose a baud rate that both end can generate accurately. If the total error exceeds of both sides exceeds around 2% then you are likely to get byte errors. Ideally you want to be within 1%.
+If you are changing the baud rate, care must be taken to choose a baud rate that both end can generate accurately. If the total error exceeds of both sides exceeds around 2 or 3% then you are likely to start getting byte errors. Ideally you want to be within 1%.
 
 One such baud rate table for the AVR on the Arduino Nano inclides: https://trolsoft.ru/en/uart-calc
 
-Remeber to add on the error rate of the other side as well - whehter that be a Rasberry Pi, USB-Serial converter, or other serial port. Sometimes you can get lucky. If they are both, say +3% of the target, then the baud rates will match. But a -1.6% on one end, and a +1.6% on the other end gives 3.2% error, and this will cause problems. (Although errors rates up to 5% would theoretically work before it meets an edge, the reality of sampling mechanisms, slew rate and other factors means that realistic error rates are well under half of this.)
+Remeber to add on the error rate of the other side as well - whehter that be a Rasberry Pi, USB-Serial converter, or other serial port. Sometimes you can get lucky. If they are both, say +3% of the target, then the baud rates will match. But a -2.5% on one end, and a +2.5% on the other end gives 5% error, and this will cause problems. (Although errors rates up to 5% would theoretically work before it meets an edge, the reality of sampling mechanisms, slew rate and other factors means that realistic error rates are well under half of this.)
 
 Sometimes these cannot be simply looked up from microcontroller or microprocessor data sheets - crystals tend to be accurate, but devices with resonators or internal RC oscillators tend to have large tolerance between devices themselves - and this needs to be taken into account. 
 
-NOTE: We tried 115200, which is listed (with U2Xn=1) as +2.1%, and while is worked initially, we had data errors on testing automated commands of data over the USB-serial converter. It seems that 76800 is another good baud rate for the Arduino Nano with a 16MHz crystal - but we didn't make this standard because most terminal emulators used for testing don't generally provide this as a standard setting.
 
