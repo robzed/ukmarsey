@@ -63,45 +63,7 @@ void analogueSetup() {
 }
 char emitter_on = 1;
 
-void update_sensors_control() {
-  // first read them dark
-  int a0 = analogRead(A0);
-  int a1 = analogRead(A1);
-  int a2 = analogRead(A2);
-  int a3 = analogRead(A3);
-  int a0_ = a0;
-  int a1_ = a1;
-  int a2_ = a2;
-  int a3_ = a3;  // they should read as the same if emitter is off.
 
-  if (emitter_on) {
-    // light them up
-    digitalWriteFast(EMITTER, 1);
-
-    // wait until all the detectors are stable
-    delayMicroseconds(50);
-
-    // now find the differences
-    a0_ = analogRead(A0);
-    a1_ = analogRead(A1);
-    a2_ = analogRead(A2);
-    a3_ = analogRead(A3);
-    gSensorA4_light = analogRead(A4);
-    gSensorA5_light = analogRead(A5);
-    // and go dark again.
-    digitalWriteFast(EMITTER, 0);
-  }
-
-  // make the results available to the rest of the program
-  gSensorA0_dark = a0;
-  gSensorA1_dark = a1;
-  gSensorA2_dark = a2;
-  gSensorA3_dark = a3;
-  gSensorA0_light = a0_;
-  gSensorA1_light = a1_;
-  gSensorA2_light = a2_;
-  gSensorA3_light = a3_;
-}
 
 void sensors_control_setup() {
   pinMode(EMITTER, OUTPUT);

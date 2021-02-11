@@ -43,7 +43,6 @@ extern volatile int gSensorA5_light;
 // provided by sensors_control.cpp
 void sensors_control_setup();
 void print_sensors_control(char mode);
-void update_sensors_control();
 extern char emitter_on;
 
 // provided by distance-moved.cpp
