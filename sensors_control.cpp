@@ -77,8 +77,7 @@ void print_hex2(int value) {
   Serial.print(value % 16, HEX);
 }
 
-void print_sensors_control(char mode)
-{
+void print_sensors_control(char mode) {
   int a0_dark;
   int a1_dark;
   int a2_dark;
@@ -92,35 +91,34 @@ void print_sensors_control(char mode)
   int a4_lit;
   int a5_lit;
   const char comma = ',';
-while(readFunctionSwitch() != 16){
 
   // read the sensors
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     a0_dark = gSensorA0_dark;
     a0_lit = gSensorA0_light;
   }
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     a1_dark = gSensorA1_dark;
     a1_lit = gSensorA1_light;
   }
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     a2_dark = gSensorA2_dark;
     a2_lit = gSensorA2_light;
   }
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     a3_dark = gSensorA3_dark;
     a3_lit = gSensorA3_light;
   }
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     a4_dark = gSensorA4_dark;
     a4_lit = gSensorA4_light;
   }
-  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) { 
+  ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {
     a5_dark = gSensorA5_dark;
     a5_lit = gSensorA5_light;
   }
-  
-  if(mode == 'd') // the default
+
+  if (mode == 'd')  // the default
   {
     Serial.print(max(a0_lit - a0_dark, 0));
     Serial.print(comma);
@@ -133,19 +131,15 @@ while(readFunctionSwitch() != 16){
     Serial.print(max(a4_lit - a4_dark, 0));
     Serial.print(comma);
     Serial.print(max(a5_lit - a5_dark, 0));
-  }
-  else if(mode == 'h') // display as hex values
+  } else if (mode == 'h')  // display as hex values
   {
-    uint8_t diff;
-    print_hex2(a0_lit-a0_dark);
-    print_hex2(a1_lit-a1_dark);
-    print_hex2(a2_lit-a2_dark);
-    print_hex2(a3_lit-a3_dark);
-    print_hex2(a4_lit-a4_dark);
-    print_hex2(a5_lit-a5_dark);
-  }
-  else if(mode == 'r')
-  {
+    print_hex2(a0_lit - a0_dark);
+    print_hex2(a1_lit - a1_dark);
+    print_hex2(a2_lit - a2_dark);
+    print_hex2(a3_lit - a3_dark);
+    print_hex2(a4_lit - a4_dark);
+    print_hex2(a5_lit - a5_dark);
+  } else if (mode == 'r') { // 
     Serial.print(a0_dark);
     Serial.print(comma);
     Serial.print(a1_dark);
@@ -173,6 +167,4 @@ while(readFunctionSwitch() != 16){
     Serial.print(a5_lit);
   }
   Serial.println();
-  delay(100);
-}
 }
