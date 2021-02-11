@@ -171,7 +171,7 @@ unsigned long t_systick3 = 0;
  * should ideally last no more than 10us.
  * 
  * The reason for this apparently arcane technique is that the 
- * ATMEGA328P does not have nested interrupts. At top speed, the 
+ * ATMEGA328P does not have nested interrupts by default. At top speed, the 
  * encoders may generate interrupt at more than 20kHz and we cannot
  * afford to miss one. Also, received serial characters must be serviced
  * as they arrive or they will be lost. Having a single systick event
