@@ -1250,7 +1250,7 @@ void interpreter()
         {
             if(interpreter_echo) { Serial.write(inChar); }
             inputString[inputIndex] = 0;  // zero terminate
-            parse_cmd();
+            parse_cmd2();
             inputIndex = 0;
         }
         else if(inChar == CTRL_X or inChar == CTRL_C)
