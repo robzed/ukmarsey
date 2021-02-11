@@ -1193,7 +1193,8 @@ template <typename T> T PROGMEM_getAnything (const T * sce)
  */
 void parse_cmd()
 {
-    const cmds_t* cmd_ptr = cmds;
+   unsigned long _start = micros();
+   const cmds_t* cmd_ptr = cmds;
     char command;
     while(1)
     {
@@ -1205,6 +1206,8 @@ void parse_cmd()
         
         if(command == inputString[0])
         {
+            unsigned long timing = micros() - _start;
+            Serial.println(timing);
             cmd_ptr->func();
             return;
         }
