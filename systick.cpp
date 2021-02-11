@@ -170,7 +170,7 @@ unsigned long t_systick3 = 0;
  * So that high-speed encoder interrupts are not missed each phase
  * should ideally last no more than 10us.
  * 
- * The reason fo rthis apparently arcane technique is that the 
+ * The reason for this apparently arcane technique is that the 
  * ATMEGA328P does not have nested interrupts. At top speed, the 
  * encoders may generate interrupt at more than 20kHz and we cannot
  * afford to miss one. Also, received serial characters must be serviced
@@ -178,20 +178,21 @@ unsigned long t_systick3 = 0;
  * that does everything but takes many tens of microseconds risks
  * lost serial data and encoder pulses.
  *  
- * For testing, the built-in LED is turned on at the start of the interrupt
+ * For testing, the built-in LED can be turned on at the start of the interrupt
  * and off again at the end. This can be used to measure system load.
  * Disable the feature if you want to use the built-in LED for some other 
  * purpose.
- */ 
+ * 
+ */
 ISR(TIMER2_COMPA_vect) {
-  digitalWriteFast(LED_BUILTIN, 1);
+  // digitalWriteFast(LED_BUILTIN, 1);
   systick_phase++;
   if (systick_phase >= 40) {
     systick_phase = 0;
   }
   switch (systick_phase) {
     case 0:
-      // always start conversions as soon as  possible so they get a 
+      // always start conversions as soon as  possible so they get a
       // full 50us to convert
       start_adc(BATTERY_VOLTS);
       delayMicroseconds(40);  // just a long marker for the oscilloscope.
@@ -266,7 +267,7 @@ ISR(TIMER2_COMPA_vect) {
     default:
       break;
   }
-  digitalWriteFast(LED_BUILTIN, 0);
+  // digitalWriteFast(LED_BUILTIN, 0);
   /***
    * Speed control may now need to happen either in short sections here
    * or at the top level of the code. A flag, set in one phase
