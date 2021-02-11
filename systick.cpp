@@ -147,9 +147,8 @@ void setupSystick() {
   bitSet(TCCR2B, CS20);
 
   // set the timer frequency
-  OCR2A = 24;  // (16000000/32/20000)-1 = 24
-  // enable the timer interrupt
-  bitSet(TIMSK2, OCIE2A);
+  OCR2A = 24;              // (16000000/32/20000)-1 = 24
+  bitSet(TIMSK2, OCIE2A);  // enable the timer interrupt
 }
 
 unsigned long t_systick1 = 0;
