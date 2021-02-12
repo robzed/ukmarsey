@@ -1000,7 +1000,9 @@ void print_serial_capture_read_buff()
 }
 #endif
 
+#define NEW_COMMAND_LOOKUP 1
 
+#if NEW_COMMAND_LOOKUP==0
 
 typedef struct {
     char cmd;
@@ -1046,23 +1048,25 @@ const /*PROGMEM*/ cmds_t cmds[] = {
     {0, 0}
 };
 
+#else
+
 #define NO_FUNCTION 0
 
 typedef void (*fptr)();
 
-const /*PROGMEM*/ fptr cmd2[] = 
+const PROGMEM fptr PROGMEM cmd2[] = 
 {
   NO_FUNCTION, // ' ' 
   NO_FUNCTION, // '!' 
   NO_FUNCTION, // '"' 
   NO_FUNCTION, // '#' 
-  NO_FUNCTION, // '$' 
+  stored_parameter_control, // '$' 
   NO_FUNCTION, // '%' 
   NO_FUNCTION, // '&' 
   NO_FUNCTION, // ''' 
   NO_FUNCTION, // '(' 
   NO_FUNCTION, // ')' 
-  NO_FUNCTION, // '*' 
+  emitter_control, // '*' 
   NO_FUNCTION, // '+' 
   NO_FUNCTION, // ',' 
   NO_FUNCTION, // '-' 
@@ -1085,11 +1089,11 @@ const /*PROGMEM*/ fptr cmd2[] =
   NO_FUNCTION, // '>' 
   ok, // '?' 
   NO_FUNCTION, // '@' 
-  NO_FUNCTION, // 'A' 
+  analogue_control, // 'A' 
   NO_FUNCTION, // 'B' 
-  NO_FUNCTION, // 'C' 
-  NO_FUNCTION, // 'D' 
-  NO_FUNCTION, // 'E' 
+  encoder_values, // 'C' 
+  digital_pin_control, // 'D' 
+  echo_control, // 'E' 
   NO_FUNCTION, // 'F' 
   NO_FUNCTION, // 'G' 
   NO_FUNCTION, // 'H' 
@@ -1097,31 +1101,35 @@ const /*PROGMEM*/ fptr cmd2[] =
   NO_FUNCTION, // 'J' 
   NO_FUNCTION, // 'K' 
   NO_FUNCTION, // 'L' 
-  NO_FUNCTION, // 'M' 
-  NO_FUNCTION, // 'N' 
+  motor_control, // 'M' 
+  motor_control_dual_voltage, // 'N' 
   NO_FUNCTION, // 'O' 
-  NO_FUNCTION, // 'P' 
+  pinMode_command, // 'P' 
   NO_FUNCTION, // 'Q' 
   NO_FUNCTION, // 'R' 
-  NO_FUNCTION, // 'S' 
+  print_sensors_control_command, // 'S' 
   NO_FUNCTION, // 'T' 
   NO_FUNCTION, // 'U' 
-  NO_FUNCTION, // 'V' 
+  verbose_control, // 'V' 
   NO_FUNCTION, // 'W' 
   NO_FUNCTION, // 'X' 
   NO_FUNCTION, // 'Y' 
   NO_FUNCTION, // 'Z' 
   NO_FUNCTION, // '[' 
+#if SERIAL_IN_CAPTURE
+  print_serial_capture_read_buff, // '\' 
+#else
   NO_FUNCTION, // '\' 
+#endif
   NO_FUNCTION, // ']' 
-  NO_FUNCTION, // '^' 
+  reset_state, // '^' 
   NO_FUNCTION, // '_' 
   NO_FUNCTION, // '`' 
   NO_FUNCTION, // 'a' 
-  NO_FUNCTION, // 'b' 
+  print_bat, // 'b' 
   NO_FUNCTION, // 'c' 
   NO_FUNCTION, // 'd' 
-  NO_FUNCTION, // 'e' 
+  print_encoders, // 'e' 
   NO_FUNCTION, // 'f' 
   NO_FUNCTION, // 'g' 
   ok, // 'h' 
@@ -1129,48 +1137,26 @@ const /*PROGMEM*/ fptr cmd2[] =
   NO_FUNCTION, // 'j' 
   NO_FUNCTION, // 'k' 
   led, // 'l' 
-  NO_FUNCTION, // 'm' 
+  motor_test, // 'm' 
   NO_FUNCTION, // 'n' 
   NO_FUNCTION, // 'o' 
   NO_FUNCTION, // 'p' 
   NO_FUNCTION, // 'q' 
-  NO_FUNCTION, // 'r' 
-  NO_FUNCTION, // 's' 
+  print_encoder_setup, // 'r' 
+  print_switches, // 's' 
   NO_FUNCTION, // 't' 
   NO_FUNCTION, // 'u' 
-  NO_FUNCTION, // 'v' 
-  NO_FUNCTION, // 'w' 
-  NO_FUNCTION, // 'x' 
+  show_version, // 'v' 
+  NO_FUNCTION, // 'w'     // used to be print_wall_sensors
+  stop_motors_and_everything_command, // 'x' 
   NO_FUNCTION, // 'y' 
-  NO_FUNCTION, // 'z' 
+  zero_encoders, // 'z' 
   NO_FUNCTION, // '{' 
   NO_FUNCTION, // '|' 
-  NO_FUNCTION, // '}' 
+  led, // '}' 
 };
-int cmd2_size = sizeof(cmd2) / sizeof(fptr);
-
-void parse_cmd2()
-{
-   unsigned long _start = micros();
-   int command = inputString[0] - ' ';
-   fptr f = 0;
-   if(command <= cmd2_size)
-   {
-     f = cmd2[command];
-   }
-   if(not f)
-   {
-        interpreter_error(T_UNKNOWN_COMMAND);
-        return;
-   }
-   else
-    {
-        unsigned long timing = micros() - _start;
-        Serial.println(timing);
-        f();
-        return;
-    }
-}
+const int cmd2_size = sizeof(cmd2) / sizeof(fptr);
+#endif
 
 
 /*
@@ -1187,6 +1173,33 @@ template <typename T> T PROGMEM_getAnything (const T * sce)
   return temp;
   }
 */
+
+#if NEW_COMMAND_LOOKUP
+
+void parse_cmd()
+{
+   unsigned long _start = micros();
+   int command = inputString[0] - ' ';
+   fptr f = 0;
+   if(command < cmd2_size)
+   {
+     f = pgm_read_ptr(cmd2+command);
+   }
+   if(not f)
+   {
+        interpreter_error(T_UNKNOWN_COMMAND);
+        return;
+   }
+   else
+    {
+        unsigned long timing = micros() - _start;
+        Serial.println(timing);
+        f();
+        return;
+    }
+}
+
+#else
 
 /** @brief  Finds the single character command from a list.
  *  @return Void.
@@ -1214,6 +1227,7 @@ void parse_cmd()
         cmd_ptr++;
     }
 }
+#endif
 
 #define CTRL_C 0x03
 #define BACKSPACE 0x08
@@ -1249,9 +1263,17 @@ void interpreter()
         if(inChar == '\n')
         {
             if(interpreter_echo) { Serial.write(inChar); }
-            inputString[inputIndex] = 0;  // zero terminate
-            parse_cmd2();
-            inputIndex = 0;
+            if(inputIndex)
+            {
+              inputString[inputIndex] = 0;  // zero terminate
+              parse_cmd();
+              inputIndex = 0;
+            }
+            else
+            {
+              // what do we want to print here? OK for V0?
+              interpreter_error(T_OK);
+            }
         }
         else if(inChar == CTRL_X or inChar == CTRL_C)
         {
