@@ -250,7 +250,7 @@ void reset_state() {
  *  @param  
  *  @return void
  */
-void show_version() { Serial.println(F("v1.2")); }
+void show_version() { Serial.println(F("v1.3")); }
 
 
 /** @brief  Print the decoded switch value.
