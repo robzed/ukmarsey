@@ -1000,55 +1000,6 @@ void print_serial_capture_read_buff()
 }
 #endif
 
-#define NEW_COMMAND_LOOKUP 1
-
-#if NEW_COMMAND_LOOKUP==0
-
-typedef struct {
-    char cmd;
-    void (*func)();
-} cmds_t;
-
-const /*PROGMEM*/ cmds_t cmds[] = {
-    {'l', led },
-    {'?', ok },
-    {'h', ok },
-    {'b', print_bat },
-    {'s', print_switches },
-    //{'w', print_wall_sensors },
-    {'e', print_encoders },
-    {'z', zero_encoders },
-    {'r', print_encoder_setup },
-    {'m', motor_test },
-
-    // Interpreter Commands
-    {'^', reset_state },
-    {'v', show_version },
-    {'V', verbose_control },
-    {'E', echo_control },
-    
-
-    // Robot I/O remote control
-    {'D', digital_pin_control },
-    {'A', analogue_control },
-    {'M', motor_control },
-    {'N', motor_control_dual_voltage },
-    {'P', pinMode_command },
-    {'C', encoder_values },
-    {'$', stored_parameter_control },
-    {'x', stop_motors_and_everything_command },
-    {'S', print_sensors_control_command },
-    {'*', emitter_control },
-
-#if SERIAL_IN_CAPTURE
-   {'\\', print_serial_capture_read_buff },
-#endif
-    // keep this as the last command for testing
-    {'=', echo_command },   // not official command, just for testing
-    {0, 0}
-};
-
-#else
 
 #define NO_FUNCTION 0
 
@@ -1153,81 +1104,30 @@ const PROGMEM fptr PROGMEM cmd2[] =
   zero_encoders, // 'z' 
   NO_FUNCTION, // '{' 
   NO_FUNCTION, // '|' 
-  led, // '}' 
+  NO_FUNCTION, // '}' 
 };
 const int cmd2_size = sizeof(cmd2) / sizeof(fptr);
-#endif
 
-
-/*
-// templates from:  https://arduino.stackexchange.com/questions/13545/using-progmem-to-store-array-of-structs
-template <typename T> void PROGMEM_readAnything (const T * sce, T& dest)
-  {
-  memcpy_P (&dest, sce, sizeof (T));
-  }
-
-template <typename T> T PROGMEM_getAnything (const T * sce)
-  {
-  static T temp;
-  memcpy_P (&temp, sce, sizeof (T));
-  return temp;
-  }
-*/
-
-#if NEW_COMMAND_LOOKUP
-
-void parse_cmd()
-{
-   unsigned long _start = micros();
-   int command = inputString[0] - ' ';
-   fptr f = 0;
-   if(command < cmd2_size)
-   {
-     f = pgm_read_ptr(cmd2+command);
-   }
-   if(not f)
-   {
-        interpreter_error(T_UNKNOWN_COMMAND);
-        return;
-   }
-   else
-    {
-        unsigned long timing = micros() - _start;
-        Serial.println(timing);
-        f();
-        return;
-    }
-}
-
-#else
 
 /** @brief  Finds the single character command from a list.
  *  @return Void.
  */
 void parse_cmd()
 {
-   unsigned long _start = micros();
-   const cmds_t* cmd_ptr = cmds;
-    char command;
-    while(1)
-    {
-        if( not (command = cmd_ptr->cmd) )
-        {
-            interpreter_error(T_UNKNOWN_COMMAND);
-            return;
-        }
-        
-        if(command == inputString[0])
-        {
-            unsigned long timing = micros() - _start;
-            Serial.println(timing);
-            cmd_ptr->func();
-            return;
-        }
-        cmd_ptr++;
-    }
+   int command = inputString[0] - ' ';
+   fptr f = 0;
+   if(command < cmd2_size)
+   {
+     f = pgm_read_ptr(cmd2+command);
+     if(f)
+     {
+        f();
+        return;
+     }
+   }
+   interpreter_error(T_UNKNOWN_COMMAND);
 }
-#endif
+
 
 #define CTRL_C 0x03
 #define BACKSPACE 0x08
