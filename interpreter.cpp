@@ -241,8 +241,23 @@ void ok() { interpreter_error(T_OK); }
  *  @return void
  */
 void reset_state() {
-  // We should reset all state here. At the moment there isn't any
-  Serial.println(F("RST"));
+  char function = inputString[1];
+  if(function == '^')
+  {
+    void(* resetFunc) (void) = 0;  // declare reset fuction at address 0
+    resetFunc();
+  }
+  else if(function == '?')
+  {
+      extern uint8_t PoR_status;
+      Serial.println(PoR_status);
+  }
+  else
+  {
+    // We should reset all state here. At the moment there isn't any.
+    Serial.println(F("RST"));
+    // Reset the actual state
+  }
 }
 
 

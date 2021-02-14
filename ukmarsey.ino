@@ -36,7 +36,10 @@
 #include <Arduino.h>
 #include "public.h"
 
+uint8_t PoR_status = 0;
 void setup() {
+  PoR_status = MCUSR;   // is this erased by bootloader?
+  MCUSR = 0;
   pinMode(LED_BUILTIN, OUTPUT);
   Serial.begin(115200);
   Serial.println(F("Hello from ukmarsey"));

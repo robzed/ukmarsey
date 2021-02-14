@@ -75,7 +75,8 @@ Note: 'x' command stops the motors in the case of runaway, but requires a newlin
 
 | Cmd | Action    |
 |:---:|-----------|
-| ^ | reset state | 
+| ^ | reset state - writes RST in reply. | 
+| ^^ | processor reset |
 | v | show version |
 | V | Verbose error code, 1=verbose (default), 0=numeric - see 'Interpreter errors'.  |
 | E | Serial echo of input 0=off, 1=on (default). Generally should be turned off for machines |
