@@ -72,6 +72,7 @@ void sensors_control_setup() {
 }
 
 void print_hex2(int value) {
+  value >>= 2;         // get rid of button 2 bits - probably noise
   value = constrain(value, 0, 255);
   Serial.print(value / 16, HEX);
   Serial.print(value % 16, HEX);

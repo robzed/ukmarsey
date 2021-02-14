@@ -208,6 +208,8 @@ By default this is set up to read A0, A1, A2, A3 as sensors and use D12 to turn 
 |  Sh | As per S, but in hex from 0-FF without commas. You can get more data samples per second in this format. |
 |  *  | Enable/Disable emitter LED Control. Used to save power. |
 
+NOTE: Sh values are divided by 4 (lose bottom 2 bits), capped at 255 (FF). The bottom bits are generally noise anyway. Use this if the transfer time is more important than resolution.
+
 Examples of output of 'S':
 
     S
