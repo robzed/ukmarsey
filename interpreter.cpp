@@ -167,7 +167,13 @@ enum
   T_UNKNOWN_COMMAND = 4,
   T_UNEXPECTED_TOKEN = 5
 };
-bool verbose_errors = true;
+
+enum {
+  NUMERIC_ERRORS = 0,
+  TEXT_ERRORS = 1,
+  TEXT_VERBOSE = 2
+};
+uint8_t verbose_errors = TEXT_ERRORS; 
 
 /** @brief  Print the interpreter error
  *  @param  error to be printed
@@ -724,7 +730,7 @@ void motor_control_dual_voltage()
 /** @brief Reads and writes stored parameters
  *  @return Void.
  */
-void stored_parameter_control()
+uint8_t stored_parameter_control()
 {
   int param_number = decode_input_value(1);
   if(param_number >= 0 and param_number < NUM_STORED_PARAMS)
@@ -1018,7 +1024,7 @@ void print_serial_capture_read_buff()
 
 #define NO_FUNCTION 0
 
-typedef void (*fptr)();
+typedef uint8_t (*fptr)(); 
 
 const PROGMEM fptr PROGMEM cmd2[] = 
 {
