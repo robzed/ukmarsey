@@ -1,6 +1,6 @@
 /*
  * interpreter - provides quick and low-bandwith serial command line interpreter
- * to access all features of the hardware, and allow a secondary processor (e.g. 
+ * to access all features of the hardware, and allow a secondary processor (e.g.
  * Raspberry Pi Zero) to coordinate robot actions.
 
    ukmarsey is a machine and human command-based Robot Low-level I/O platform initially targetting UKMARSBot
@@ -9,7 +9,7 @@
        https://ukmars.org/
        https://github.com/ukmars/ukmarsbot
        https://github.com/robzed/pizero_for_ukmarsbot
-       
+
   MIT License
 
   Copyright (c) 2020-2021 Rob Probin & Peter Harrison
@@ -56,10 +56,10 @@ static bool interpreter_echo = true;
 float stored_params[NUM_STORED_PARAMS];
 static const float stored_parameters_default_values[NUM_STORED_PARAMS] = {
 
-        // Index: Usage 
-  0.0F, //  0: undefined 
+        // Index: Usage
+  0.0F, //  0: undefined
   0.0F, //  1: undefined
-  0.0F, //  2: undefined 
+  0.0F, //  2: undefined
   0.0F, //  3: undefined
 
   0.0F, //  4: undefined
@@ -80,8 +80,8 @@ static const float stored_parameters_default_values[NUM_STORED_PARAMS] = {
 };
 
 #define NUMBER_OF_BITFIELD_STORED_PARAMS 32
-static const uint32_t bitfield_default_values = 
-// Default 0UL/1UL  Index: Usage 
+static const uint32_t bitfield_default_values =
+// Default 0UL/1UL  Index: Usage
   (0UL << 31) +  // 131: undefined
   (0UL << 30) +  // 130: undefined
   (0UL << 29) +  // 129: undefined
@@ -99,7 +99,7 @@ static const uint32_t bitfield_default_values =
   (0UL << 18) +  // 118: undefined
   (0UL << 17) +  // 117: undefined
   (0UL << 16) +  // 116: undefined
-  
+
   (0UL << 15) +  // 115: undefined
   (0UL << 14) +  // 114: undefined
   (0UL << 13) +  // 113: undefined
@@ -109,7 +109,7 @@ static const uint32_t bitfield_default_values =
   (0UL <<  9) +  // 109: undefined
   (0UL <<  8) +  // 108: undefined
 
-  (0UL <<  7) +  // 107: undefined 
+  (0UL <<  7) +  // 107: undefined
   (0UL <<  6) +  // 106: undefined
   (0UL <<  5) +  // 105: undefined
   (0UL <<  4) +  // 104: undefined
@@ -123,14 +123,14 @@ static const uint32_t bitfield_default_values =
 uint32_t bitfield_stored_params = bitfield_default_values;
 
 // Addresses
-#define BITFIELD_ADDRESS ((NUM_STORED_PARAMS+1)*4) 
+#define BITFIELD_ADDRESS ((NUM_STORED_PARAMS+1)*4)
 #define MAGIC_ADDRESS (BITFIELD_ADDRESS+sizeof(bitfield_stored_params))
 
 //
 // Version number for parameter configuration in EEPROM
 //
 // If the parameter configuration in EEPROM changes, increase this number
-// and new versions will get a clean set of defaults. 
+// and new versions will get a clean set of defaults.
 #define PARAMETER_EEPROM_VERSION 1
 
 // Magic to detect uninitialised space
@@ -179,7 +179,7 @@ uint8_t verbose_errors = TEXT_ERRORS;
  *  @param  error to be printed
  *  @return void
  */
-void interpreter_error(int error)
+void interpreter_error(int error, char* extra=0)
 {
   if(verbose_errors)
   {
@@ -202,14 +202,21 @@ void interpreter_error(int error)
         Serial.println(F("Too long"));
         break;
       case T_UNKNOWN_COMMAND:
-        Serial.println(F("Unknown"));
+        Serial.print(F("Unknown "));
+        if(extra) {
+          Serial.println(extra);
+        }
+        else
+        {
+          Serial.println();
+        }
         break;
       case T_UNEXPECTED_TOKEN:
         Serial.println(F("Unexpected"));
         break;
       default:
         Serial.println(F("Error"));
-        break;    
+        break;
     }
   }
   else
@@ -229,13 +236,13 @@ typedef struct {
 //
 
 /** @brief  Turns on and off the fixed LED
- *  @param  
+ *  @param
  *  @return void
  */
 void led() { digitalWriteFast(LED_BUILTIN, (inputString[1] == '0') ? LOW:HIGH); }
 
 /** @brief  Prints OK
- *  @param  
+ *  @param
  *  @return void
  */
 void ok() { interpreter_error(T_OK); }
@@ -243,7 +250,7 @@ void ok() { interpreter_error(T_OK); }
 
 /** @brief  Reset the robot state to a known value
  *          NOTE: Does not reset $ parameters.
- *  @param  
+ *  @param
  *  @return void
  */
 void reset_state() {
@@ -268,25 +275,25 @@ void reset_state() {
 
 
 /** @brief  Show version of the program.
- *  @param  
+ *  @param
  *  @return void
  */
 void show_version() { Serial.println(F("v1.3")); }
 
 
 /** @brief  Print the decoded switch value.
- *  @param  
+ *  @param
  *  @return void
  */
 void print_switches() { Serial.println(readFunctionSwitch()); }
 
 
 /** @brief  Select one of several hardware motor tests.
- *  @param  
+ *  @param
  *  @return void
  */
 void motor_test() {
-  
+
   char function = inputString[1];
 
   switch (function) {
@@ -329,7 +336,7 @@ void motor_test() {
     case '9':
       setMotorVolts(1.5, -1.5);
       Serial.println(F("spin right 25%"));
-      break;  
+      break;
     case 'a':
       setMotorVolts(3.0, -3.0);
       Serial.println(F("spin right 50%"));
@@ -368,7 +375,7 @@ void motor_test() {
   // be sure to turn off the motors
   setMotorVolts(0, 0);
 
-  
+
 }
 
 //int numeric_mode = 10;
@@ -386,7 +393,7 @@ int decode_input_value(int index)
   int n = inputString[index++]-'0';
   if(n < 0 or n >= 10)
   {
-    inputIndex = index-1; 
+    inputIndex = index-1;
     return -1;
   }
   while(true)
@@ -438,7 +445,7 @@ int decode_input_value_signed(int index)
  *          Also alters inputIndex to past float
  */
 float fractional_float(int index, float n)
-{ 
+{
   float frac = 0.1F;
   while(true)
   {
@@ -463,7 +470,7 @@ float fractional_float(int index, float n)
 // If invalid, return 0;
 // Differnt to atoi, etc., because updates index.
 float decode_input_value_float_unsigned(int index)
-{ 
+{
   float n = 0.0F;
   while(true)
   {
@@ -543,7 +550,7 @@ void digital_pin_control()
   }
 }
 
-static volatile int* pointers_to_ADC_readings[] = 
+static volatile int* pointers_to_ADC_readings[] =
 {
   &gSensorA0_dark, // SENSOR_RIGHT_MARK = A0;
   &gSensorA1_dark, // SENSOR_1 = A1;
@@ -629,7 +636,7 @@ void motor_control()
   {
     interpreter_error(T_OUT_OF_RANGE);
   }
-} 
+}
 
 
 
@@ -680,7 +687,7 @@ void encoder_values()
         encoderLeftCount = 0;
         encoderRightCount = 0;
       }
-      
+
       Serial.print(left, HEX);
       Serial.print(",");
       Serial.println(right, HEX);
@@ -704,7 +711,7 @@ void encoder_values()
       interpreter_error(T_OUT_OF_RANGE);
     }
   }
-} 
+}
 
 
 /** @brief Selects the left and right motor voltages
@@ -826,7 +833,7 @@ void init_stored_parameters()
     // finally write magic back
     EEPROM.put(MAGIC_ADDRESS, MAGIC_NUMBER);
   }
-  
+
   for(int i=0; i<NUM_STORED_PARAMS; i++)
   {
     float f;
@@ -1022,133 +1029,129 @@ void print_serial_capture_read_buff()
 #endif
 
 
-#define NO_FUNCTION 0
+
+void not_implemented(){
+  interpreter_error(T_UNKNOWN_COMMAND, inputString);
+}
 
 typedef uint8_t (*fptr)(); 
 
-const PROGMEM fptr PROGMEM cmd2[] = 
+const PROGMEM fptr PROGMEM cmd2[] =
 {
-  NO_FUNCTION, // ' ' 
-  NO_FUNCTION, // '!' 
-  NO_FUNCTION, // '"' 
-  NO_FUNCTION, // '#' 
-  stored_parameter_control, // '$' 
-  NO_FUNCTION, // '%' 
-  NO_FUNCTION, // '&' 
-  NO_FUNCTION, // ''' 
-  NO_FUNCTION, // '(' 
-  NO_FUNCTION, // ')' 
-  emitter_control, // '*' 
-  NO_FUNCTION, // '+' 
-  NO_FUNCTION, // ',' 
-  NO_FUNCTION, // '-' 
-  NO_FUNCTION, // '.' 
-  NO_FUNCTION, // '/' 
-  NO_FUNCTION, // '0' 
-  NO_FUNCTION, // '1' 
-  NO_FUNCTION, // '2' 
-  NO_FUNCTION, // '3' 
-  NO_FUNCTION, // '4' 
-  NO_FUNCTION, // '5' 
-  NO_FUNCTION, // '6' 
-  NO_FUNCTION, // '7' 
-  NO_FUNCTION, // '8' 
-  NO_FUNCTION, // '9' 
-  NO_FUNCTION, // ':' 
-  NO_FUNCTION, // ';' 
-  NO_FUNCTION, // '<' 
-  echo_command, // '=' 
-  NO_FUNCTION, // '>' 
-  ok, // '?' 
-  NO_FUNCTION, // '@' 
-  analogue_control, // 'A' 
-  NO_FUNCTION, // 'B' 
-  encoder_values, // 'C' 
-  digital_pin_control, // 'D' 
-  echo_control, // 'E' 
-  NO_FUNCTION, // 'F' 
-  NO_FUNCTION, // 'G' 
-  NO_FUNCTION, // 'H' 
-  NO_FUNCTION, // 'I' 
-  NO_FUNCTION, // 'J' 
-  NO_FUNCTION, // 'K' 
-  NO_FUNCTION, // 'L' 
-  motor_control, // 'M' 
-  motor_control_dual_voltage, // 'N' 
-  NO_FUNCTION, // 'O' 
-  pinMode_command, // 'P' 
-  NO_FUNCTION, // 'Q' 
-  NO_FUNCTION, // 'R' 
-  print_sensors_control_command, // 'S' 
-  NO_FUNCTION, // 'T' 
-  NO_FUNCTION, // 'U' 
-  verbose_control, // 'V' 
-  NO_FUNCTION, // 'W' 
-  NO_FUNCTION, // 'X' 
-  NO_FUNCTION, // 'Y' 
-  NO_FUNCTION, // 'Z' 
-  NO_FUNCTION, // '[' 
+  not_implemented, // ' '
+  not_implemented, // '!'
+  not_implemented, // '"'
+  not_implemented, // '#'
+  stored_parameter_control, // '$'
+  not_implemented, // '%'
+  not_implemented, // '&'
+  not_implemented, // '''
+  not_implemented, // '('
+  not_implemented, // ')'
+  emitter_control, // '*'
+  not_implemented, // '+'
+  not_implemented, // ','
+  not_implemented, // '-'
+  not_implemented, // '.'
+  not_implemented, // '/'
+  not_implemented, // '0'
+  not_implemented, // '1'
+  not_implemented, // '2'
+  not_implemented, // '3'
+  not_implemented, // '4'
+  not_implemented, // '5'
+  not_implemented, // '6'
+  not_implemented, // '7'
+  not_implemented, // '8'
+  not_implemented, // '9'
+  not_implemented, // ':'
+  not_implemented, // ';'
+  not_implemented, // '<'
+  echo_command, // '='
+  not_implemented, // '>'
+  ok, // '?'
+  not_implemented, // '@'
+  analogue_control, // 'A'
+  not_implemented, // 'B'
+  encoder_values, // 'C'
+  digital_pin_control, // 'D'
+  echo_control, // 'E'
+  not_implemented, // 'F'
+  not_implemented, // 'G'
+  not_implemented, // 'H'
+  not_implemented, // 'I'
+  not_implemented, // 'J'
+  not_implemented, // 'K'
+  not_implemented, // 'L'
+  motor_control, // 'M'
+  motor_control_dual_voltage, // 'N'
+  not_implemented, // 'O'
+  pinMode_command, // 'P'
+  not_implemented, // 'Q'
+  not_implemented, // 'R'
+  print_sensors_control_command, // 'S'
+  not_implemented, // 'T'
+  not_implemented, // 'U'
+  verbose_control, // 'V'
+  not_implemented, // 'W'
+  not_implemented, // 'X'
+  not_implemented, // 'Y'
+  not_implemented, // 'Z'
+  not_implemented, // '['
 #if SERIAL_IN_CAPTURE
-  print_serial_capture_read_buff, // '\' 
+  print_serial_capture_read_buff, // '\'
 #else
-  NO_FUNCTION, // '\' 
+  not_implemented, // '\'
 #endif
-  NO_FUNCTION, // ']' 
-  reset_state, // '^' 
-  NO_FUNCTION, // '_' 
-  NO_FUNCTION, // '`' 
-  NO_FUNCTION, // 'a' 
-  print_bat, // 'b' 
-  NO_FUNCTION, // 'c' 
-  NO_FUNCTION, // 'd' 
-  print_encoders, // 'e' 
-  NO_FUNCTION, // 'f' 
-  NO_FUNCTION, // 'g' 
-  ok, // 'h' 
-  NO_FUNCTION, // 'i' 
-  NO_FUNCTION, // 'j' 
-  NO_FUNCTION, // 'k' 
-  led, // 'l' 
-  motor_test, // 'm' 
-  NO_FUNCTION, // 'n' 
-  NO_FUNCTION, // 'o' 
-  NO_FUNCTION, // 'p' 
-  NO_FUNCTION, // 'q' 
-  print_encoder_setup, // 'r' 
-  print_switches, // 's' 
-  NO_FUNCTION, // 't' 
-  NO_FUNCTION, // 'u' 
-  show_version, // 'v' 
-  NO_FUNCTION, // 'w'     // used to be print_wall_sensors
-  stop_motors_and_everything_command, // 'x' 
-  NO_FUNCTION, // 'y' 
-  zero_encoders, // 'z' 
-  NO_FUNCTION, // '{' 
-  NO_FUNCTION, // '|' 
-  NO_FUNCTION, // '}' 
+  not_implemented, // ']'
+  reset_state, // '^'
+  not_implemented, // '_'
+  not_implemented, // '`'
+  not_implemented, // 'a'
+  print_bat, // 'b'
+  not_implemented, // 'c'
+  not_implemented, // 'd'
+  print_encoders, // 'e'
+  not_implemented, // 'f'
+  not_implemented, // 'g'
+  ok, // 'h'
+  not_implemented, // 'i'
+  not_implemented, // 'j'
+  not_implemented, // 'k'
+  led, // 'l'
+  motor_test, // 'm'
+  not_implemented, // 'n'
+  not_implemented, // 'o'
+  not_implemented, // 'p'
+  not_implemented, // 'q'
+  print_encoder_setup, // 'r'
+  print_switches, // 's'
+  not_implemented, // 't'
+  not_implemented, // 'u'
+  show_version, // 'v'
+  not_implemented, // 'w'     // used to be print_wall_sensors
+  stop_motors_and_everything_command, // 'x'
+  not_implemented, // 'y'
+  zero_encoders, // 'z'
+  not_implemented, // '{'
+  not_implemented, // '|'
+  not_implemented, // '}'
 };
-const int cmd2_size = sizeof(cmd2) / sizeof(fptr);
+const int CMD2_SIZE = sizeof(cmd2) / sizeof(fptr);
 
 
 /** @brief  Finds the single character command from a list.
  *  @return Void.
  */
-void parse_cmd()
-{
-   int command = inputString[0] - ' ';
-   fptr f = 0;
-   if(command < cmd2_size)
-   {
-     f = pgm_read_ptr(cmd2+command);
-     if(f)
-     {
-        f();
-        return;
-     }
-   }
-   interpreter_error(T_UNKNOWN_COMMAND);
+void parse_cmd() {
+  int command = inputString[0] - ' ';
+  if (command >= CMD2_SIZE) {
+    interpreter_error(T_UNKNOWN_COMMAND);
+    return;
+  }
+  fptr f = fptr(pgm_read_ptr(cmd2 + command));
+  f();
 }
-
 
 #define CTRL_C 0x03
 #define BACKSPACE 0x08
@@ -1160,7 +1163,7 @@ void parse_cmd()
  *  @return Void.
  */
 void interpreter()
-{    
+{
     while (Serial.available()) {
       char inChar = (char)Serial.read();      // get the new byte:
 #if SERIAL_IN_CAPTURE
@@ -1170,7 +1173,7 @@ void interpreter()
       if(inChar > ' ')
       {
         if(interpreter_echo) { Serial.write(inChar); }
-        
+
         inputString[inputIndex++] = inChar;      // add it to the inputString:
         if(inputIndex == MAX_INPUT_SIZE)
         {
