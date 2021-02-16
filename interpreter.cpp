@@ -173,7 +173,7 @@ bool verbose_errors = true;
  *  @param  error to be printed
  *  @return void
  */
-void interpreter_error(int error)
+void interpreter_error(int error, char* extra=0)
 {
   if(verbose_errors)
   {
@@ -196,7 +196,14 @@ void interpreter_error(int error)
         Serial.println(F("Too long"));
         break;
       case T_UNKNOWN_COMMAND:
-        Serial.println(F("Unknown"));
+        Serial.print(F("Unknown "));
+        if(extra) {
+          Serial.println(extra);
+        }
+        else
+        {
+          Serial.println();
+        }
         break;
       case T_UNEXPECTED_TOKEN:
         Serial.println(F("Unexpected"));
@@ -1018,8 +1025,7 @@ void print_serial_capture_read_buff()
 
 
 void not_implemented(){
-  Serial.print(F("ERR: "));
-  Serial.println(inputString);
+  interpreter_error(T_UNKNOWN_COMMAND, inputString);
 }
 
 typedef void (*fptr)();
