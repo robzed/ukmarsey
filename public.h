@@ -1,6 +1,7 @@
 #ifndef PUBLIC_H
 #define PUBLIC_H
 
+#include <Arduino.h>
 // provided by interpreter.cpp
 void interpreter();
 void init_stored_parameters();
