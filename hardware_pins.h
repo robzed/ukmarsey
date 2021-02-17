@@ -25,4 +25,3 @@ const int FUNCTION_PIN = A6;
 const int BATTERY_VOLTS = A7;
 /****/
 #endif
-
