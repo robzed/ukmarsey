@@ -7,7 +7,7 @@
        https://ukmars.org/
        https://github.com/ukmars/ukmarsbot
        https://github.com/robzed/pizero_for_ukmarsbot
-       
+
   MIT License
 
   Copyright (c) 2020-2021 Rob Probin & Peter Harrison
@@ -32,25 +32,24 @@
   SOFTWARE.
 */
 
-
-#include <Arduino.h>
 #include "public.h"
+#include <Arduino.h>
 
 uint8_t PoR_status = 0;
-void setup() {
-  PoR_status = MCUSR;   // is this erased by bootloader?
-  MCUSR = 0;
-  pinMode(LED_BUILTIN, OUTPUT);
-  Serial.begin(115200);
-  Serial.println(F("Hello from ukmarsey"));
-  setupSystick();
-  //wall_sensors_setup();
-  sensors_control_setup();
-  setupEncoders();
-  motorSetup();
-  init_stored_parameters();
+void setup()
+{
+    PoR_status = MCUSR; // is this erased by bootloader?
+    MCUSR = 0;
+    pinMode(LED_BUILTIN, OUTPUT);
+    Serial.begin(115200);
+    Serial.println(F("Hello from ukmarsey"));
+    setupSystick();
+    //wall_sensors_setup();
+    sensors_control_setup();
+    setupEncoders();
+    motorSetup();
+    init_stored_parameters();
 }
-
 
 //extern unsigned long t_systick1;
 //extern unsigned long t_systick2;
@@ -58,9 +57,10 @@ void setup() {
 
 //unsigned int next_time = 0;
 
-void loop() {
+void loop()
+{
 
-  /*
+    /*
     if(millis() >= next_time)
     {
       delay(100);
@@ -85,6 +85,5 @@ void loop() {
     }
   */
 
-
-  interpreter();
+    interpreter();
 }
