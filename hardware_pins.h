@@ -3,6 +3,9 @@
 /**
  * Hardware pin defines
  */
+
+#include <Arduino.h>
+
 #define BOARD UKMARSBOT_V1
 const int ENCODER_LEFT_CLK = 2;
 const int ENCODER_RIGHT_CLK = 3;
