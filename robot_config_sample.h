@@ -1,6 +1,17 @@
 #ifndef ROBOT_CONFIG_H
 #define ROBOT_CONFIG_H
 
+
+/*******************************************************************
+ *
+ * Copy this file as robot_config.h in the working directory
+ * and edit the contents to match your particular robot.
+ *
+ * This sample is maintained by git but the working copy is not.
+ *
+ * So don't lose it
+ *
+ *******************************************************************/
 //
 // Robot Specific Configuration
 //
