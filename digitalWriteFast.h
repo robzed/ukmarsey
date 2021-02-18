@@ -4,6 +4,7 @@
   based on http://code.google.com/p/digitalwritefast
  */
 
+#include <Arduino.h>
 #ifndef __digitalWriteFast_h_
 #define __digitalWriteFast_h_ 1
 
