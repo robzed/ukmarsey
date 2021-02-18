@@ -46,7 +46,7 @@ void setup()
     setupSystick();
     //wall_sensors_setup();
     sensors_control_setup();
-    setupEncoders();
+    setup_encoders();
     motorSetup();
     init_stored_parameters();
 }

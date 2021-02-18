@@ -47,12 +47,20 @@ void print_sensors_control(char mode);
 extern char emitter_on;
 
 // provided by distance-moved.cpp
-void setupEncoders();
+void setup_encoders();
 void print_encoder_setup();
 void zero_encoders();
+void update_encoders();
 void print_encoders();
-extern volatile int32_t encoderLeftCount;
-extern volatile int32_t encoderRightCount;
+
+extern double robot_velocity;
+extern double robot_omega;
+
+extern float robot_distance;
+extern float robot_angle;
+
+extern int32_t encoderLeftTotal;
+extern int32_t encoderRightTotal;
 
 // provided by motor_control.cpp
 void setMotorVolts(float left, float right);

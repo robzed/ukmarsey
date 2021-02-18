@@ -37,37 +37,101 @@
 #include "hardware_pins.h"
 #include "public.h"
 #include "robot_config.h"
+#include "stopwatch.h"
 #include <Arduino.h>
+#include <util/atomic.h>
 
 /***
  * Global variables
  */
-volatile int32_t encoderLeftCount;
-volatile int32_t encoderRightCount;
-int32_t encoderSum;
-int32_t encoderDifference;
 
-void setupEncoders()
+/***
+ * The encoders accumulate counts as the wheels turn.
+ * The count for each wheel encoder changes frequently and means nothing without
+ * an associated time interval.
+ *
+ * At the beginning of each control loop interval, the counts are captured and
+ * used to update the current speeds and distances.
+ *
+ */
+volatile int encoder_left_count;    // Updated by pin change interrupts. Reset every loop interval.
+volatile int encoder_right_count;   // Updated by pin change interrupts. Reset every loop interval.
+
+
+/***
+ * Raw count values are not normally used informative except when calibrating the
+ * robot to calculate the counts MM_PER_COUNT and DEG_PER_COUNT constants.
+ *
+ * Even so, the raw count values are retained because they do not suffer
+ * from floating point error accumulation when calculating the total distance
+ * and angle travelled.
+ */
+int32_t encoderLeftTotal;
+int32_t encoderRightTotal;
+
+
+float robot_distance;   // mm
+float robot_angle;      // degrees
+
+// PID controller expects doubles. Arduino has double defined as float anyway
+double robot_velocity;  // mm/s
+double robot_omega;     // deg/s
+
+
+void setup_encoders()
 {
-    // left
-    pinMode(ENCODER_LEFT_CLK, INPUT);
-    pinMode(ENCODER_LEFT_B, INPUT);
-    // configure the pin change
-    bitClear(EICRA, ISC01);
-    bitSet(EICRA, ISC00);
-    // enable the interrupt
-    bitSet(EIMSK, INT0);
-    encoderLeftCount = 0;
-    // right
-    pinMode(ENCODER_RIGHT_CLK, INPUT);
-    pinMode(ENCODER_RIGHT_B, INPUT);
-    // configure the pin change
-    bitClear(EICRA, ISC11);
-    bitSet(EICRA, ISC10);
-    // enable the interrupt
-    bitSet(EIMSK, INT1);
-    encoderRightCount = 0;
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        // left
+        pinMode(ENCODER_LEFT_CLK, INPUT);
+        pinMode(ENCODER_LEFT_B, INPUT);
+        // configure the pin change
+        bitClear(EICRA, ISC01);
+        bitSet(EICRA, ISC00);
+        // enable the interrupt
+        bitSet(EIMSK, INT0);
+        encoder_left_count = 0;
+        // right
+        pinMode(ENCODER_RIGHT_CLK, INPUT);
+        pinMode(ENCODER_RIGHT_B, INPUT);
+        // configure the pin change
+        bitClear(EICRA, ISC11);
+        bitSet(EICRA, ISC10);
+        // enable the interrupt
+        bitSet(EIMSK, INT1);
+        encoder_right_count = 0;
+    }
+    zero_encoders();
 }
+
+/***
+ * update_encoders() must be called at the control loop frequency so that
+ * speeds and distances can be correctly calculated.
+ */
+void update_encoders()
+{
+    int leftCount;
+    int rightCount;
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        leftCount = encoder_left_count;
+        rightCount = encoder_right_count;
+        encoder_left_count = 0;
+        encoder_right_count = 0;
+    }
+
+    encoderRightTotal += rightCount;
+    encoderLeftTotal += leftCount;
+
+    int encoderSum = rightCount + leftCount;
+    robot_velocity = LOOP_FREQUENCY * MM_PER_COUNT * encoderSum;
+    robot_distance = MM_PER_COUNT * (encoderRightTotal + encoderLeftTotal);
+
+    int encoderDiff = rightCount - leftCount;
+    robot_omega = LOOP_FREQUENCY * DEG_PER_COUNT * encoderDiff;
+    robot_angle = DEG_PER_COUNT * (encoderRightTotal - encoderLeftTotal);
+}
+
 
 ISR(INT0_vect)
 {
@@ -76,7 +140,7 @@ ISR(INT0_vect)
     bool newB = digitalReadFast(ENCODER_LEFT_B);
     bool newA = digitalReadFast(ENCODER_LEFT_CLK) ^ newB;
     int delta = ENCODER_LEFT_POLARITY * ((oldA ^ newB) - (newA ^ oldB));
-    encoderLeftCount += delta;
+    encoder_left_count += delta;
     oldA = newA;
     oldB = newB;
 }
@@ -88,7 +152,7 @@ ISR(INT1_vect)
     bool newB = digitalReadFast(ENCODER_RIGHT_B);
     bool newA = digitalReadFast(ENCODER_RIGHT_CLK) ^ newB;
     int delta = ENCODER_RIGHT_POLARITY * ((oldA ^ newB) - (newA ^ oldB));
-    encoderRightCount += delta;
+    encoder_right_count += delta;
     oldA = newA;
     oldB = newB;
 }
@@ -119,27 +183,26 @@ void print_encoder_setup()
 
 void zero_encoders()
 {
-    encoderLeftCount = 0;
-    encoderRightCount = 0;
+    noInterrupts();
+    encoderLeftTotal = 0;
+    encoderRightTotal = 0;
+    robot_distance = 0;
+    robot_angle = 0;
+    interrupts();
 }
 
 void print_encoders()
 {
-    encoderSum = encoderRightCount + encoderLeftCount;
-    encoderDifference = encoderRightCount - encoderLeftCount;
-    float distance = MM_PER_COUNT * encoderSum;
-    float angle = DEG_PER_COUNT * encoderDifference;
-
     Serial.print(F("EncoderSum: "));
-    Serial.print(encoderSum);
+    Serial.print(encoderRightTotal + encoderLeftTotal);
     Serial.print(F(" = "));
-    Serial.print(distance);
+    Serial.print(robot_distance);
     Serial.print(F(" mm    "));
 
     Serial.print(F("EncoderDifference: "));
-    Serial.print(encoderDifference);
+    Serial.print(encoderRightTotal - encoderLeftTotal);
     Serial.print(F(" = "));
-    Serial.print(angle);
+    Serial.print(robot_angle);
     Serial.print(F(" deg"));
 
     Serial.println();

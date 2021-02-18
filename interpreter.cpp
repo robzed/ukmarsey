@@ -650,22 +650,22 @@ void encoder_values()
             int32_t param = decode_input_value_signed(inputIndex + 1);
             if (motor == 1)
             {
-                encoderLeftCount = param;
+                encoderLeftTotal = param;
             }
             else
             {
-                encoderRightCount = param;
+                encoderRightTotal = param;
             }
         }
         else // read motor
         {
             if (motor == 1)
             {
-                Serial.println(encoderLeftCount);
+                Serial.println(encoderLeftTotal);
             }
             else
             {
-                Serial.println(encoderRightCount);
+                Serial.println(encoderRightTotal);
             }
         }
     }
@@ -675,12 +675,12 @@ void encoder_values()
         if (c == 'h')
         {
             // read both encoder values ahead of time so print time doesn't offset.
-            int32_t left = encoderLeftCount;
-            int32_t right = encoderRightCount;
+            int32_t left = encoderLeftTotal;
+            int32_t right = encoderRightTotal;
             if (inputString[2] == 'z')
             {
-                encoderLeftCount = 0;
-                encoderRightCount = 0;
+                encoderLeftTotal = 0;
+                encoderRightTotal = 0;
             }
 
             Serial.print(left, HEX);
@@ -690,12 +690,12 @@ void encoder_values()
         else if (c == 0 or c == 'z')
         {
             // read both encoder values ahead of time so print time doesn't offset.
-            int32_t left = encoderLeftCount;
-            int32_t right = encoderRightCount;
+            int32_t left = encoderLeftTotal;
+            int32_t right = encoderRightTotal;
             if (c == 'z')
             {
-                encoderLeftCount = 0;
-                encoderRightCount = 0;
+                encoderLeftTotal = 0;
+                encoderRightTotal = 0;
             }
             Serial.print(left);
             Serial.print(",");
