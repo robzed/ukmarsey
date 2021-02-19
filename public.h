@@ -50,8 +50,8 @@ void zero_encoders();
 void update_encoders();
 bool print_encoders(char select);
 
-extern double robot_velocity;
-extern double robot_omega;
+extern float robot_velocity;
+extern float robot_omega;
 
 extern float robot_distance;
 extern float robot_angle;

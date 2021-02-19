@@ -57,9 +57,8 @@ int32_t encoder_right_total; // counts
 float robot_distance; // mm
 float robot_angle;    // degrees
 
-// PID controller expects doubles. Arduino has double defined as float anyway
-double robot_velocity; // mm/s
-double robot_omega;    // deg/s
+float robot_velocity; // mm/s
+float robot_omega;    // deg/s
 
 /***
  * Local variables
