@@ -60,8 +60,8 @@ extern double robot_omega;
 extern float robot_distance;
 extern float robot_angle;
 
-extern int32_t encoderLeftTotal;
-extern int32_t encoderRightTotal;
+extern int32_t encoder_left_total;
+extern int32_t encoder_right_total;
 
 // provided by motor_control.cpp
 void setMotorVolts(float left, float right);

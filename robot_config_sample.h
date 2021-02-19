@@ -1,7 +1,6 @@
 #ifndef ROBOT_CONFIG_H
 #define ROBOT_CONFIG_H
 
-
 /*******************************************************************
  *
  * Copy this file as robot_config.h in the working directory

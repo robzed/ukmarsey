@@ -61,9 +61,8 @@ void loop()
         // this is where we will do all the controller calculations and updates
         loop_time_trigger += LOOP_INTERVAL_MS;
         Stopwatch sw;
-        setLeftMotorPWM(100);
-        setRightMotorPWM(100);
-        uint32_t split = sw.split();
+        // setLeftMotorPWM(100);
+        // setRightMotorPWM(100);
         update_encoders(); // (50us) surprisingly quick.
         sw.stop();
         // Serial.print(millis());

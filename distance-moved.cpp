@@ -43,9 +43,27 @@
 
 /***
  * Global variables
+ *
+ * Raw count values are not normally used informative except when calibrating the
+ * robot to calculate the counts MM_PER_COUNT and DEG_PER_COUNT constants.
+ *
+ * Even so, the raw count values are retained because they do not suffer
+ * from floating point error accumulation when calculating the total distance
+ * and angle travelled.
  */
+int32_t encoder_left_total;  // counts
+int32_t encoder_right_total; // counts
+
+float robot_distance; // mm
+float robot_angle;    // degrees
+
+// PID controller expects doubles. Arduino has double defined as float anyway
+double robot_velocity; // mm/s
+double robot_omega;    // deg/s
 
 /***
+ * Local variables
+ *
  * The encoders accumulate counts as the wheels turn.
  * The count for each wheel encoder changes frequently and means nothing without
  * an associated time interval.
@@ -54,26 +72,9 @@
  * used to update the current speeds and distances.
  *
  */
-volatile int encoder_left_count;  // Updated by pin change interrupts. Reset every loop interval.
-volatile int encoder_right_count; // Updated by pin change interrupts. Reset every loop interval.
 
-/***
- * Raw count values are not normally used informative except when calibrating the
- * robot to calculate the counts MM_PER_COUNT and DEG_PER_COUNT constants.
- *
- * Even so, the raw count values are retained because they do not suffer
- * from floating point error accumulation when calculating the total distance
- * and angle travelled.
- */
-int32_t encoderLeftTotal;
-int32_t encoderRightTotal;
-
-float robot_distance; // mm
-float robot_angle;    // degrees
-
-// PID controller expects doubles. Arduino has double defined as float anyway
-double robot_velocity; // mm/s
-double robot_omega;    // deg/s
+static volatile int encoder_left_count;  // Updated by pin change interrupts. Reset every loop interval.
+static volatile int encoder_right_count; // Updated by pin change interrupts. Reset every loop interval.
 
 void setup_encoders()
 {
@@ -107,28 +108,30 @@ void setup_encoders()
  */
 void update_encoders()
 {
-    int leftCount;
-    int rightCount;
+    int left_count;
+    int right_count;
+    // Make sure values don't change while being read. Be quick.
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
-        leftCount = encoder_left_count;
-        rightCount = encoder_right_count;
+        left_count = encoder_left_count;
+        right_count = encoder_right_count;
         encoder_left_count = 0;
         encoder_right_count = 0;
     }
 
-    encoderRightTotal += rightCount;
-    encoderLeftTotal += leftCount;
+    encoder_right_total += right_count;
+    encoder_left_total += left_count;
 
-    int encoderSum = rightCount + leftCount;
-    robot_velocity = LOOP_FREQUENCY * MM_PER_COUNT * encoderSum;
-    robot_distance = MM_PER_COUNT * (encoderRightTotal + encoderLeftTotal);
+    int encoder_sum = right_count + left_count;
+    robot_velocity = LOOP_FREQUENCY * MM_PER_COUNT * encoder_sum;
+    robot_distance = MM_PER_COUNT * (encoder_right_total + encoder_left_total);
 
-    int encoderDiff = rightCount - leftCount;
-    robot_omega = LOOP_FREQUENCY * DEG_PER_COUNT * encoderDiff;
-    robot_angle = DEG_PER_COUNT * (encoderRightTotal - encoderLeftTotal);
+    int encoder_diff = right_count - left_count;
+    robot_omega = LOOP_FREQUENCY * DEG_PER_COUNT * encoder_diff;
+    robot_angle = DEG_PER_COUNT * (encoder_right_total - encoder_left_total);
 }
 
+// Interrupt called every time there is a change on the left encoder
 ISR(INT0_vect)
 {
     static bool oldA = 0;
@@ -141,6 +144,7 @@ ISR(INT0_vect)
     oldB = newB;
 }
 
+// Interrupt called every time there is a change on the right encoder
 ISR(INT1_vect)
 {
     static bool oldA = 0;
@@ -153,9 +157,11 @@ ISR(INT1_vect)
     oldB = newB;
 }
 
+/******************************** command functions **************************/
+
+// command 'r'
 void print_encoder_setup()
 {
-
     Serial.print(F("MM PER COUNT = "));
     Serial.println(MM_PER_COUNT, 5);
 
@@ -177,26 +183,31 @@ void print_encoder_setup()
     Serial.println();
 }
 
+// command 'z'
 void zero_encoders()
 {
-    noInterrupts();
-    encoderLeftTotal = 0;
-    encoderRightTotal = 0;
-    robot_distance = 0;
-    robot_angle = 0;
-    interrupts();
+    ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+    {
+        encoder_left_total = 0;
+        encoder_right_total = 0;
+        robot_distance = 0;
+        robot_angle = 0;
+    }
 }
 
+// command 'e'
 void print_encoders()
 {
+    // the encoder sum is a measure of forward travel
     Serial.print(F("EncoderSum: "));
-    Serial.print(encoderRightTotal + encoderLeftTotal);
+    Serial.print(encoder_right_total + encoder_left_total);
     Serial.print(F(" = "));
     Serial.print(robot_distance);
     Serial.print(F(" mm    "));
 
+    // the encoder sum is a measure of rotation
     Serial.print(F("EncoderDifference: "));
-    Serial.print(encoderRightTotal - encoderLeftTotal);
+    Serial.print(encoder_right_total - encoder_left_total);
     Serial.print(F(" = "));
     Serial.print(robot_angle);
     Serial.print(F(" deg"));
