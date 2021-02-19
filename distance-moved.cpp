@@ -54,9 +54,8 @@
  * used to update the current speeds and distances.
  *
  */
-volatile int encoder_left_count;    // Updated by pin change interrupts. Reset every loop interval.
-volatile int encoder_right_count;   // Updated by pin change interrupts. Reset every loop interval.
-
+volatile int encoder_left_count;  // Updated by pin change interrupts. Reset every loop interval.
+volatile int encoder_right_count; // Updated by pin change interrupts. Reset every loop interval.
 
 /***
  * Raw count values are not normally used informative except when calibrating the
@@ -69,14 +68,12 @@ volatile int encoder_right_count;   // Updated by pin change interrupts. Reset e
 int32_t encoderLeftTotal;
 int32_t encoderRightTotal;
 
-
-float robot_distance;   // mm
-float robot_angle;      // degrees
+float robot_distance; // mm
+float robot_angle;    // degrees
 
 // PID controller expects doubles. Arduino has double defined as float anyway
-double robot_velocity;  // mm/s
-double robot_omega;     // deg/s
-
+double robot_velocity; // mm/s
+double robot_omega;    // deg/s
 
 void setup_encoders()
 {
@@ -131,7 +128,6 @@ void update_encoders()
     robot_omega = LOOP_FREQUENCY * DEG_PER_COUNT * encoderDiff;
     robot_angle = DEG_PER_COUNT * (encoderRightTotal - encoderLeftTotal);
 }
-
 
 ISR(INT0_vect)
 {
