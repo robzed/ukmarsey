@@ -1,12 +1,22 @@
 #ifndef ROBOT_CONFIG_H
 #define ROBOT_CONFIG_H
 
+
+/*******************************************************************
+ *
+ * Copy this file as robot_config.h in the working directory
+ * and edit the contents to match your particular robot.
+ *
+ * This sample is maintained by git but the working copy is not.
+ *
+ * So don't lose it
+ *
+ *******************************************************************/
 //
 // Robot Specific Configuration
-// 
+//
 // Depending on how you wired up your motor and encoders, you might need to tweak these values
-// 
-
+//
 
 // Encoder polarity is either 1 or -1 and is used to account for reversal of the encoder phases
 // The encoders should count up when the robot is moving forward.
@@ -17,7 +27,6 @@
 // Setting a positive voltage always moves the robot forwards
 #define MOTOR_LEFT_POLARITY (-1)
 #define MOTOR_RIGHT_POLARITY (1)
-
 
 /***
  * Global robot characteristic constants
@@ -31,7 +40,7 @@ const float WHEEL_SEPARATION = 75.2;
 const float MM_PER_COUNT = (PI * WHEEL_DIAMETER) / (2 * COUNTS_PER_ROTATION * GEAR_RATIO);
 const float DEG_PER_COUNT = (360.0 * MM_PER_COUNT) / (PI * WHEEL_SEPARATION);
 
-// The is the maximum voltage the motor should be driven at when 
+// The is the maximum voltage the motor should be driven at when
 // using voltage based control.
 const float MAX_MOTOR_VOLTS = 6.0f;
 

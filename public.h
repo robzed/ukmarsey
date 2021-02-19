@@ -72,11 +72,10 @@ typedef unsigned time_measure_t;
 #else
 #define TIME_START(START_VARIABLE)
 #define TIME_END(START_VARIABLE, END_VARIABLE)
-#define TIME_DEFINE_VARIABLE(VARIABLE) 
+#define TIME_DEFINE_VARIABLE(VARIABLE)
 #endif
 
 // Other constants
 const int floating_decimal_places = 3;
-
 
 #endif

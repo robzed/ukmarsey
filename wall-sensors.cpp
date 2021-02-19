@@ -7,7 +7,7 @@
        https://ukmars.org/
        https://github.com/ukmars/ukmarsbot
        https://github.com/robzed/pizero_for_ukmarsbot
-       
+
   MIT License
 
   Copyright (c) 2020-2021 Rob Probin & Peter Harrison
@@ -31,10 +31,10 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-#include <Arduino.h>
 #include "hardware_pins.h"
+#include <Arduino.h>
 
-#if 0     // disabled for now - replace with generic sensor system (under development).
+#if 0 // disabled for now - replace with generic sensor system (under development).
 #define ENABLE_SENSOR_LED_OUTPUT 0
 
 /***

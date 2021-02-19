@@ -1,5 +1,5 @@
 /*
- * ukmarsey main file
+ * Stopwatch class - provides basic microsecond level timing.
 
    ukmarsey is a machine and human command-based Robot Low-level I/O platform initially targetting UKMARSBot
    For more information see:
@@ -32,58 +32,44 @@
   SOFTWARE.
 */
 
-#include "public.h"
+#ifndef _STOPWATCH_H
+#define _STOPWATCH_H
+
 #include <Arduino.h>
 
-uint8_t PoR_status = 0;
-void setup()
-{
-    PoR_status = MCUSR; // is this erased by bootloader?
-    MCUSR = 0;
-    pinMode(LED_BUILTIN, OUTPUT);
-    Serial.begin(115200);
-    Serial.println(F("Hello from ukmarsey"));
-    setupSystick();
-    //wall_sensors_setup();
-    sensors_control_setup();
-    setupEncoders();
-    motorSetup();
-    init_stored_parameters();
-}
-
-//extern unsigned long t_systick1;
-//extern unsigned long t_systick2;
-//extern unsigned long t_systick3;
-
-//unsigned int next_time = 0;
-
-void loop()
+class Stopwatch
 {
 
-    /*
-    if(millis() >= next_time)
+public:
+    Stopwatch()
     {
-      delay(100);
-      Serial.println(Serial.availableForWrite());
-    Serial.println();
-    Serial.print("bat read time=");
-    Serial.print(t_systick1);
-    Serial.println("µs");
-    Serial.print("switch read time=");
-    Serial.print(t_systick2);
-    Serial.println("µs");
-    Serial.print("wall sensor read time=");
-    Serial.print(t_systick3);
-    Serial.println("µs");
+        start();
+    };
 
-    unsigned long _start = micros();
-    unsigned long timing_timing = micros() - _start;
-    Serial.print("timing timing =");
-    Serial.print(timing_timing);
-    Serial.println(" µs");
-    next_time = millis() + 2000;  // every 2 seconds
+    void start()
+    {
+        start_time = micros();
+        stop_time = start_time;
+    };
+
+    void stop()
+    {
+        stop_time = micros();
+    };
+
+    uint32_t split()
+    {
+        return micros() - start_time;
     }
-  */
 
-    interpreter();
-}
+    uint32_t elapsed_time() const
+    {
+        return stop_time - start_time;
+    };
+
+private:
+    uint32_t start_time;
+    uint32_t stop_time;
+};
+
+#endif
