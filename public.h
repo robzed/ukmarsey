@@ -1,6 +1,8 @@
 #ifndef PUBLIC_H
 #define PUBLIC_H
 
+#include "robot_config.h"
+#include <Arduino.h>
 // provided by interpreter.cpp
 void interpreter();
 void init_stored_parameters();
@@ -46,12 +48,20 @@ void print_sensors_control(char mode);
 extern char emitter_on;
 
 // provided by distance-moved.cpp
-void setupEncoders();
+void setup_encoders();
 void print_encoder_setup();
 void zero_encoders();
+void update_encoders();
 void print_encoders();
-extern volatile int32_t encoderLeftCount;
-extern volatile int32_t encoderRightCount;
+
+extern double robot_velocity;
+extern double robot_omega;
+
+extern float robot_distance;
+extern float robot_angle;
+
+extern int32_t encoder_left_total;
+extern int32_t encoder_right_total;
 
 // provided by motor_control.cpp
 void setMotorVolts(float left, float right);
