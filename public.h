@@ -1,6 +1,7 @@
 #ifndef PUBLIC_H
 #define PUBLIC_H
 
+#include "pid_v1.h"
 #include "robot_config.h"
 #include <Arduino.h>
 #include <wiring_private.h>
@@ -60,12 +61,27 @@ extern int32_t encoder_left_total;
 extern int32_t encoder_right_total;
 
 // provided by motor_control.cpp
+extern float fwd_kp;
+extern float fwd_ki;
+extern float fwd_kd;
+extern float fwd_set_speed;
+extern float fwd_volts;
+extern PID fwd_controller;
+
+extern float rot_kp;
+extern float rot_ki;
+extern float rot_kd;
+extern float rot_set_speed;
+extern float rot_volts;
+extern PID rot_controller;
+
 void setMotorVolts(float left, float right);
 void setRightMotorVolts(float volts);
 void setLeftMotorVolts(float volts);
 void setLeftMotorPWM(int pwm);
 void setRightMotorPWM(int pwm);
 void motorSetup();
+void motorUpdate();
 
 // internal use
 #define MEASURE_TIMING 0

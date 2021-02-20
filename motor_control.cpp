@@ -41,13 +41,21 @@
  * Global variables
  */
 
-float fwd_kp = 0.003;
-float fwd_ki = 0.001;
+float fwd_kp = 0.010;
+float fwd_ki = 0.010;
 float fwd_kd = 0.000;
 float fwd_set_speed;
-float fwd_output;
+float fwd_volts;
 
-PID fwd_controller(&robot_velocity, &fwd_output, &fwd_set_speed, fwd_kp, fwd_ki, fwd_kd);
+
+float rot_kp = 0.010;
+float rot_ki = 0.010;
+float rot_kd = 0.000;
+float rot_set_speed;
+float rot_volts;
+
+PID fwd_controller(&robot_velocity, &fwd_volts, &fwd_set_speed, fwd_kp, fwd_ki, fwd_kd);
+PID rot_controller(&robot_omega, &rot_volts, &rot_set_speed, rot_kp, rot_ki, rot_kd);
 
 void motorSetup()
 {
@@ -59,7 +67,64 @@ void motorSetup()
     digitalWriteFast(MOTOR_LEFT_DIR, 0);
     digitalWriteFast(MOTOR_RIGHT_PWM, 0);
     digitalWriteFast(MOTOR_RIGHT_DIR, 0);
+    setMotorVolts(0, 0);
+    fwd_controller.SetOutputLimits(-6.0, 6.0);
+    fwd_controller.SetMode(AUTOMATIC); // turns on the controller. Set to manual for off.
+    rot_controller.SetOutputLimits(-6.0, 6.0);
+    rot_controller.SetMode(AUTOMATIC); // turns on the controller. Set to manual for off.
 }
+
+/*
+
+  //   Combine the components
+  //  rotControllerVolts -= ROTATION_BIAS_VOLTS;
+  leftMotorVolts = 0;
+  leftMotorVolts += fwdControllerVolts - rotControllerVolts;
+  rightMotorVolts = 0;
+  rightMotorVolts += fwdControllerVolts + rotControllerVolts;
+
+  if (fwdFFControlEnabled) {
+    leftMotorVolts += fwdFeedForward;   //- rotFeedForward;
+    rightMotorVolts += fwdFeedForward;  // + rotFeedForward;
+  }
+  if (rotFFControlEnabled) {
+    leftMotorVolts -= rotFeedForward;
+    rightMotorVolts += rotFeedForward;
+  }
+
+
+*/
+void motorUpdate()
+{
+    rot_controller.Compute();
+    fwd_controller.Compute();
+    // assume both motors behave the same
+    const float k_velocity_ff = (1.0 / 302.0);
+    const float k_bias_ff = (23.0 / 302.0);
+
+    float left_volts = 0;
+    float right_volts = 0;
+
+    left_volts += fwd_volts;
+    right_volts += fwd_volts;
+
+    left_volts -= rot_volts;
+    right_volts += rot_volts;
+
+    float fwd_ff = robot_velocity * k_velocity_ff;
+    float rot_ff = robot_omega * (WHEEL_SEPARATION / (2 * 57.29)) * k_velocity_ff;
+    // rot_ff = 0;
+
+    left_volts += fwd_ff;
+    right_volts += fwd_ff;
+
+    left_volts -= rot_ff;
+    right_volts += rot_ff;
+
+    setMotorVolts(left_volts, right_volts);
+    // setMotorVolts(1.4, 1.4);
+    // setMotorVolts(0, 0);
+};
 
 void setLeftMotorPWM(int pwm)
 {
