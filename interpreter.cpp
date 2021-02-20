@@ -986,6 +986,16 @@ void print_sensors_control_command()
     }
 }
 
+void print_encoders_command()
+{
+	// translate into argument
+	// If no second parameters this will be 0.
+	if(print_encoders(inputString[1]) == false)
+	{
+		interpreter_error(T_UNEXPECTED_TOKEN);
+	}
+}
+
 #define SERIAL_IN_CAPTURE 0
 #if SERIAL_IN_CAPTURE
 char serial_capture_read_buff[256]; // circular buffer
@@ -1101,7 +1111,7 @@ const PROGMEM fptr PROGMEM cmd2[] =
         print_bat,                          // 'b'
         not_implemented,                    // 'c'
         not_implemented,                    // 'd'
-        print_encoders,                     // 'e'
+        print_encoders_command,             // 'e'
         not_implemented,                    // 'f'
         not_implemented,                    // 'g'
         ok,                                 // 'h'

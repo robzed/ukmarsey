@@ -169,8 +169,13 @@ Reading an encoder counter might be more involved. It is the total so far and th
 | Ch | Same as C, but values in Hex |
 | ChZ| Same as Ch, but also zeros encoders immediately after reading |
 | z | zero wheel encoder counters. No return. | 
-| e | print wheel current info - human readable NOT for machine parsing! |
-| r | print encoder setup - human readable NOT for machine parsing! | 
+| ea | print wheel current info (all) - Format 'encoder-sum,distance,encoder-difference,angle' |
+| e  | Old command for 'ea' command, still supported for backward compatability |
+| er | print wheel current info (raw format) - Format 'encoder-sum,encoder-difference'|
+| eu | print wheel cujrent info (unit format) - Format 'distance,angle' where distance is mm, angle is degrees |
+| r | print encoder setup - Format 'mm-per-count,degrees-per-count' | 
+
+NOTE: 'r' command allows decoding 'er' into distances/angles on the host, rather than taking time to print floating values.
 
 Setting a counter using 'C' command is usually to zero but could be any legal value. Therefore a quick 'z' command is provided.
 

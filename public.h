@@ -52,7 +52,7 @@ void setup_encoders();
 void print_encoder_setup();
 void zero_encoders();
 void update_encoders();
-void print_encoders();
+bool print_encoders(char select);
 
 extern double robot_velocity;
 extern double robot_omega;
