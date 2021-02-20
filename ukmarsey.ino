@@ -32,9 +32,9 @@
   SOFTWARE.
 */
 
+#include <Arduino.h>
 #include "public.h"
 #include "stopwatch.h"
-#include <Arduino.h>
 
 uint32_t loop_time_trigger;
 uint8_t PoR_status = 0;
