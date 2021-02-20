@@ -47,7 +47,7 @@ float fwd_kd = 0.000;
 float fwd_set_speed;
 float fwd_output;
 
-PID fwd_controller(&robot_velocity, &fwd_output, &fwd_set_speed, fwd_kp, fwd_ki, fwd_kd, DIRECT);
+PID fwd_controller(&robot_velocity, &fwd_output, &fwd_set_speed, fwd_kp, fwd_ki, fwd_kd);
 
 void motorSetup()
 {
