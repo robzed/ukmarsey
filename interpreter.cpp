@@ -650,22 +650,22 @@ void encoder_values()
             int32_t param = decode_input_value_signed(inputIndex + 1);
             if (motor == 1)
             {
-                encoderLeftCount = param;
+                encoder_left_total = param;
             }
             else
             {
-                encoderRightCount = param;
+                encoder_right_total = param;
             }
         }
         else // read motor
         {
             if (motor == 1)
             {
-                Serial.println(encoderLeftCount);
+                Serial.println(encoder_left_total);
             }
             else
             {
-                Serial.println(encoderRightCount);
+                Serial.println(encoder_right_total);
             }
         }
     }
@@ -675,12 +675,12 @@ void encoder_values()
         if (c == 'h')
         {
             // read both encoder values ahead of time so print time doesn't offset.
-            int32_t left = encoderLeftCount;
-            int32_t right = encoderRightCount;
+            int32_t left = encoder_left_total;
+            int32_t right = encoder_right_total;
             if (inputString[2] == 'z')
             {
-                encoderLeftCount = 0;
-                encoderRightCount = 0;
+                encoder_left_total = 0;
+                encoder_right_total = 0;
             }
 
             Serial.print(left, HEX);
@@ -690,12 +690,12 @@ void encoder_values()
         else if (c == 0 or c == 'z')
         {
             // read both encoder values ahead of time so print time doesn't offset.
-            int32_t left = encoderLeftCount;
-            int32_t right = encoderRightCount;
+            int32_t left = encoder_left_total;
+            int32_t right = encoder_right_total;
             if (c == 'z')
             {
-                encoderLeftCount = 0;
-                encoderRightCount = 0;
+                encoder_left_total = 0;
+                encoder_right_total = 0;
             }
             Serial.print(left);
             Serial.print(",");

@@ -33,8 +33,10 @@
 */
 
 #include "public.h"
+#include "stopwatch.h"
 #include <Arduino.h>
 
+uint32_t loop_time_trigger;
 uint8_t PoR_status = 0;
 void setup()
 {
@@ -46,44 +48,33 @@ void setup()
     setupSystick();
     //wall_sensors_setup();
     sensors_control_setup();
-    setupEncoders();
+    setup_encoders();
     motorSetup();
     init_stored_parameters();
+    loop_time_trigger += LOOP_INTERVAL_MS;
 }
-
-//extern unsigned long t_systick1;
-//extern unsigned long t_systick2;
-//extern unsigned long t_systick3;
-
-//unsigned int next_time = 0;
 
 void loop()
 {
-
-    /*
-    if(millis() >= next_time)
+    if (millis() > loop_time_trigger)
     {
-      delay(100);
-      Serial.println(Serial.availableForWrite());
-    Serial.println();
-    Serial.print("bat read time=");
-    Serial.print(t_systick1);
-    Serial.println("µs");
-    Serial.print("switch read time=");
-    Serial.print(t_systick2);
-    Serial.println("µs");
-    Serial.print("wall sensor read time=");
-    Serial.print(t_systick3);
-    Serial.println("µs");
-
-    unsigned long _start = micros();
-    unsigned long timing_timing = micros() - _start;
-    Serial.print("timing timing =");
-    Serial.print(timing_timing);
-    Serial.println(" µs");
-    next_time = millis() + 2000;  // every 2 seconds
+        // this is where we will do all the controller calculations and updates
+        loop_time_trigger += LOOP_INTERVAL_MS;
+        Stopwatch sw;
+        // setLeftMotorPWM(100);
+        // setRightMotorPWM(100);
+        update_encoders(); // (50us) surprisingly quick.
+        sw.stop();
+        // Serial.print(millis());
+        // Serial.print(' ');
+        // Serial.print(robot_velocity);
+        // Serial.print(' ');
+        // Serial.print(0);  // placeholder for controller voltage
+        // Serial.print(' ');
+        // Serial.print(split);
+        // Serial.print(' ');
+        // Serial.print(sw.elapsed_time());
+        // Serial.println();
     }
-  */
-
     interpreter();
 }
