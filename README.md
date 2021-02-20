@@ -86,8 +86,8 @@ Examples:
 
     V0      Verbose off (numeric error codes)
     V1      Verbose on (text error codes)
-    E0      Echo input back (for humans with serial terminals)
-    E1      Don't echo input back (for machines, or for use with Arduino Serial monitor)
+    E1      Echo input back (for humans with serial terminals)
+    E0      Don't echo input back (for machines, or for use with Arduino Serial monitor)
 
 
 ### Low Level I/O Control Commands
