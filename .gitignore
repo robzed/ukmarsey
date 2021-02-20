@@ -8,5 +8,12 @@ for_reference_do_not_track/
 
 robot_config.h
 
+# These are for the Eclipse IDE for Arduino (Sloeber)
 /Release/
 /sloeber.ino.cpp
+.settings/
+
+# These are for VIM text editor
+*.swp
+*~
+
