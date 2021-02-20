@@ -1198,6 +1198,7 @@ void interpreter()
                     inputString[inputIndex] = 0; // zero terminate
                     parse_cmd();
                     inputIndex = 0;
+                    break;		// go back to loop() once we've processed one command to run other controllers. One command at a time only!
                 }
                 else
                 {
