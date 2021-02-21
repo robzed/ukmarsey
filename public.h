@@ -13,7 +13,6 @@ bool get_bool_param(int param_index);
 // provided by systick.cpp
 //
 void setupSystick();
-void print_bat();
 float get_BatteryVolts();
 int readFunctionSwitch();
 

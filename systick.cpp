@@ -290,8 +290,4 @@ ISR(TIMER2_COMPA_vect)
    */
 }
 
-void print_bat()
-{
-    Serial.println(get_BatteryVolts(), floating_decimal_places);
-    //Serial.println(F(" v"));
-}
+

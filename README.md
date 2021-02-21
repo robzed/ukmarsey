@@ -317,6 +317,8 @@ There are also 32 boolean ('bit') parameters. The first 16 are listed here. Curr
 | h | just prints 'OK' |
 | s | shows the state of the switches. Returns a single number. NOTE: the Button is '16', and overrides the 4 switches | 
 | b | shows the voltage of the battery. Example return '7.421' |
+| bi | Shows the voltage of the battery in millivolts. Example: '7421' |
+| bh | Shows the voltage of the battery in millivolts in hex format |
 | m | motor tests (see below) | 
 | x | Motor stop (no parameters, no return.) - and cancels any actions |
 

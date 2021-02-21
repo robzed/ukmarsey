@@ -996,6 +996,25 @@ void print_encoders_command()
 	}
 }
 
+void print_bat()
+{
+	float bat = get_BatteryVolts();
+	if(inputString[1] == 'i')
+	{
+		int bat_int = bat*1000;
+		Serial.println(bat_int);
+	}
+	else if(inputString[1] == 'h')
+	{
+		int bat_int = bat*1000;
+		Serial.println(bat_int, 16);
+	}
+	else
+	{
+		Serial.println(get_BatteryVolts(), floating_decimal_places);
+	}
+}
+
 #define SERIAL_IN_CAPTURE 0
 #if SERIAL_IN_CAPTURE
 char serial_capture_read_buff[256]; // circular buffer
