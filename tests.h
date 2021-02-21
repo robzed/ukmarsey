@@ -38,6 +38,11 @@
 #include "public.h"
 #include <Arduino.h>
 
+/***
+ * All the tests in this module are normally run via calls to this function
+ */
+void cmd_test_runner();
+
 // TODO: consider use of on-board switches to select type of test.
 
 /***

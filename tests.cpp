@@ -34,6 +34,14 @@
 
 #include "tests.h"
 
+void cmd_test_runner()
+{
+    int test = decode_input_value(1);
+    Serial.print(F("TEST: "));
+    Serial.println(test);
+}
+
+
 void test_fwd_feedforward(){
 
 };
