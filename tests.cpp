@@ -33,6 +33,7 @@
 */
 
 #include "tests.h"
+#include "public.h"
 
 void cmd_test_runner()
 {
@@ -41,6 +42,25 @@ void cmd_test_runner()
     Serial.println(test);
 }
 
+// ----------------- telemetry functions
+
+void log_controller_data()
+{
+    Serial.print(millis());
+    Serial.print(' ');
+    Serial.print(fwd_set_speed);
+    Serial.print(' ');
+    Serial.print(rot_set_speed);
+    Serial.print(' ');
+    Serial.print(robot_velocity);
+    Serial.print(' ');
+    Serial.print(robot_omega);
+    Serial.print(' ');
+    Serial.print(fwd_volts);
+    Serial.print(' ');
+    Serial.print(rot_volts); // placeholder for controller voltage
+    Serial.println();
+}
 
 void test_fwd_feedforward(){
 

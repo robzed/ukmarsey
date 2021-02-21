@@ -43,6 +43,11 @@
  */
 void cmd_test_runner();
 
+/***
+ * Canned telemetry logging functions
+ */
+void log_controller_data();
+
 // TODO: consider use of on-board switches to select type of test.
 
 /***
