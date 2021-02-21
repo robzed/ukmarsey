@@ -24,6 +24,8 @@ Loads into Arduino via serial lead from the Arduino IDE. You can issue commands 
 As well as directly commanding the robot over the serial port, it's designed to be controlled from a host CPU which can be anything 
 but we've been using it with the Raspberry Pi.
 
+There is some more information about development environments in [Code Development](Documentation/code_development.md).
+
 # Robot Configuration
 
 Even though the UKMarsBot is a standard design, there are several options:
@@ -446,7 +448,7 @@ There are several techniques possible - for instance avoid sending a long stream
 
 If you are changing the baud rate, care must be taken to choose a baud rate that both end can generate accurately. If the total error exceeds of both sides exceeds around 2 or 3% then you are likely to start getting byte errors. Ideally you want to be within 1%.
 
-One such baud rate table for the AVR on the Arduino Nano inclides: https://trolsoft.ru/en/uart-calc
+One such baud rate table for the AVR on the Arduino Nano includes: https://trolsoft.ru/en/uart-calc
 
 Remeber to add on the error rate of the other side as well - whehter that be a Rasberry Pi, USB-Serial converter, or other serial port. Sometimes you can get lucky. If they are both, say +3% of the target, then the baud rates will match. But a -2.5% on one end, and a +2.5% on the other end gives 5% error, and this will cause problems. (Although errors rates up to 5% would theoretically work before it meets an edge, the reality of sampling mechanisms, slew rate and other factors means that realistic error rates are well under half of this.)
 
