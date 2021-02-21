@@ -11,6 +11,7 @@ void interpreter();
 void init_stored_parameters();
 float get_float_param(int param_index);
 bool get_bool_param(int param_index);
+int decode_input_value(int index);
 
 //
 // provided by systick.cpp
