@@ -95,14 +95,6 @@ ISR(TIMER2_COMPA_vect, ISR_NOBLOCK)
     // upddate switch debounce if needed
 
     battery_voltage = raw_BatteryVolts_adcValue * (2.0 * 5.0 / 1024.0);
-    /***
-   * Speed control may now need to happen either in short sections here
-   * or at the top level of the code. A flag, set in one phase
-   * of systick could tell the higher level code that it is time to
-   * update the controllers. Or they could just use the millis()
-   * counter, or hey could get around to it as often as possible and
-   * make use of the elapsed time in the calculations
-   */
     start_sensor_cycle();
     // digitalWriteFast(LED_BUILTIN, 0);
 }
