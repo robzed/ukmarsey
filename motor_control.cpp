@@ -103,8 +103,8 @@ void update_motors()
     rot_controller.Compute();
     fwd_controller.Compute();
     // assume both motors behave the same
-    const float k_velocity_ff = (1.0 / 302.0);
-    const float k_bias_ff = (23.0 / 302.0);
+    const float k_velocity_ff = (1.0 / 280.0);
+    const float k_bias_ff = (23.0 / 280.0);
 
     float left_volts = 0;
     float right_volts = 0;
