@@ -89,7 +89,6 @@ void setup_systick()
 ISR(TIMER2_COMPA_vect, ISR_NOBLOCK)
 {
     digitalWriteFast(LED_BUILTIN, 1);
-    delayMicroseconds(20);
     update_encoders(); // 50us) surprisingly quick.
 
     // update system controllers
