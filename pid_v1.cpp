@@ -4,8 +4,8 @@
  * https://github.com/br3ttb/Arduino-PID-Library
  * This Library is licensed under the MIT License
  *
- * Modified P Harrison 2020
- **********************************************************************************************/
+ * Modified for fixed rate execution  - P Harrison 2020
+**********************************************************************************************/
 
 #if ARDUINO >= 100
 #include "Arduino.h"
@@ -30,7 +30,7 @@ PID::PID(float *Input, float *Output, float *Setpoint,
     PID::SetOutputLimits(0, 255); //default output limit corresponds to
                                   //the arduino pwm limits
 
-    SampleTime = 10; //default Controller Sample Time is 0.01 seconds
+    SampleTime = 0.002; //seconds
 
     PID::SetControllerDirection(ControllerDirection);
     PID::SetTunings(Kp, Ki, Kd, POn);
@@ -59,48 +59,41 @@ bool PID::Compute()
 {
     if (!inAuto)
         return false;
-    unsigned long now = millis();
-    unsigned long timeChange = (now - lastTime);
-    if (timeChange >= SampleTime)
-    {
-        /*Compute all the working error variables*/
-        float input = *myInput;
-        float error = *mySetpoint - input;
-        float dInput = (input - lastInput);
-        outputSum += (ki * error);
 
-        /*Add Proportional on Measurement, if P_ON_M is specified*/
-        if (!pOnE)
-            outputSum -= kp * dInput;
+    /*Compute all the working error variables*/
+    float input = *myInput;
+    float error = *mySetpoint - input;
+    float dInput = (input - lastInput);
+    outputSum += (ki * error);
 
-        if (outputSum > outMax)
-            outputSum = outMax;
-        else if (outputSum < outMin)
-            outputSum = outMin;
+    /*Add Proportional on Measurement, if P_ON_M is specified*/
+    if (!pOnE)
+        outputSum -= kp * dInput;
 
-        /*Add Proportional on Error, if P_ON_E is specified*/
-        float output;
-        if (pOnE)
-            output = kp * error;
-        else
-            output = 0;
+    if (outputSum > outMax)
+        outputSum = outMax;
+    else if (outputSum < outMin)
+        outputSum = outMin;
 
-        /*Compute Rest of PID Output*/
-        output += outputSum - kd * dInput;
-
-        if (output > outMax)
-            output = outMax;
-        else if (output < outMin)
-            output = outMin;
-        *myOutput = output;
-
-        /*Remember some variables for next time*/
-        lastInput = input;
-        lastTime = now;
-        return true;
-    }
+    /*Add Proportional on Error, if P_ON_E is specified*/
+    float output;
+    if (pOnE)
+        output = kp * error;
     else
-        return false;
+        output = 0;
+
+    /*Compute Rest of PID Output*/
+    output += outputSum - kd * dInput;
+
+    if (output > outMax)
+        output = outMax;
+    else if (output < outMin)
+        output = outMin;
+    *myOutput = output;
+
+    /*Remember some variables for next time*/
+    lastInput = input;
+    return true;
 }
 
 /* SetTunings(...)*************************************************************
@@ -120,10 +113,9 @@ void PID::SetTunings(float Kp, float Ki, float Kd, int POn)
     dispKi = Ki;
     dispKd = Kd;
 
-    float SampleTimeInSec = ((float)SampleTime) / 1000;
     kp = Kp;
-    ki = Ki * SampleTimeInSec;
-    kd = Kd / SampleTimeInSec;
+    ki = Ki * SampleTime;
+    kd = Kd / SampleTime;
 
     if (controllerDirection == REVERSE)
     {

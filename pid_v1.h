@@ -8,7 +8,7 @@
  * https://github.com/br3ttb/Arduino-PID-Library
  * This Library is licensed under the MIT License
  *
- * Modified P Harrison 2020
+ * Modified for fixed rate execution  - P Harrison 2020
  **********************************************************************************************/
 
 class PID
@@ -93,7 +93,7 @@ private:
     unsigned long lastTime;
     float outputSum, lastInput;
 
-    unsigned long SampleTime;
+    float SampleTime;
     float outMin, outMax;
     bool inAuto, pOnE;
 };
