@@ -40,6 +40,7 @@ void cmd_test_runner()
     int test = decode_input_value(1);
     Serial.print(F("TEST: "));
     Serial.println(test);
+    test_controllers();
 }
 
 // ----------------- telemetry functions
@@ -61,6 +62,31 @@ void log_controller_data()
     Serial.print(rot_volts); // placeholder for controller voltage
     Serial.println();
 }
+
+void test_controllers()
+{
+    Serial.println(F("Press the button when ready"));
+    wait_for_button_click();
+    delay(100);
+    uint32_t tick = millis() + 10;
+    while (not button_pressed())
+    {
+        if (millis() > tick)
+        {
+            tick += 10;
+            int ms = millis() % 1000;
+            // fwd_set_speed = 600 * sin(0.5*millis()/157.1);
+            fwd_set_speed = (ms > 500)?400:-400;
+            // fwd_set_speed = 400;
+            // rot_set_speed = 1080 * sin(1 * millis() / 157.1);
+            // rot_set_speed = 600;
+            // fwd_set_speed = 0;
+            log_controller_data();
+        }
+    }
+    fwd_set_speed = 0;
+    rot_set_speed = 0;
+};
 
 void test_fwd_feedforward(){
 

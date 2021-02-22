@@ -48,6 +48,11 @@ void cmd_test_runner();
  */
 void log_controller_data();
 
+/*** @brief Just a hacky controller test.
+ * Anything could happen
+ */
+void test_controllers();
+
 // TODO: consider use of on-board switches to select type of test.
 
 /***
