@@ -57,6 +57,28 @@ float rot_volts;
 PID fwd_controller(&robot_velocity, &fwd_volts, &fwd_set_speed, fwd_kp, fwd_ki, fwd_kd);
 PID rot_controller(&robot_omega, &rot_volts, &rot_set_speed, rot_kp, rot_ki, rot_kd);
 
+enum { PWM_488_HZ, PWM_3900_HZ, PWM_31_KHZ };
+void pwmSetup(int frequency = PWM_488_HZ) {
+  switch (frequency) {
+    case PWM_31_KHZ:
+      // Divide by 1. frequency = 31.25 kHz;
+      bitClear(TCCR1B, CS11);
+      bitSet(TCCR1B, CS10);
+      break;
+    case PWM_3900_HZ:
+      // Divide by 8. frequency = 3.91 kHz;
+      bitSet(TCCR1B, CS11);
+      bitClear(TCCR1B, CS10);
+      break;
+    case PWM_488_HZ:
+    default:
+      // Divide by 64. frequency = 488Hz;
+      bitSet(TCCR1B, CS11);
+      bitSet(TCCR1B, CS10);
+      break;
+  }
+}
+
 void motorSetup()
 {
     pinMode(MOTOR_LEFT_DIR, OUTPUT);
@@ -67,6 +89,8 @@ void motorSetup()
     digitalWriteFast(MOTOR_LEFT_DIR, 0);
     digitalWriteFast(MOTOR_RIGHT_PWM, 0);
     digitalWriteFast(MOTOR_RIGHT_DIR, 0);
+    pwmSetup(PWM_31_KHZ);
+
     setMotorVolts(0, 0);
     fwd_controller.SetOutputLimits(-6.0, 6.0);
     fwd_controller.SetMode(AUTOMATIC); // turns on the controller. Set to manual for off.
