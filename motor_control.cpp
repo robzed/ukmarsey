@@ -115,8 +115,8 @@ void update_motors()
     left_volts -= rot_volts;
     right_volts += rot_volts;
 
-    float fwd_ff = robot_velocity * k_velocity_ff;
-    float rot_ff = robot_omega * (WHEEL_SEPARATION / (2 * 57.29)) * k_velocity_ff;
+    float fwd_ff = fwd_set_speed * k_velocity_ff;
+    float rot_ff = rot_set_speed * (WHEEL_SEPARATION / (2 * 57.29)) * k_velocity_ff;
     // rot_ff = 0;
 
     left_volts += fwd_ff;
