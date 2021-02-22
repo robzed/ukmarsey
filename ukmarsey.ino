@@ -32,11 +32,11 @@
   SOFTWARE.
 */
 
-#include <Arduino.h>
 #include "public.h"
 #include "stopwatch.h"
-
-uint32_t loop_time_trigger;
+#include <Arduino.h>
+const int REPORTING_INTERVAL = 10;
+uint32_t report_time_trigger;
 uint8_t PoR_status = 0;
 void setup()
 {
@@ -45,36 +45,26 @@ void setup()
     pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(115200);
     Serial.println(F("Hello from ukmarsey"));
-    setupSystick();
-    //wall_sensors_setup();
+    setup_systick();
     sensors_control_setup();
     setup_encoders();
     motorSetup();
     init_stored_parameters();
-    loop_time_trigger += LOOP_INTERVAL_MS;
+    report_time_trigger += REPORTING_INTERVAL;
 }
 
 void loop()
 {
-    if (millis() > loop_time_trigger)
+    // handy for simple continuous tests
+    if (millis() > report_time_trigger)
     {
-        // this is where we will do all the controller calculations and updates
-        loop_time_trigger += LOOP_INTERVAL_MS;
-        Stopwatch sw;
-        // setLeftMotorPWM(100);
-        // setRightMotorPWM(100);
-        update_encoders(); // (50us) surprisingly quick.
-        sw.stop();
+        // report_time_trigger += REPORTING_INTERVAL;
+        // setMotorVolts(1.4, 1.4);
         // Serial.print(millis());
         // Serial.print(' ');
         // Serial.print(robot_velocity);
-        // Serial.print(' ');
-        // Serial.print(0);  // placeholder for controller voltage
-        // Serial.print(' ');
-        // Serial.print(split);
-        // Serial.print(' ');
-        // Serial.print(sw.elapsed_time());
         // Serial.println();
     }
+
     interpreter();
 }

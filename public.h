@@ -3,6 +3,8 @@
 
 #include "robot_config.h"
 #include <Arduino.h>
+#include <wiring_private.h>
+
 // provided by interpreter.cpp
 void interpreter();
 void init_stored_parameters();
@@ -11,13 +13,13 @@ bool get_bool_param(int param_index);
 
 //
 // provided by systick.cpp
+void setup_systick();
+
 //
-void setupSystick();
-float get_BatteryVolts();
-int readFunctionSwitch();
 
 // ADC channels
 extern volatile int raw_BatteryVolts_adcValue;
+extern volatile float battery_voltage;
 extern volatile int Switch_ADC_value;
 
 extern volatile int gSensorA0_dark;
@@ -34,14 +36,9 @@ extern volatile int gSensorA3_light;
 extern volatile int gSensorA4_light;
 extern volatile int gSensorA5_light;
 
-//
-// provided by wall_sensors.cpp
-//
-//void wall_sensors_setup();
-//void print_wall_sensors();
-//void updateWallSensor();  // usually called from sysTick interrupt
-
 // provided by sensors_control.cpp
+int readFunctionSwitch();
+void start_sensor_cycle();
 void sensors_control_setup();
 void print_sensors_control(char mode);
 extern char emitter_on;

@@ -988,31 +988,31 @@ void print_sensors_control_command()
 
 void print_encoders_command()
 {
-	// translate into argument
-	// If no second parameters this will be 0.
-	if(print_encoders(inputString[1]) == false)
-	{
-		interpreter_error(T_UNEXPECTED_TOKEN);
-	}
+    // translate into argument
+    // If no second parameters this will be 0.
+    if (print_encoders(inputString[1]) == false)
+    {
+        interpreter_error(T_UNEXPECTED_TOKEN);
+    }
 }
 
 void print_bat()
 {
-	float bat = get_BatteryVolts();
-	if(inputString[1] == 'i')
-	{
-		int bat_int = bat*1000;
-		Serial.println(bat_int);
-	}
-	else if(inputString[1] == 'h')
-	{
-		int bat_int = bat*1000;
-		Serial.println(bat_int, 16);
-	}
-	else
-	{
-		Serial.println(get_BatteryVolts(), floating_decimal_places);
-	}
+    float bat = battery_voltage;
+    if (inputString[1] == 'i')
+    {
+        int bat_int = bat * 1000;
+        Serial.println(bat_int);
+    }
+    else if (inputString[1] == 'h')
+    {
+        int bat_int = bat * 1000;
+        Serial.println(bat_int, 16);
+    }
+    else
+    {
+        Serial.println(battery_voltage, floating_decimal_places);
+    }
 }
 
 #define SERIAL_IN_CAPTURE 0
@@ -1217,7 +1217,7 @@ void interpreter()
                     inputString[inputIndex] = 0; // zero terminate
                     parse_cmd();
                     inputIndex = 0;
-                    break;		// go back to loop() once we've processed one command to run other controllers. One command at a time only!
+                    break; // go back to loop() once we've processed one command to run other controllers. One command at a time only!
                 }
                 else
                 {
