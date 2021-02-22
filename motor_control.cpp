@@ -42,14 +42,14 @@
  */
 
 float fwd_kp = 0.010;
-float fwd_ki = 0.001;
+float fwd_ki = 1.00;
 float fwd_kd = 0.000;
 float fwd_set_speed;
 float fwd_volts;
 
 
 float rot_kp = 0.010;
-float rot_ki = 0.001;
+float rot_ki = 1.00;
 float rot_kd = 0.000;
 float rot_set_speed;
 float rot_volts;
