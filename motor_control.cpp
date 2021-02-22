@@ -98,27 +98,7 @@ void motorSetup()
     rot_controller.SetMode(AUTOMATIC); // turns on the controller. Set to manual for off.
 }
 
-/*
-
-  //   Combine the components
-  //  rotControllerVolts -= ROTATION_BIAS_VOLTS;
-  leftMotorVolts = 0;
-  leftMotorVolts += fwdControllerVolts - rotControllerVolts;
-  rightMotorVolts = 0;
-  rightMotorVolts += fwdControllerVolts + rotControllerVolts;
-
-  if (fwdFFControlEnabled) {
-    leftMotorVolts += fwdFeedForward;   //- rotFeedForward;
-    rightMotorVolts += fwdFeedForward;  // + rotFeedForward;
-  }
-  if (rotFFControlEnabled) {
-    leftMotorVolts -= rotFeedForward;
-    rightMotorVolts += rotFeedForward;
-  }
-
-
-*/
-void motorUpdate()
+void update_motors()
 {
     rot_controller.Compute();
     fwd_controller.Compute();
