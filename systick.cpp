@@ -90,7 +90,7 @@ ISR(TIMER2_COMPA_vect, ISR_NOBLOCK)
 {
     // digitalWriteFast(LED_BUILTIN, 1);
     update_encoders(); // 50us) surprisingly quick.
-
+    // calaculte values, errors and flags from sensor
     // update system controllers
     // upddate switch debounce if needed
 
