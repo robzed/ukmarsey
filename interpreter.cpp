@@ -998,7 +998,7 @@ void print_encoders_command()
 
 void print_bat()
 {
-    float bat = get_BatteryVolts();
+    float bat = battery_voltage;
     if (inputString[1] == 'i')
     {
         int bat_int = bat * 1000;
@@ -1011,7 +1011,7 @@ void print_bat()
     }
     else
     {
-        Serial.println(get_BatteryVolts(), floating_decimal_places);
+        Serial.println(battery_voltage, floating_decimal_places);
     }
 }
 

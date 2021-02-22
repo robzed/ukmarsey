@@ -91,9 +91,12 @@ ISR(TIMER2_COMPA_vect, ISR_NOBLOCK)
     digitalWriteFast(LED_BUILTIN, 1);
     delayMicroseconds(20);
     update_encoders(); // 50us) surprisingly quick.
-                       // update system controllers
-                       // upddate switch debounce if needed
-                       /***
+
+    // update system controllers
+    // upddate switch debounce if needed
+
+    battery_voltage = raw_BatteryVolts_adcValue * (2.0 * 5.0 / 1024.0);
+    /***
    * Speed control may now need to happen either in short sections here
    * or at the top level of the code. A flag, set in one phase
    * of systick could tell the higher level code that it is time to

@@ -60,7 +60,7 @@ volatile int gSensorA5_light;
  */
 
 volatile int raw_BatteryVolts_adcValue;
-volatile float raw_BatteryVolts;
+volatile float battery_voltage;
 volatile int Switch_ADC_value;
 const float batteryDividerRatio = 2.0f;
 
@@ -128,18 +128,6 @@ static int get_adc_result()
 
     // combine the two bytes
     return (high << 8) | low;
-}
-
-void updateBatteryVolts()
-{
-    raw_BatteryVolts_adcValue = analogRead(BATTERY_VOLTS);
-    raw_BatteryVolts = raw_BatteryVolts_adcValue * (5.0f * batteryDividerRatio / 1023.0f);
-}
-
-float get_BatteryVolts()
-{
-    return raw_BatteryVolts;
-    //return raw_BatteryVolts_adcValue * (5.0f * batteryDividerRatio / 1023.0f);
 }
 
 /** @brief  Read the raw switch reading
@@ -332,8 +320,6 @@ ISR(ADC_vect)
     case 1:
         raw_BatteryVolts_adcValue = get_adc_result();
         start_adc(FUNCTION_PIN);
-        // TODO find a magic voltage divider ratio that makes this a single multiply for millivolts
-        raw_BatteryVolts = (raw_BatteryVolts_adcValue * 2 * 5) / 1024;
         break;
     case 2:
         Switch_ADC_value = get_adc_result();

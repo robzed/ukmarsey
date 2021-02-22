@@ -14,10 +14,12 @@ bool get_bool_param(int param_index);
 //
 // provided by systick.cpp
 void setup_systick();
+
 //
 
 // ADC channels
 extern volatile int raw_BatteryVolts_adcValue;
+extern volatile float battery_voltage;
 extern volatile int Switch_ADC_value;
 
 extern volatile int gSensorA0_dark;
@@ -35,7 +37,6 @@ extern volatile int gSensorA4_light;
 extern volatile int gSensorA5_light;
 
 // provided by sensors_control.cpp
-float get_BatteryVolts();
 int readFunctionSwitch();
 void start_sensor_cycle();
 void sensors_control_setup();
