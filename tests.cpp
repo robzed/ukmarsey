@@ -31,9 +31,9 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-
 #include "tests.h"
 #include "public.h"
+#include "switches.h"
 
 void cmd_test_runner()
 {

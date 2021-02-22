@@ -1,5 +1,5 @@
 /*
- * ukmarsey main file
+ * Switches. Read and test the on-board function switches and button
 
    ukmarsey is a machine and human command-based Robot Low-level I/O platform initially targetting UKMARSBot
    For more information see:
@@ -32,53 +32,14 @@
   SOFTWARE.
 */
 
-#include "public.h"
-#include "stopwatch.h"
-#include <Arduino.h>
-const int REPORTING_INTERVAL = 10;
-uint32_t report_time_trigger;
-uint8_t PoR_status = 0;
-void setup()
-{
-    PoR_status = MCUSR; // is this erased by bootloader?
-    MCUSR = 0;
-    pinMode(LED_BUILTIN, OUTPUT);
-    Serial.begin(115200);
-    Serial.println(F("Hello from ukmarsey"));
-    setup_systick();
-    sensors_control_setup();
-    setup_encoders();
-    motorSetup();
-    init_stored_parameters();
-    report_time_trigger += REPORTING_INTERVAL;
-}
+#ifndef SWITCHES_H
+#define SWITCHES_H
 
-void loop()
-{
-    // fwd_set_speed = 500.0;
-    // rot_set_speed = 0;
-    // handy for simple continuous tests
-    // if (millis() > report_time_trigger)
-    // {
-    //     report_time_trigger += REPORTING_INTERVAL;
-    //     Stopwatch sw;
-    //     Serial.print(millis());
-    //     Serial.print(' ');
-    //     Serial.print(fwd_set_speed);
-    //     Serial.print(' ');
-    //     Serial.print(rot_set_speed);
-    //     Serial.print(' ');
-    //     Serial.print(robot_velocity);
-    //     Serial.print(' ');
-    //     Serial.print(robot_omega);
-    //     Serial.print(' ');
-    //     Serial.print(fwd_volts);
-    //     Serial.print(' ');
-    //     Serial.print(rot_volts); // placeholder for controller voltage
-    //     Serial.print(' ');
-    //     Serial.print(sw.elapsed_time());
-    //     Serial.println();
-    // }
+int readFunctionSwitch();
 
-    interpreter();
-}
+bool button_pressed();
+void wait_for_button_press();
+void wait_for_button_release();
+void wait_for_button_click();
+
+#endif

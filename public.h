@@ -2,6 +2,8 @@
 #define PUBLIC_H
 
 #include "pid_v1.h"
+#include "switches.h"
+#include "tests.h"
 #include "robot_config.h"
 #include <Arduino.h>
 #include <wiring_private.h>
@@ -16,8 +18,6 @@ int decode_input_value(int index);
 //
 // provided by systick.cpp
 void setup_systick();
-
-//
 
 // ADC channels
 extern volatile int raw_BatteryVolts_adcValue;
@@ -39,7 +39,6 @@ extern volatile int gSensorA4_light;
 extern volatile int gSensorA5_light;
 
 // provided by sensors_control.cpp
-int readFunctionSwitch();
 void start_sensor_cycle();
 void sensors_control_setup();
 void print_sensors_control(char mode);

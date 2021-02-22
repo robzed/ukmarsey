@@ -34,11 +34,11 @@
   SOFTWARE.
 */
 #include "digitalWriteFast.h"
-#include "tests.h"
 #include "public.h"
+#include "switches.h"
+#include "tests.h"
 #include <Arduino.h>
 #include <EEPROM.h>
-
 /*
  * Small command line interpreter
  */
