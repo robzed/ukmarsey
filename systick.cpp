@@ -88,7 +88,7 @@ void setup_systick()
  */
 ISR(TIMER2_COMPA_vect, ISR_NOBLOCK)
 {
-    digitalWriteFast(LED_BUILTIN, 1);
+    // digitalWriteFast(LED_BUILTIN, 1);
     update_encoders(); // 50us) surprisingly quick.
 
     // update system controllers
@@ -104,6 +104,5 @@ ISR(TIMER2_COMPA_vect, ISR_NOBLOCK)
    * make use of the elapsed time in the calculations
    */
     start_sensor_cycle();
-
-    digitalWriteFast(LED_BUILTIN, 0);
+    // digitalWriteFast(LED_BUILTIN, 0);
 }

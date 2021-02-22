@@ -309,7 +309,7 @@ void print_sensors_control(char mode)
  */
 ISR(ADC_vect)
 {
-    digitalWriteFast(13, 1);
+    // digitalWriteFast(13, 1);
     switch (sensor_phase)
     {
     case 0:
@@ -390,5 +390,5 @@ ISR(ADC_vect)
         break;
     }
     sensor_phase++;
-    digitalWriteFast(13, 0);
+    // digitalWriteFast(13, 0);
 }
