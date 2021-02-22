@@ -162,7 +162,7 @@ ISR(INT1_vect)
 // command 'r'
 void print_encoder_setup()
 {
-	const char comma = ',';
+    const char comma = ',';
 
     Serial.print(MM_PER_COUNT, 5);
     Serial.print(comma);
@@ -184,35 +184,34 @@ void zero_encoders()
 // command 'e'
 bool print_encoders(char select)
 {
-	const char comma = ',';
+    const char comma = ',';
 
-	if(select == 'a' or select == 0)
-	{
-		// the encoder sum is a measure of forward travel
-		Serial.print(encoder_right_total + encoder_left_total);
-		Serial.print(comma);
-		Serial.print(robot_distance);
-		Serial.print(comma);
-		Serial.print(encoder_right_total - encoder_left_total);
-		Serial.print(comma);
-		Serial.println(robot_angle);
-	}
-	else if(select == 'r')
-	{
-		Serial.print(encoder_right_total + encoder_left_total);
-		Serial.print(comma);
-		Serial.println(encoder_right_total - encoder_left_total);
-	}
-	else if(select == 'u')
-	{
-		Serial.print(robot_distance);
-		Serial.print(comma);
-		Serial.println(robot_angle);
-	}
-	else
-	{
-		return false;
-	}
-	return true;
+    if (select == 'a' or select == 0)
+    {
+        // the encoder sum is a measure of forward travel
+        Serial.print(encoder_right_total + encoder_left_total);
+        Serial.print(comma);
+        Serial.print(robot_distance);
+        Serial.print(comma);
+        Serial.print(encoder_right_total - encoder_left_total);
+        Serial.print(comma);
+        Serial.println(robot_angle);
+    }
+    else if (select == 'r')
+    {
+        Serial.print(encoder_right_total + encoder_left_total);
+        Serial.print(comma);
+        Serial.println(encoder_right_total - encoder_left_total);
+    }
+    else if (select == 'u')
+    {
+        Serial.print(robot_distance);
+        Serial.print(comma);
+        Serial.println(robot_angle);
+    }
+    else
+    {
+        return false;
+    }
+    return true;
 }
-
