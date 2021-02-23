@@ -62,7 +62,6 @@ void test_controllers();
 void test_fwd_feedforward();
 void test_rot_feedforward();
 
-
 /***
  * Command simple constant speed forward and rotation motion while adjusting
  * the PID controller constants. Data is streamed back to the host for
@@ -80,6 +79,5 @@ void test_rot_speed_control_constants();
  */
 void test_fwd_motion();
 void test_rot_motion();
-
 
 #endif

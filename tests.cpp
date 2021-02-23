@@ -33,6 +33,7 @@
 */
 #include "tests.h"
 #include "public.h"
+#include "stopwatch.h"
 #include "switches.h"
 
 void cmd_test_runner()
@@ -63,20 +64,41 @@ void log_controller_data()
     Serial.println();
 }
 
+/***
+ * Illustrates how to setup and run a test.
+ * The main user button can be used to start and stop the test
+ * It will also run for only a set time.
+ * The function switches can be used to determine the test action.
+ * Most tests need not be this complicated.
+ */
 void test_controllers()
 {
+    Serial.print(F("CONTROLLER TEST - "));
+    bool was_using_ff = flag_controllers_use_ff;
+    if (readFunctionSwitch() & 0x01)
+    {
+        flag_controllers_use_ff = true;
+        Serial.println(F("WITH FF"));
+    }
+    else
+    {
+        flag_controllers_use_ff = false;
+        Serial.println(F("NO FF"));
+    }
     Serial.println(F("Press the button when ready"));
     wait_for_button_click();
     delay(100);
     uint32_t tick = millis() + 10;
-    while (not button_pressed())
+    Stopwatch sw;
+    uint32_t start_time = millis();
+    while (not button_pressed() && sw.split() < (5 * ONE_SECOND))
     {
         if (millis() > tick)
         {
             tick += 10;
             int ms = millis() % 1000;
             // fwd_set_speed = 600 * sin(0.5*millis()/157.1);
-            fwd_set_speed = (ms > 500)?400:-400;
+            fwd_set_speed = (ms > 500) ? 400 : -400;
             // fwd_set_speed = 400;
             // rot_set_speed = 1080 * sin(1 * millis() / 157.1);
             // rot_set_speed = 600;
@@ -86,6 +108,7 @@ void test_controllers()
     }
     fwd_set_speed = 0;
     rot_set_speed = 0;
+    flag_controllers_use_ff = was_using_ff;
 };
 
 void test_fwd_feedforward(){
