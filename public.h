@@ -2,9 +2,9 @@
 #define PUBLIC_H
 
 #include "pid_v1.h"
+#include "robot_config.h"
 #include "switches.h"
 #include "tests.h"
-#include "robot_config.h"
 #include <Arduino.h>
 #include <wiring_private.h>
 
@@ -74,6 +74,8 @@ extern float rot_kd;
 extern float rot_set_speed;
 extern float rot_volts;
 extern PID rot_controller;
+
+extern bool flag_controllers_use_ff;
 
 void setMotorVolts(float left, float right);
 void setRightMotorVolts(float volts);
