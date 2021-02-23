@@ -35,9 +35,10 @@
 */
 #include "digitalWriteFast.h"
 #include "public.h"
+#include "switches.h"
+#include "tests.h"
 #include <Arduino.h>
 #include <EEPROM.h>
-
 /*
  * Small command line interpreter
  */
@@ -1142,7 +1143,7 @@ const PROGMEM fptr PROGMEM cmd2[] =
         not_implemented,                    // 'n'
         not_implemented,                    // 'o'
         not_implemented,                    // 'p'
-        not_implemented,                    // 'q'
+        cmd_test_runner,                    // 'q'
         print_encoder_setup,                // 'r'
         print_switches,                     // 's'
         not_implemented,                    // 't'

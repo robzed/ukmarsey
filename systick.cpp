@@ -89,12 +89,14 @@ void setup_systick()
 ISR(TIMER2_COMPA_vect, ISR_NOBLOCK)
 {
     // digitalWriteFast(LED_BUILTIN, 1);
-    update_encoders(); // 50us) surprisingly quick.
-    // calaculte values, errors and flags from sensor
+    battery_voltage = raw_BatteryVolts_adcValue * (2.0 * 5.0 / 1024.0);
+    update_encoders(); //
+    // calculate values, errors and flags from sensor
     // update system controllers
+    update_motors();
     // upddate switch debounce if needed
 
-    battery_voltage = raw_BatteryVolts_adcValue * (2.0 * 5.0 / 1024.0);
-    start_sensor_cycle();
     // digitalWriteFast(LED_BUILTIN, 0);
+    start_sensor_cycle();
+    // NOTE: no code should follow this line;
 }

@@ -1,7 +1,10 @@
 #ifndef PUBLIC_H
 #define PUBLIC_H
 
+#include "pid_v1.h"
 #include "robot_config.h"
+#include "switches.h"
+#include "tests.h"
 #include <Arduino.h>
 #include <wiring_private.h>
 
@@ -10,12 +13,11 @@ void interpreter();
 void init_stored_parameters();
 float get_float_param(int param_index);
 bool get_bool_param(int param_index);
+int decode_input_value(int index);
 
 //
 // provided by systick.cpp
 void setup_systick();
-
-//
 
 // ADC channels
 extern volatile int raw_BatteryVolts_adcValue;
@@ -37,7 +39,6 @@ extern volatile int gSensorA4_light;
 extern volatile int gSensorA5_light;
 
 // provided by sensors_control.cpp
-int readFunctionSwitch();
 void start_sensor_cycle();
 void sensors_control_setup();
 void print_sensors_control(char mode);
@@ -50,8 +51,8 @@ void zero_encoders();
 void update_encoders();
 bool print_encoders(char select);
 
-extern double robot_velocity;
-extern double robot_omega;
+extern float robot_velocity;
+extern float robot_omega;
 
 extern float robot_distance;
 extern float robot_angle;
@@ -60,12 +61,29 @@ extern int32_t encoder_left_total;
 extern int32_t encoder_right_total;
 
 // provided by motor_control.cpp
+extern float fwd_kp;
+extern float fwd_ki;
+extern float fwd_kd;
+extern float fwd_set_speed;
+extern float fwd_volts;
+extern PID fwd_controller;
+
+extern float rot_kp;
+extern float rot_ki;
+extern float rot_kd;
+extern float rot_set_speed;
+extern float rot_volts;
+extern PID rot_controller;
+
+extern bool flag_controllers_use_ff;
+
 void setMotorVolts(float left, float right);
 void setRightMotorVolts(float volts);
 void setLeftMotorVolts(float volts);
 void setLeftMotorPWM(int pwm);
 void setRightMotorPWM(int pwm);
 void motorSetup();
+void update_motors();
 
 // internal use
 #define MEASURE_TIMING 0

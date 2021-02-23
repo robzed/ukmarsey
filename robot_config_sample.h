@@ -59,6 +59,6 @@ const float DEG_PER_COUNT = (360.0 * MM_PER_COUNT) / (PI * WHEEL_SEPARATION);
 // using voltage based control.
 const float MAX_MOTOR_VOLTS = 6.0f;
 
-const float LOOP_FREQUENCY = 500.0; //Hz
+const float LOOP_FREQUENCY = 500.0;                //Hz
 const float LOOP_INTERVAL = 1.0f / LOOP_FREQUENCY; //seconds
 #endif

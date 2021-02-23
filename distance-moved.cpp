@@ -57,9 +57,8 @@ int32_t encoder_right_total; // counts
 float robot_distance; // mm
 float robot_angle;    // degrees
 
-// PID controller expects doubles. Arduino has double defined as float anyway
-double robot_velocity; // mm/s
-double robot_omega;    // deg/s
+float robot_velocity; // mm/s
+float robot_omega;    // deg/s
 
 /***
  * Local variables
@@ -121,13 +120,15 @@ void update_encoders()
 
     encoder_right_total += right_count;
     encoder_left_total += left_count;
+    // calculate and low pass filter the speeds
+    //TODO: how does the filtering affect the controller?
+    float velocity = LOOP_FREQUENCY * MM_PER_COUNT * (right_count + left_count);
+    robot_velocity += 0.5 * (velocity - robot_velocity);
 
-    int encoder_sum = right_count + left_count;
-    robot_velocity = LOOP_FREQUENCY * MM_PER_COUNT * encoder_sum;
+    float omega = LOOP_FREQUENCY * DEG_PER_COUNT * (right_count - left_count);
+    robot_omega += 0.5 * (omega - robot_omega);
+
     robot_distance = MM_PER_COUNT * (encoder_right_total + encoder_left_total);
-
-    int encoder_diff = right_count - left_count;
-    robot_omega = LOOP_FREQUENCY * DEG_PER_COUNT * encoder_diff;
     robot_angle = DEG_PER_COUNT * (encoder_right_total - encoder_left_total);
 }
 

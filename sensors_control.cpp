@@ -141,28 +141,6 @@ void updateFunctionSwitch()
     Switch_ADC_value = analogRead(FUNCTION_PIN);
 }
 
-/** @brief  Convert the switch ADC reading into a switch reading.
- *  @return void
- */
-int readFunctionSwitch()
-{
-    const int adcReading[] = {660, 647, 630, 614, 590, 570, 545, 522, 461,
-                              429, 385, 343, 271, 212, 128, 44, 0};
-
-    if (Switch_ADC_value > 1000)
-    {
-        return 16;
-    }
-    for (int i = 0; i < 16; i++)
-    {
-        if (Switch_ADC_value > (adcReading[i] + adcReading[i + 1]) / 2)
-        {
-            return i;
-        }
-    }
-    return 15; // should never get here... but if we do show 15
-}
-
 char emitter_on = 1;
 
 void sensors_control_setup()
