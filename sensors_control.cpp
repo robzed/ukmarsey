@@ -141,8 +141,6 @@ void updateFunctionSwitch()
     Switch_ADC_value = analogRead(FUNCTION_PIN);
 }
 
-
-
 char emitter_on = 1;
 
 void sensors_control_setup()
