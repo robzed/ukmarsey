@@ -1,5 +1,5 @@
 /*
- * ukmarsey main file
+ * Tests. Various test functions for demonstration of facilities, tuning and development.
 
    ukmarsey is a machine and human command-based Robot Low-level I/O platform initially targetting UKMARSBot
    For more information see:
@@ -32,53 +32,52 @@
   SOFTWARE.
 */
 
+#ifndef TESTS_H
+#define TESTS_H
+
 #include "public.h"
-#include "stopwatch.h"
 #include <Arduino.h>
-const int REPORTING_INTERVAL = 10;
-uint32_t report_time_trigger;
-uint8_t PoR_status = 0;
-void setup()
-{
-    PoR_status = MCUSR; // is this erased by bootloader?
-    MCUSR = 0;
-    pinMode(LED_BUILTIN, OUTPUT);
-    Serial.begin(115200);
-    Serial.println(F("Hello from ukmarsey"));
-    setup_systick();
-    sensors_control_setup();
-    setup_encoders();
-    motorSetup();
-    init_stored_parameters();
-    report_time_trigger += REPORTING_INTERVAL;
-}
 
-void loop()
-{
-    // fwd_set_speed = 500.0;
-    // rot_set_speed = 0;
-    // handy for simple continuous tests
-    // if (millis() > report_time_trigger)
-    // {
-    //     report_time_trigger += REPORTING_INTERVAL;
-    //     Stopwatch sw;
-    //     Serial.print(millis());
-    //     Serial.print(' ');
-    //     Serial.print(fwd_set_speed);
-    //     Serial.print(' ');
-    //     Serial.print(rot_set_speed);
-    //     Serial.print(' ');
-    //     Serial.print(robot_velocity);
-    //     Serial.print(' ');
-    //     Serial.print(robot_omega);
-    //     Serial.print(' ');
-    //     Serial.print(fwd_volts);
-    //     Serial.print(' ');
-    //     Serial.print(rot_volts); // placeholder for controller voltage
-    //     Serial.print(' ');
-    //     Serial.print(sw.elapsed_time());
-    //     Serial.println();
-    // }
+/***
+ * All the tests in this module are normally run via calls to this function
+ */
+void cmd_test_runner();
 
-    interpreter();
-}
+/***
+ * Canned telemetry logging functions
+ */
+void log_controller_data();
+
+/*** @brief Just a hacky controller test.
+ * Anything could happen
+ */
+void test_controllers();
+
+// TODO: consider use of on-board switches to select type of test.
+
+/***
+ * Fixed voltages are applied to the motors and the robot speed is recorded
+ * Plot speed vs voltage to calculate the feedforward constants for forward motion.
+ */
+void test_fwd_feedforward();
+void test_rot_feedforward();
+
+/***
+ * Command simple constant speed forward and rotation motion while adjusting
+ * the PID controller constants. Data is streamed back to the host for
+ * analysis
+ */
+void test_fwd_speed_control_constants();
+void test_rot_speed_control_constants();
+
+/***
+ * Complex speed profiles are commanded of the robot and telemetry streamed
+ * back to the host for analysis.
+ * Feedback and feedforward control are applied so that the robot response to
+ * motion commands can be fine tuned. Step, sinusoidal and triangular profiles
+ * can be used along with constant velocity.
+ */
+void test_fwd_motion();
+void test_rot_motion();
+
+#endif

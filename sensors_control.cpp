@@ -54,14 +54,93 @@ volatile int gSensorA2_light;
 volatile int gSensorA3_light;
 volatile int gSensorA4_light;
 volatile int gSensorA5_light;
+
+/***
+ * Global variables
+ */
+
+volatile int raw_BatteryVolts_adcValue;
+volatile float battery_voltage;
+volatile int Switch_ADC_value;
+const float batteryDividerRatio = 2.0f;
+
+/** @brief change the ADC prescaler to give a suitable conversion rate
+ *
+ * The default for the Arduino is to give a slow ADC clock for maximum
+ * SNR in the results. That typically beans a prescale value of 128
+ * for the 16MHz ATMEGA328P running at 16MHz. Conversions then take more
+ * than 100us to complete. In this application, we want to be able to
+ * perform about 16 conversions in around 500us. To do that the prescaler
+ * is reduced to a value of 32. This gives an ADC clock speed of
+ * 500kHz and a single conversion in around 26us. SNR is still pretty good
+ * at these speeds:
+ * http://www.openmusiclabs.com/learning/digital/atmega-adc/
+ */
 void analogueSetup()
 {
     // increase speed of ADC conversions to 28us each
-    // by changing the clock prescaler from 128 to 16
-    bitClear(ADCSRA, ADPS0);
-    bitClear(ADCSRA, ADPS1);
+    // by changing the clock prescaler from 128 to 32
+    // to give a 500kHz clock
     bitSet(ADCSRA, ADPS2);
+    bitClear(ADCSRA, ADPS1);
+    bitSet(ADCSRA, ADPS0);
 }
+
+/***
+ * Locals
+*/
+
+/***
+ * NOTE: Manual analogue conversions
+ * All eight available ADC channels are aatomatically converted
+ * by the sensor interrupt. Attempting to performa a manual ADC
+ * conversion with the Arduino AnalogueIn() function will disrupt
+ * that process so avoid doing that.
+ */
+
+static const uint8_t ADC_REF = DEFAULT;
+
+static void start_adc(uint8_t pin)
+{
+
+    if (pin >= 14)
+        pin -= 14; // allow for channel or pin numbers
+                   // set the analog reference (high two bits of ADMUX) and select the
+                   // channel (low 4 bits).  Result is right-adjusted
+#if defined(ADMUX)
+    ADMUX = (ADC_REF << 6) | (pin & 0x07);
+#endif
+    // start the conversion
+    sbi(ADCSRA, ADSC);
+}
+
+static int get_adc_result()
+{
+    // ADSC is cleared when the conversion finishes
+    // while (bit_is_set(ADCSRA, ADSC));
+
+    // we have to read ADCL first; doing so locks both ADCL
+    // and ADCH until ADCH is read.  reading ADCL second would
+    // cause the results of each conversion to be discarded,
+    // as ADCL and ADCH would be locked when it completed.
+    uint8_t low = ADCL;
+    uint8_t high = ADCH;
+
+    // combine the two bytes
+    return (high << 8) | low;
+}
+
+/** @brief  Read the raw switch reading
+ *  @return void
+ */
+void updateFunctionSwitch()
+{
+    /**
+   * Typical ADC values for all function switch settings
+   */
+    Switch_ADC_value = analogRead(FUNCTION_PIN);
+}
+
 char emitter_on = 1;
 
 void sensors_control_setup()
@@ -69,6 +148,15 @@ void sensors_control_setup()
     pinMode(EMITTER, OUTPUT);
     digitalWriteFast(EMITTER, 0); // be sure the emitter is off
     analogueSetup();              // increase the ADC conversion speed
+}
+
+static uint8_t sensor_phase = 0;
+
+void start_sensor_cycle()
+{
+    sensor_phase = 0;     // sync up the start of the sensor sequence
+    bitSet(ADCSRA, ADIE); // enable the ADC interrupt
+    start_adc(0);         // begin a conversion to get things started
 }
 
 void print_hex2(int value)
@@ -179,4 +267,106 @@ void print_sensors_control(char mode)
         Serial.print(a5_lit);
     }
     Serial.println();
+}
+
+/** @brief Sample all the sensor channels with and without the emitter on
+ *
+ * At the end of the 500Hz systick interrupt, the ADC interrupt is enabled
+ * and a conversion started. After each ADC conversion the interrupt gets
+ * generated and this ISR is called. The eight channels are read in turn with
+ * the sensor emitter(s) off.
+ * At the end of that sequence, the emiter(s) get turned on and a dummy ADC
+ * conversion is started to provide a delay while the sensors respond.
+ * After that, all channels are read again to get the lit values.
+ * After all the channels have been read twice, the ADC interrupt is disabbled
+ * and the sensors are idle until triggered again.
+ *
+ * There are actually 16 available channels and channel 8 is the internal
+ * temperature sensor. Channel 15 is Gnd. If appropriate, a read of channel
+ * 15 can be used to zero the ADC sample and hold capacitor.
+ */
+ISR(ADC_vect)
+{
+    // digitalWriteFast(13, 1);
+    switch (sensor_phase)
+    {
+    case 0:
+        // always start conversions as soon as  possible so they get a
+        // full 50us to convert
+        start_adc(BATTERY_VOLTS);
+        break;
+    case 1:
+        raw_BatteryVolts_adcValue = get_adc_result();
+        start_adc(FUNCTION_PIN);
+        break;
+    case 2:
+        Switch_ADC_value = get_adc_result();
+        start_adc(A0);
+        break;
+    case 3:
+        gSensorA0_dark = get_adc_result();
+        start_adc(A1);
+        break;
+    case 4:
+        gSensorA1_dark = get_adc_result();
+        start_adc(A2);
+        break;
+    case 5:
+        gSensorA2_dark = get_adc_result();
+        start_adc(A3);
+        break;
+    case 6:
+        gSensorA3_dark = get_adc_result();
+        start_adc(A4);
+        break;
+    case 7:
+        gSensorA4_dark = get_adc_result();
+        start_adc(A5);
+        break;
+    case 8:
+        gSensorA5_dark = get_adc_result();
+        // got all the dark ones so light them up
+        if (emitter_on)
+        {
+            digitalWriteFast(EMITTER, 1);
+        }
+        start_adc(A7); // dummy read of the battery to provide delay
+        // wait at least one cycle for the detectors to respond
+        break;
+    case 9:
+        start_adc(A0);
+        break;
+    case 10:
+        gSensorA0_light = get_adc_result();
+        start_adc(A1);
+        break;
+    case 11:
+        gSensorA1_light = get_adc_result();
+        start_adc(A2);
+        break;
+    case 12:
+        gSensorA2_light = get_adc_result();
+        start_adc(A3);
+        break;
+    case 13:
+        gSensorA3_light = get_adc_result();
+        start_adc(A4);
+        break;
+    case 14:
+        gSensorA4_light = get_adc_result();
+        start_adc(A5);
+        break;
+    case 15:
+        gSensorA5_light = get_adc_result();
+        if (emitter_on)
+        {
+            digitalWriteFast(EMITTER, 0);
+        }
+        bitClear(ADCSRA, ADIE);
+        break;
+    default:
+        break;
+    }
+    sensor_phase++;
+    // digitalWriteFast(13, 0);
 }

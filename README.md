@@ -24,6 +24,8 @@ Loads into Arduino via serial lead from the Arduino IDE. You can issue commands 
 As well as directly commanding the robot over the serial port, it's designed to be controlled from a host CPU which can be anything 
 but we've been using it with the Raspberry Pi.
 
+There is some more information about development environments in [Code Development](Documentation/code_development.md).
+
 # Robot Configuration
 
 Even though the UKMarsBot is a standard design, there are several options:
@@ -86,8 +88,8 @@ Examples:
 
     V0      Verbose off (numeric error codes)
     V1      Verbose on (text error codes)
-    E0      Echo input back (for humans with serial terminals)
-    E1      Don't echo input back (for machines, or for use with Arduino Serial monitor)
+    E1      Echo input back (for humans with serial terminals)
+    E0      Don't echo input back (for machines, or for use with Arduino Serial monitor)
 
 
 ### Low Level I/O Control Commands
@@ -169,8 +171,13 @@ Reading an encoder counter might be more involved. It is the total so far and th
 | Ch | Same as C, but values in Hex |
 | ChZ| Same as Ch, but also zeros encoders immediately after reading |
 | z | zero wheel encoder counters. No return. | 
-| e | print wheel current info - human readable NOT for machine parsing! |
-| r | print encoder setup - human readable NOT for machine parsing! | 
+| ea | print wheel current info (all) - Format 'encoder-sum,distance,encoder-difference,angle' |
+| e  | Old command for 'ea' command, still supported for backward compatability |
+| er | print wheel current info (raw format) - Format 'encoder-sum,encoder-difference'|
+| eu | print wheel cujrent info (unit format) - Format 'distance,angle' where distance is mm, angle is degrees |
+| r | print encoder setup - Format 'mm-per-count,degrees-per-count' | 
+
+NOTE: 'r' command allows decoding 'er' into distances/angles on the host, rather than taking time to print floating values.
 
 Setting a counter using 'C' command is usually to zero but could be any legal value. Therefore a quick 'z' command is provided.
 
@@ -310,6 +317,8 @@ There are also 32 boolean ('bit') parameters. The first 16 are listed here. Curr
 | h | just prints 'OK' |
 | s | shows the state of the switches. Returns a single number. NOTE: the Button is '16', and overrides the 4 switches | 
 | b | shows the voltage of the battery. Example return '7.421' |
+| bi | Shows the voltage of the battery in millivolts. Example: '7421' |
+| bh | Shows the voltage of the battery in millivolts in hex format |
 | m | motor tests (see below) | 
 | x | Motor stop (no parameters, no return.) - and cancels any actions |
 
@@ -441,7 +450,7 @@ There are several techniques possible - for instance avoid sending a long stream
 
 If you are changing the baud rate, care must be taken to choose a baud rate that both end can generate accurately. If the total error exceeds of both sides exceeds around 2 or 3% then you are likely to start getting byte errors. Ideally you want to be within 1%.
 
-One such baud rate table for the AVR on the Arduino Nano inclides: https://trolsoft.ru/en/uart-calc
+One such baud rate table for the AVR on the Arduino Nano includes: https://trolsoft.ru/en/uart-calc
 
 Remeber to add on the error rate of the other side as well - whehter that be a Rasberry Pi, USB-Serial converter, or other serial port. Sometimes you can get lucky. If they are both, say +3% of the target, then the baud rates will match. But a -2.5% on one end, and a +2.5% on the other end gives 5% error, and this will cause problems. (Although errors rates up to 5% would theoretically work before it meets an edge, the reality of sampling mechanisms, slew rate and other factors means that realistic error rates are well under half of this.)
 

@@ -35,9 +35,10 @@
 */
 #include "digitalWriteFast.h"
 #include "public.h"
+#include "switches.h"
+#include "tests.h"
 #include <Arduino.h>
 #include <EEPROM.h>
-
 /*
  * Small command line interpreter
  */
@@ -656,22 +657,22 @@ void encoder_values()
             int32_t param = decode_input_value_signed(inputIndex + 1);
             if (motor == 1)
             {
-                encoderLeftCount = param;
+                encoder_left_total = param;
             }
             else
             {
-                encoderRightCount = param;
+                encoder_right_total = param;
             }
         }
         else // read motor
         {
             if (motor == 1)
             {
-                Serial.println(encoderLeftCount);
+                Serial.println(encoder_left_total);
             }
             else
             {
-                Serial.println(encoderRightCount);
+                Serial.println(encoder_right_total);
             }
         }
     }
@@ -681,12 +682,12 @@ void encoder_values()
         if (c == 'h')
         {
             // read both encoder values ahead of time so print time doesn't offset.
-            int32_t left = encoderLeftCount;
-            int32_t right = encoderRightCount;
+            int32_t left = encoder_left_total;
+            int32_t right = encoder_right_total;
             if (inputString[2] == 'z')
             {
-                encoderLeftCount = 0;
-                encoderRightCount = 0;
+                encoder_left_total = 0;
+                encoder_right_total = 0;
             }
 
             Serial.print(left, HEX);
@@ -696,12 +697,12 @@ void encoder_values()
         else if (c == 0 or c == 'z')
         {
             // read both encoder values ahead of time so print time doesn't offset.
-            int32_t left = encoderLeftCount;
-            int32_t right = encoderRightCount;
+            int32_t left = encoder_left_total;
+            int32_t right = encoder_right_total;
             if (c == 'z')
             {
-                encoderLeftCount = 0;
-                encoderRightCount = 0;
+                encoder_left_total = 0;
+                encoder_right_total = 0;
             }
             Serial.print(left);
             Serial.print(",");
@@ -992,6 +993,35 @@ void print_sensors_control_command()
     }
 }
 
+void print_encoders_command()
+{
+    // translate into argument
+    // If no second parameters this will be 0.
+    if (print_encoders(inputString[1]) == false)
+    {
+        interpreter_error(T_UNEXPECTED_TOKEN);
+    }
+}
+
+void print_bat()
+{
+    float bat = battery_voltage;
+    if (inputString[1] == 'i')
+    {
+        int bat_int = bat * 1000;
+        Serial.println(bat_int);
+    }
+    else if (inputString[1] == 'h')
+    {
+        int bat_int = bat * 1000;
+        Serial.println(bat_int, 16);
+    }
+    else
+    {
+        Serial.println(battery_voltage, floating_decimal_places);
+    }
+}
+
 #define SERIAL_IN_CAPTURE 0
 #if SERIAL_IN_CAPTURE
 char serial_capture_read_buff[256]; // circular buffer
@@ -1107,7 +1137,7 @@ const PROGMEM fptr PROGMEM cmd2[] =
         print_bat,                          // 'b'
         not_implemented,                    // 'c'
         not_implemented,                    // 'd'
-        print_encoders,                     // 'e'
+        print_encoders_command,             // 'e'
         not_implemented,                    // 'f'
         not_implemented,                    // 'g'
         ok,                                 // 'h'
@@ -1119,7 +1149,7 @@ const PROGMEM fptr PROGMEM cmd2[] =
         not_implemented,                    // 'n'
         not_implemented,                    // 'o'
         not_implemented,                    // 'p'
-        not_implemented,                    // 'q'
+        cmd_test_runner,                    // 'q'
         print_encoder_setup,                // 'r'
         print_switches,                     // 's'
         not_implemented,                    // 't'
@@ -1194,6 +1224,7 @@ void interpreter()
                     inputString[inputIndex] = 0; // zero terminate
                     parse_cmd();
                     inputIndex = 0;
+                    break; // go back to loop() once we've processed one command to run other controllers. One command at a time only!
                 }
                 else
                 {

@@ -8,3 +8,19 @@ for_reference_do_not_track/
 
 robot_config.h
 
+# These are for the Eclipse IDE for Arduino (Sloeber)
+# As per https://github.com/Sloeber/arduino-eclipse-plugin/discussions/1307
+# sloeber.cfg (make it by going to project properties->arduino->other and select "share in version control" for all config you want to sshare)
+/Release/
+/sloeber.ino.cpp
+.settings/
+/spec.d
+/.cproject
+/.sproject
+/.project
+
+
+# These are for VIM text editor
+*.swp
+*~
+

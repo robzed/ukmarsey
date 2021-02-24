@@ -37,6 +37,8 @@
 
 #include <Arduino.h>
 
+const uint32_t ONE_MILLISECOND = 1000;
+const uint32_t ONE_SECOND = 1000 * ONE_MILLISECOND;
 class Stopwatch
 {
 
