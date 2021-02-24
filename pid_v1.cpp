@@ -13,7 +13,7 @@
 #include "WProgram.h"
 #endif
 
-#include <pid_v1.h>
+#include "pid_v1.h"
 
 /*Constructor (...)*********************************************************
  *    The parameters specified here are those for for which we can't set up

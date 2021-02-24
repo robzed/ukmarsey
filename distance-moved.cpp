@@ -161,7 +161,7 @@ ISR(INT1_vect)
 /******************************** command functions **************************/
 
 // command 'r'
-void print_encoder_setup()
+int8_t print_encoder_setup()
 {
     const char comma = ',';
 
@@ -171,7 +171,7 @@ void print_encoder_setup()
 }
 
 // command 'z'
-void zero_encoders()
+int8_t zero_encoders()
 {
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {

@@ -35,13 +35,13 @@
 #ifndef TESTS_H
 #define TESTS_H
 
-#include "public.h"
 #include <Arduino.h>
+#include "public.h"
 
 /***
  * All the tests in this module are normally run via calls to this function
  */
-void cmd_test_runner();
+int8_t cmd_test_runner();
 
 /***
  * Canned telemetry logging functions

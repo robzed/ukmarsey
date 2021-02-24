@@ -37,6 +37,7 @@
 #include "public.h"
 #include "switches.h"
 #include "tests.h"
+#include "interpreter.h"
 #include <Arduino.h>
 #include <EEPROM.h>
 /*
@@ -162,40 +163,57 @@ bool get_bool_param(int param_index)
     return bitfield_stored_params & (1 << (param_index - 100));
 }
 
+
+
 // ------------------------------------------
-enum
-{
-    T_OK = 0,
-    T_OUT_OF_RANGE = 1,
-    T_READ_NOT_SUPPORTED = 2,
-    T_LINE_TOO_LONG = 3,
-    T_UNKNOWN_COMMAND = 4,
-    T_UNEXPECTED_TOKEN = 5
+// These are the types
+enum {
+  NUMERIC_ERRORS = 0,   // Numeric error codes. Good for machines, bad for humans.
+  TEXT_ERRORS = 1,      // Text error codes.
+  TEXT_VERBOSE = 2      // All commands return a text message, even silent ones. Noisy, but good for beginners.
 };
 
-enum {
-  NUMERIC_ERRORS = 0,
-  TEXT_ERRORS = 1,
-  TEXT_VERBOSE = 2
-};
+// Setting for verboseness.
 uint8_t verbose_errors = TEXT_ERRORS; 
+
+/** @brief  Prints OK
+ *  @param
+ *  @return void
+ */
+int8_t ok()
+{
+    if (verbose_errors)
+    {
+        Serial.println(F("OK"));
+    }
+    else
+    {
+        Serial.println(F("@Error:0"));
+    }
+    return T_SILENT_ERROR;
+}
+
 
 /** @brief  Print the interpreter error
  *  @param  error to be printed
  *  @return void
  */
-void interpreter_error(int error, char *extra = 0)
+void interpreter_error(int8_t error, char *extra = 0)
 {
+    if(error == T_SILENT_ERROR or (error == T_OK and verbose_errors < TEXT_VERBOSE))
+    {
+        return;
+    }
     if (verbose_errors)
     {
         if (error != T_OK)
         {
-            Serial.print("@Error:");
+            Serial.print(F("@Error:"));
         }
         switch (error)
         {
         case T_OK:
-            Serial.println(F("OK"));
+            ok();
             break;
         case T_OUT_OF_RANGE:
             Serial.println(F("Out of range"));
@@ -227,16 +245,11 @@ void interpreter_error(int error, char *extra = 0)
     }
     else
     {
-        Serial.print("@Error:");
+        Serial.print(F("@Error:"));
         Serial.println(error);
     }
 }
 
-typedef struct
-{
-    const char *nam;
-    void (*func)();
-} entry_t;
 
 //
 // functions to run commands
@@ -246,20 +259,15 @@ typedef struct
  *  @param
  *  @return void
  */
-void led() { digitalWriteFast(LED_BUILTIN, (inputString[1] == '0') ? LOW : HIGH); }
+int8_t led() { digitalWriteFast(LED_BUILTIN, (inputString[1] == '0') ? LOW : HIGH); return T_OK;}
 
-/** @brief  Prints OK
- *  @param
- *  @return void
- */
-void ok() { interpreter_error(T_OK); }
 
 /** @brief  Reset the robot state to a known value
  *          NOTE: Does not reset $ parameters.
  *  @param
  *  @return void
  */
-void reset_state()
+int8_t reset_state()
 {
     char function = inputString[1];
     if (function == '^')
@@ -278,25 +286,28 @@ void reset_state()
         Serial.println(F("RST"));
         // Reset the actual state
     }
+    return T_OK;
 }
 
 /** @brief  Show version of the program.
  *  @param
  *  @return void
  */
-void show_version() { Serial.println(F("v1.3")); }
+int8_t show_version() { Serial.println(F("v1.3"));     return T_OK;
+}
 
 /** @brief  Print the decoded switch value.
  *  @param
  *  @return void
  */
-void print_switches() { Serial.println(readFunctionSwitch()); }
+int8_t print_switches() { Serial.println(readFunctionSwitch());     return T_OK;
+}
 
 /** @brief  Select one of several hardware motor tests.
  *  @param
  *  @return void
  */
-void motor_test()
+int8_t motor_test()
 {
 
     char function = inputString[1];
@@ -382,6 +393,7 @@ void motor_test()
     }
     // be sure to turn off the motors
     setMotorVolts(0, 0);
+    return T_OK;
 }
 
 //int numeric_mode = 10;
@@ -521,7 +533,7 @@ float decode_input_value_float(int index)
 /** @brief Reads or writes a digital GPIO
  *  @return Void.
  */
-void digital_pin_control()
+int8_t digital_pin_control()
 {
     // D3=1
     // D13=0
@@ -551,8 +563,9 @@ void digital_pin_control()
     }
     else
     {
-        interpreter_error(T_OUT_OF_RANGE);
+        return T_OUT_OF_RANGE;
     }
+    return T_OK;
 }
 
 static volatile int *pointers_to_ADC_readings[] =
@@ -570,7 +583,7 @@ static volatile int *pointers_to_ADC_readings[] =
 /** @brief Reads an analogue pin or sets a PWM output.
  *  @return Void.
  */
-void analogue_control()
+int8_t analogue_control()
 {
     // A2
     // A9=255
@@ -588,7 +601,7 @@ void analogue_control()
             }
             else
             {
-                interpreter_error(T_OUT_OF_RANGE);
+                return T_OUT_OF_RANGE;
             }
         }
         else // read port
@@ -599,20 +612,21 @@ void analogue_control()
             }
             else
             {
-                interpreter_error(T_OUT_OF_RANGE);
+                return T_OUT_OF_RANGE;
             }
         }
     }
     else
     {
-        interpreter_error(T_OUT_OF_RANGE);
+        return T_OUT_OF_RANGE;
     }
+    return T_OK;
 }
 
 /** @brief Turns a specific motor PWM to a specific value (and also set direction)
  *  @return Void.
  */
-void motor_control()
+int8_t motor_control()
 {
     int motor = decode_input_value(1);
     if (motor >= 0)
@@ -633,19 +647,20 @@ void motor_control()
         }
         else // read motor
         {
-            interpreter_error(T_READ_NOT_SUPPORTED);
+            return T_READ_NOT_SUPPORTED;
         }
     }
     else
     {
-        interpreter_error(T_OUT_OF_RANGE);
+        return T_OUT_OF_RANGE;
     }
+    return T_OK;
 }
 
 /** @brief Reads or writes the motor encoder values
  *  @return Void.
  */
-void encoder_values()
+int8_t encoder_values()
 {
     int motor = decode_input_value(1);
     if (motor >= 0)
@@ -710,15 +725,16 @@ void encoder_values()
         }
         else
         {
-            interpreter_error(T_OUT_OF_RANGE);
+            return T_OUT_OF_RANGE;
         }
     }
+    return T_OK;
 }
 
 /** @brief Selects the left and right motor voltages
  *  @return Void.
  */
-void motor_control_dual_voltage()
+int8_t motor_control_dual_voltage()
 {
     float motor_left = decode_input_value_float(1);
     if (inputString[inputIndex] == ',')
@@ -730,14 +746,15 @@ void motor_control_dual_voltage()
     }
     else // no comma
     {
-        interpreter_error(T_UNEXPECTED_TOKEN);
+        return T_UNEXPECTED_TOKEN;
     }
+    return T_OK;
 }
 
 /** @brief Reads and writes stored parameters
  *  @return Void.
  */
-uint8_t stored_parameter_control()
+int8_t stored_parameter_control()
 {
     int param_number = decode_input_value(1);
     if (param_number >= 0 and param_number < NUM_STORED_PARAMS)
@@ -806,9 +823,10 @@ uint8_t stored_parameter_control()
         }
         else
         {
-            interpreter_error(T_OUT_OF_RANGE);
+            return T_OUT_OF_RANGE;
         }
     }
+    return T_OK;
 }
 
 /** @brief Reads the parameters into RAM. If Magic number not found will default all parameters.
@@ -845,23 +863,24 @@ void init_stored_parameters()
 /** @brief Turns command line interpreter verbose error messages on and off
  *  @return Void.
  */
-void verbose_control()
+int8_t verbose_control()
 {
     int param = decode_input_value(1);
-    if (param == 0 or param == 1)
+    if (param >= 0 or param <= 2)
     {
         verbose_errors = param;
     }
     else
     {
-        interpreter_error(T_OUT_OF_RANGE);
+        return T_OUT_OF_RANGE;
     }
+    return T_OK;
 }
 
 /** @brief Turns command line interpreter echo of input on and off
  *  @return Void.
  */
-void echo_control()
+int8_t echo_control()
 {
     int param = decode_input_value(1);
     if (param == 0 or param == 1)
@@ -870,14 +889,15 @@ void echo_control()
     }
     else
     {
-        interpreter_error(T_OUT_OF_RANGE);
+        return T_OUT_OF_RANGE;
     }
+    return T_OK;
 }
 
 /** @brief Turns the main emitter LED on and off.
  *  @return Void.
  */
-void emitter_control()
+int8_t emitter_control()
 {
     int param = decode_input_value(1);
     if (param == 0 or param == 1)
@@ -886,43 +906,45 @@ void emitter_control()
     }
     else
     {
-        interpreter_error(T_OUT_OF_RANGE);
+        return T_OUT_OF_RANGE;
     }
+
+    return T_OK;
 }
 
 /** @brief  Echos a number to stdout from the command line.
  *  @return Void.
  */
-void echo_command()
+int8_t echo_command()
 {
     int param = inputString[1];
     if (param == 'F')
     {
         Serial.println(decode_input_value_float(2), floating_decimal_places);
-        return;
     }
-    if (param == 'U')
+    else if (param == 'U')
     {
         Serial.println(decode_input_value(2));
-        return;
     }
-    if (param == 'S')
+    else if (param == 'S')
     {
         Serial.println(decode_input_value_signed(2));
-        return;
     }
-    if (param == '*')
+    else if (param == '*')
     {
         Serial.println(inputString);
-        return;
     }
-    Serial.println(decode_input_value_float(1), floating_decimal_places);
+    else
+    {
+        Serial.println(decode_input_value_float(1), floating_decimal_places);
+    }
+    return T_OK;
 }
 
 /** @brief  Allows configuration of the Pin Mode from the command line.
  *  @return Void.
  */
-void pinMode_command()
+int8_t pinMode_command()
 {
     int pin_number = decode_input_value(1);
     if (pin_number >= 0)
@@ -946,24 +968,25 @@ void pinMode_command()
             }
             else
             {
-                interpreter_error(T_UNEXPECTED_TOKEN);
+                return T_UNEXPECTED_TOKEN;
             }
         }
         else // read?
         {
-            interpreter_error(T_READ_NOT_SUPPORTED);
+            return T_READ_NOT_SUPPORTED;
         }
     }
     else
     {
-        interpreter_error(T_OUT_OF_RANGE);
+        return T_OUT_OF_RANGE;
     }
+    return T_OK;
 }
 
 /** @brief  Stops both motors
  *  @return Void.
  */
-void stop_motors_and_everything_command()
+int8_t stop_motors_and_everything_command()
 {
     setMotorVolts(0, 0);
     // add action stop here as well
@@ -972,7 +995,7 @@ void stop_motors_and_everything_command()
 /** @brief  Prints the sensors (in various formats)
  *  @return Void.
  */
-void print_sensors_control_command()
+int8_t print_sensors_control_command()
 {
     int mode = inputString[1];
     if (mode == 'h')
@@ -989,21 +1012,23 @@ void print_sensors_control_command()
     }
     else
     {
-        interpreter_error(T_UNEXPECTED_TOKEN);
+        return T_UNEXPECTED_TOKEN;
     }
+    return T_OK;
 }
 
-void print_encoders_command()
+int8_t print_encoders_command()
 {
     // translate into argument
     // If no second parameters this will be 0.
     if (print_encoders(inputString[1]) == false)
     {
-        interpreter_error(T_UNEXPECTED_TOKEN);
+        return T_UNEXPECTED_TOKEN;
     }
+    return T_OK;
 }
 
-void print_bat()
+int8_t print_bat()
 {
     float bat = battery_voltage;
     if (inputString[1] == 'i')
@@ -1020,6 +1045,7 @@ void print_bat()
     {
         Serial.println(battery_voltage, floating_decimal_places);
     }
+    return T_OK;
 }
 
 #define SERIAL_IN_CAPTURE 0
@@ -1055,12 +1081,13 @@ void print_serial_capture_read_buff()
 }
 #endif
 
-void not_implemented()
+int8_t not_implemented()
 {
     interpreter_error(T_UNKNOWN_COMMAND, inputString);
+    return T_SILENT_ERROR;
 }
 
-typedef uint8_t (*fptr)(); 
+typedef int8_t (*fptr)();
 
 const PROGMEM fptr PROGMEM cmd2[] =
     {
@@ -1177,7 +1204,7 @@ void parse_cmd()
         return;
     }
     fptr f = fptr(pgm_read_ptr(cmd2 + command));
-    f();
+    interpreter_error(f());
 }
 
 #define CTRL_C 0x03
@@ -1229,7 +1256,7 @@ void interpreter()
                 else
                 {
                     // what do we want to print here? OK for V0?
-                    interpreter_error(T_OK);
+                    ok();
                 }
             }
             else if (inChar == CTRL_X or inChar == CTRL_C)

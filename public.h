@@ -5,15 +5,9 @@
 #include "robot_config.h"
 #include "switches.h"
 #include "tests.h"
+#include "interpreter.h"
 #include <Arduino.h>
 #include <wiring_private.h>
-
-// provided by interpreter.cpp
-void interpreter();
-void init_stored_parameters();
-float get_float_param(int param_index);
-bool get_bool_param(int param_index);
-int decode_input_value(int index);
 
 //
 // provided by systick.cpp
@@ -46,8 +40,8 @@ extern char emitter_on;
 
 // provided by distance-moved.cpp
 void setup_encoders();
-void print_encoder_setup();
-void zero_encoders();
+int8_t print_encoder_setup();
+int8_t zero_encoders();
 void update_encoders();
 bool print_encoders(char select);
 

@@ -36,12 +36,13 @@
 #include "stopwatch.h"
 #include "switches.h"
 
-void cmd_test_runner()
+int8_t cmd_test_runner()
 {
     int test = decode_input_value(1);
     Serial.print(F("TEST: "));
     Serial.println(test);
     test_controllers();
+    return T_OK;
 }
 
 // ----------------- telemetry functions

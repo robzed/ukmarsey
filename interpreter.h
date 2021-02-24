@@ -1,5 +1,5 @@
 /*
- * Switches. Read and test the on-board function switches and button
+ * interpreter.h - command line interpreter
 
    ukmarsey is a machine and human command-based Robot Low-level I/O platform initially targetting UKMARSBot
    For more information see:
@@ -10,8 +10,8 @@
 
   MIT License
 
-  Copyright (c) 2020-2021 Rob Probin & Peter Harrison
-  Copyright (c) 2019-2021 UK Micromouse and Robotics Society
+  Copyright (c) 2021 Rob Probin & Peter Harrison
+  Copyright (c) 2021 UK Micromouse and Robotics Society
 
   Permission is hereby granted, free of charge, to any person obtaining a copy
   of this software and associated documentation files (the "Software"), to deal
@@ -30,62 +30,32 @@
   LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
-*/
 
-#include <Arduino.h>
-#include "switches.h"
-#include "public.h"
-
-/** @brief  Convert the switch ADC reading into a switch reading.
- *  @return integer in range 0..16
+ *  Created on: 24 Feb 2021
+ *      Author: Rob Probin
  */
-int readFunctionSwitch()
-{
-    const int adcReading[] = {660, 647, 630, 614, 590, 570, 545, 522, 461,
-                              429, 385, 343, 271, 212, 128, 44, 0};
 
-    if (Switch_ADC_value > 800)
-    {
-        return 16;
-    }
-    for (int i = 0; i < 16; i++)
-    {
-        if (Switch_ADC_value > (adcReading[i] + adcReading[i + 1]) / 2)
-        {
-            return i;
-        }
-    }
-    // TODO: should there be a more informative error value?
-    return 15; // should never get here... but if we do show 15
-}
+#ifndef INTERPRETER_H_
+#define INTERPRETER_H_
 
-/** @brief  Test the user pushbutton
- *  There is no debouncing so take care
- *  @return boolean
- */
-bool button_pressed()
+// These are the error codes produced by commands to pass into interpreter error.
+enum
 {
-    return readFunctionSwitch() == 16;
-}
+    T_SILENT_ERROR = -1,    // Special error code designed for ?, h and unimplemented commands that report their own errors.
+    T_OK = 0,               // Normal 'no error' return code.
+    T_OUT_OF_RANGE = 1,
+    T_READ_NOT_SUPPORTED = 2,
+    T_LINE_TOO_LONG = 3,
+    T_UNKNOWN_COMMAND = 4,
+    T_UNEXPECTED_TOKEN = 5
+};
 
-void wait_for_button_press()
-{
-    while (not button_pressed())
-    {
-        delay(10);
-    }
-}
+void interpreter();
+void init_stored_parameters();
+float get_float_param(int param_index);
+bool get_bool_param(int param_index);
+int decode_input_value(int index);
 
-void wait_for_button_release()
-{
-    while (button_pressed())
-    {
-        delay(10);
-    }
-}
 
-void wait_for_button_click()
-{
-    wait_for_button_press();
-    wait_for_button_release();
-}
+
+#endif /* INTERPRETER_H_ */
