@@ -41,8 +41,8 @@
 // These are the error codes produced by commands to pass into interpreter error.
 enum
 {
-    T_SILENT_ERROR = -1,    // Special error code designed for ?, h and unimplemented commands that report their own errors.
-    T_OK = 0,               // Normal 'no error' return code.
+    T_SILENT_ERROR = -1, // Special error code designed for ?, h and unimplemented commands that report their own errors.
+    T_OK = 0,            // Normal 'no error' return code.
     T_OUT_OF_RANGE = 1,
     T_READ_NOT_SUPPORTED = 2,
     T_LINE_TOO_LONG = 3,
@@ -55,7 +55,5 @@ void init_stored_parameters();
 float get_float_param(int param_index);
 bool get_bool_param(int param_index);
 int decode_input_value(int index);
-
-
 
 #endif /* INTERPRETER_H_ */

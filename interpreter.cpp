@@ -33,11 +33,11 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
+#include "interpreter.h"
 #include "digitalWriteFast.h"
 #include "public.h"
 #include "switches.h"
 #include "tests.h"
-#include "interpreter.h"
 #include <Arduino.h>
 #include <EEPROM.h>
 /*
@@ -163,18 +163,17 @@ bool get_bool_param(int param_index)
     return bitfield_stored_params & (1 << (param_index - 100));
 }
 
-
-
 // ------------------------------------------
 // These are the types
-enum {
-  NUMERIC_ERRORS = 0,   // Numeric error codes. Good for machines, bad for humans.
-  TEXT_ERRORS = 1,      // Text error codes.
-  TEXT_VERBOSE = 2      // All commands return a text message, even silent ones. Noisy, but good for beginners.
+enum
+{
+    NUMERIC_ERRORS = 0, // Numeric error codes. Good for machines, bad for humans.
+    TEXT_ERRORS = 1,    // Text error codes.
+    TEXT_VERBOSE = 2    // All commands return a text message, even silent ones. Noisy, but good for beginners.
 };
 
 // Setting for verboseness.
-uint8_t verbose_errors = TEXT_ERRORS; 
+uint8_t verbose_errors = TEXT_ERRORS;
 
 /** @brief  Prints OK
  *  @param
@@ -193,14 +192,13 @@ int8_t ok()
     return T_SILENT_ERROR;
 }
 
-
 /** @brief  Print the interpreter error
  *  @param  error to be printed
  *  @return void
  */
 void interpreter_error(int8_t error, char *extra = 0)
 {
-    if(error == T_SILENT_ERROR or (error == T_OK and verbose_errors < TEXT_VERBOSE))
+    if (error == T_SILENT_ERROR or (error == T_OK and verbose_errors < TEXT_VERBOSE))
     {
         return;
     }
@@ -250,7 +248,6 @@ void interpreter_error(int8_t error, char *extra = 0)
     }
 }
 
-
 //
 // functions to run commands
 //
@@ -259,8 +256,11 @@ void interpreter_error(int8_t error, char *extra = 0)
  *  @param
  *  @return void
  */
-int8_t led() { digitalWriteFast(LED_BUILTIN, (inputString[1] == '0') ? LOW : HIGH); return T_OK;}
-
+int8_t led()
+{
+    digitalWriteFast(LED_BUILTIN, (inputString[1] == '0') ? LOW : HIGH);
+    return T_OK;
+}
 
 /** @brief  Reset the robot state to a known value
  *          NOTE: Does not reset $ parameters.
@@ -293,14 +293,20 @@ int8_t reset_state()
  *  @param
  *  @return void
  */
-int8_t show_version() { Serial.println(F("v1.3"));     return T_OK;
+int8_t show_version()
+{
+    Serial.println(F("v1.3"));
+    return T_OK;
 }
 
 /** @brief  Print the decoded switch value.
  *  @param
  *  @return void
  */
-int8_t print_switches() { Serial.println(readFunctionSwitch());     return T_OK;
+int8_t print_switches()
+{
+    Serial.println(readFunctionSwitch());
+    return T_OK;
 }
 
 /** @brief  Select one of several hardware motor tests.
