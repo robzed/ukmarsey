@@ -80,7 +80,7 @@ Note: 'x' command stops the motors in the case of runaway, but requires a newlin
 | ^ | reset state - writes RST in reply. | 
 | ^^ | processor reset |
 | v | show version |
-| V | Verbose error code, 2=extra verbose, 1=verbose (default), 0=numeric - see 'Interpreter errors'.  |
+| V | Verbose error code, 2=extra verbose (default), 1=verbose, 0=numeric - see 'Interpreter errors'.  |
 | E | Serial echo of input 0=off, 1=on (default). Generally should be turned off for machines |
 
 
@@ -88,9 +88,9 @@ Examples:
 
     V0      Verbose off (numeric error codes)
     V1      Verbose on (text error codes)
+    V2      Like V1 except even successful commands reply with OK
     E1      Echo input back (for humans with serial terminals)
     E0      Don't echo input back (for machines, or for use with Arduino Serial monitor)
-    E2      Like E1 except even successful commands reply with OK
 
 ### Low Level I/O Control Commands
 
