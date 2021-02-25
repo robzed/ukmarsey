@@ -173,7 +173,7 @@ enum
 };
 
 // Setting for verboseness.
-uint8_t verbose_errors = TEXT_ERRORS;
+uint8_t verbose_errors = TEXT_VERBOSE;
 
 /** @brief  Prints OK
  *  @param
