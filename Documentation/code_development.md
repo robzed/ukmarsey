@@ -34,6 +34,7 @@ Generally Eclipse has many features which are helpful for development - [this vi
  * Call trees
  * Refactoring
  * TODO: task list
+ * Spell correct comments!
  * Version Control
  * File Diffs
  * Library development
