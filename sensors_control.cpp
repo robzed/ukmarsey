@@ -290,82 +290,82 @@ ISR(ADC_vect)
     // digitalWriteFast(13, 1);
     switch (sensor_phase)
     {
-    case 0:
-        // always start conversions as soon as  possible so they get a
-        // full 50us to convert
-        start_adc(BATTERY_VOLTS);
-        break;
-    case 1:
-        raw_BatteryVolts_adcValue = get_adc_result();
-        start_adc(FUNCTION_PIN);
-        break;
-    case 2:
-        Switch_ADC_value = get_adc_result();
-        start_adc(A0);
-        break;
-    case 3:
-        gSensorA0_dark = get_adc_result();
-        start_adc(A1);
-        break;
-    case 4:
-        gSensorA1_dark = get_adc_result();
-        start_adc(A2);
-        break;
-    case 5:
-        gSensorA2_dark = get_adc_result();
-        start_adc(A3);
-        break;
-    case 6:
-        gSensorA3_dark = get_adc_result();
-        start_adc(A4);
-        break;
-    case 7:
-        gSensorA4_dark = get_adc_result();
-        start_adc(A5);
-        break;
-    case 8:
-        gSensorA5_dark = get_adc_result();
-        // got all the dark ones so light them up
-        if (emitter_on)
-        {
-            digitalWriteFast(EMITTER, 1);
-        }
-        start_adc(A7); // dummy read of the battery to provide delay
-        // wait at least one cycle for the detectors to respond
-        break;
-    case 9:
-        start_adc(A0);
-        break;
-    case 10:
-        gSensorA0_light = get_adc_result();
-        start_adc(A1);
-        break;
-    case 11:
-        gSensorA1_light = get_adc_result();
-        start_adc(A2);
-        break;
-    case 12:
-        gSensorA2_light = get_adc_result();
-        start_adc(A3);
-        break;
-    case 13:
-        gSensorA3_light = get_adc_result();
-        start_adc(A4);
-        break;
-    case 14:
-        gSensorA4_light = get_adc_result();
-        start_adc(A5);
-        break;
-    case 15:
-        gSensorA5_light = get_adc_result();
-        if (emitter_on)
-        {
-            digitalWriteFast(EMITTER, 0);
-        }
-        bitClear(ADCSRA, ADIE);
-        break;
-    default:
-        break;
+        case 0:
+            // always start conversions as soon as  possible so they get a
+            // full 50us to convert
+            start_adc(BATTERY_VOLTS);
+            break;
+        case 1:
+            raw_BatteryVolts_adcValue = get_adc_result();
+            start_adc(FUNCTION_PIN);
+            break;
+        case 2:
+            Switch_ADC_value = get_adc_result();
+            start_adc(A0);
+            break;
+        case 3:
+            gSensorA0_dark = get_adc_result();
+            start_adc(A1);
+            break;
+        case 4:
+            gSensorA1_dark = get_adc_result();
+            start_adc(A2);
+            break;
+        case 5:
+            gSensorA2_dark = get_adc_result();
+            start_adc(A3);
+            break;
+        case 6:
+            gSensorA3_dark = get_adc_result();
+            start_adc(A4);
+            break;
+        case 7:
+            gSensorA4_dark = get_adc_result();
+            start_adc(A5);
+            break;
+        case 8:
+            gSensorA5_dark = get_adc_result();
+            // got all the dark ones so light them up
+            if (emitter_on)
+            {
+                digitalWriteFast(EMITTER, 1);
+            }
+            start_adc(A7); // dummy read of the battery to provide delay
+            // wait at least one cycle for the detectors to respond
+            break;
+        case 9:
+            start_adc(A0);
+            break;
+        case 10:
+            gSensorA0_light = get_adc_result();
+            start_adc(A1);
+            break;
+        case 11:
+            gSensorA1_light = get_adc_result();
+            start_adc(A2);
+            break;
+        case 12:
+            gSensorA2_light = get_adc_result();
+            start_adc(A3);
+            break;
+        case 13:
+            gSensorA3_light = get_adc_result();
+            start_adc(A4);
+            break;
+        case 14:
+            gSensorA4_light = get_adc_result();
+            start_adc(A5);
+            break;
+        case 15:
+            gSensorA5_light = get_adc_result();
+            if (emitter_on)
+            {
+                digitalWriteFast(EMITTER, 0);
+            }
+            bitClear(ADCSRA, ADIE);
+            break;
+        default:
+            break;
     }
     sensor_phase++;
     // digitalWriteFast(13, 0);

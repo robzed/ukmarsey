@@ -6,7 +6,7 @@ IndentWidth: 4
 TabWidth: 4
 BreakBeforeBraces: Allman
 AllowShortIfStatementsOnASingleLine: false
-IndentCaseLabels: false
+IndentCaseLabels: true
 ColumnLimit: 0
 AccessModifierOffset: -4
 NamespaceIndentation: All

@@ -210,35 +210,35 @@ void interpreter_error(int8_t error, char *extra = 0)
         }
         switch (error)
         {
-        case T_OK:
-            ok();
-            break;
-        case T_OUT_OF_RANGE:
-            Serial.println(F("Out of range"));
-            break;
-        case T_READ_NOT_SUPPORTED:
-            Serial.println(F("Read not supported"));
-            break;
-        case T_LINE_TOO_LONG:
-            Serial.println(F("Too long"));
-            break;
-        case T_UNKNOWN_COMMAND:
-            Serial.print(F("Unknown "));
-            if (extra)
-            {
-                Serial.println(extra);
-            }
-            else
-            {
-                Serial.println();
-            }
-            break;
-        case T_UNEXPECTED_TOKEN:
-            Serial.println(F("Unexpected"));
-            break;
-        default:
-            Serial.println(F("Error"));
-            break;
+            case T_OK:
+                ok();
+                break;
+            case T_OUT_OF_RANGE:
+                Serial.println(F("Out of range"));
+                break;
+            case T_READ_NOT_SUPPORTED:
+                Serial.println(F("Read not supported"));
+                break;
+            case T_LINE_TOO_LONG:
+                Serial.println(F("Too long"));
+                break;
+            case T_UNKNOWN_COMMAND:
+                Serial.print(F("Unknown "));
+                if (extra)
+                {
+                    Serial.println(extra);
+                }
+                else
+                {
+                    Serial.println();
+                }
+                break;
+            case T_UNEXPECTED_TOKEN:
+                Serial.println(F("Unexpected"));
+                break;
+            default:
+                Serial.println(F("Error"));
+                break;
         }
     }
     else
@@ -320,73 +320,73 @@ int8_t motor_test()
 
     switch (function)
     {
-    case '0':
-        setMotorVolts(0, 0);
-        Serial.println(F("motors off"));
-        break;
-    case '1':
-        setMotorVolts(1.5, 1.5);
-        Serial.println(F("forward 25%"));
-        break;
-    case '2':
-        setMotorVolts(3.0, 3.0);
-        Serial.println(F("forward 50%"));
-        break;
-    case '3':
-        setMotorVolts(4.5, 4.5);
-        Serial.println(F("forward 75%"));
-        break;
-    case '4':
-        setMotorVolts(-1.5, -1.5);
-        Serial.println(F("reverse 25%"));
-        break;
-    case '5':
-        setMotorVolts(-3.0, -3.0);
-        Serial.println(F("reverse 50%"));
-        break;
-    case '6':
-        setMotorVolts(-4.5, -4.5);
-        Serial.println(F("reverse 75%"));
-        break;
-    case '7':
-        setMotorVolts(-1.5, 1.5);
-        Serial.println(F("spin left 25%"));
-        break;
-    case '8':
-        setMotorVolts(-3.0, 3.0);
-        Serial.println(F("spin left 50%"));
-        break;
-    case '9':
-        setMotorVolts(1.5, -1.5);
-        Serial.println(F("spin right 25%"));
-        break;
-    case 'a':
-        setMotorVolts(3.0, -3.0);
-        Serial.println(F("spin right 50%"));
-        break;
-    case 'b':
-        setMotorVolts(0, 1.5);
-        Serial.println(F("pivot left 25%"));
-        break;
-    case 'c':
-        setMotorVolts(1.5, 0);
-        Serial.println(F("pivot right 25%"));
-        break;
-    case 'd':
-        setMotorVolts(1.5, 3.0);
-        Serial.println(F("curve left"));
-        break;
-    case 'e':
-        setMotorVolts(3.0, 1.5);
-        Serial.println(F("curve right"));
-        break;
-    case 'f':
-        setMotorVolts(4.5, 3.0);
-        Serial.println(F("big curve right"));
-        break;
-    default:
-        setMotorVolts(0, 0);
-        break;
+        case '0':
+            setMotorVolts(0, 0);
+            Serial.println(F("motors off"));
+            break;
+        case '1':
+            setMotorVolts(1.5, 1.5);
+            Serial.println(F("forward 25%"));
+            break;
+        case '2':
+            setMotorVolts(3.0, 3.0);
+            Serial.println(F("forward 50%"));
+            break;
+        case '3':
+            setMotorVolts(4.5, 4.5);
+            Serial.println(F("forward 75%"));
+            break;
+        case '4':
+            setMotorVolts(-1.5, -1.5);
+            Serial.println(F("reverse 25%"));
+            break;
+        case '5':
+            setMotorVolts(-3.0, -3.0);
+            Serial.println(F("reverse 50%"));
+            break;
+        case '6':
+            setMotorVolts(-4.5, -4.5);
+            Serial.println(F("reverse 75%"));
+            break;
+        case '7':
+            setMotorVolts(-1.5, 1.5);
+            Serial.println(F("spin left 25%"));
+            break;
+        case '8':
+            setMotorVolts(-3.0, 3.0);
+            Serial.println(F("spin left 50%"));
+            break;
+        case '9':
+            setMotorVolts(1.5, -1.5);
+            Serial.println(F("spin right 25%"));
+            break;
+        case 'a':
+            setMotorVolts(3.0, -3.0);
+            Serial.println(F("spin right 50%"));
+            break;
+        case 'b':
+            setMotorVolts(0, 1.5);
+            Serial.println(F("pivot left 25%"));
+            break;
+        case 'c':
+            setMotorVolts(1.5, 0);
+            Serial.println(F("pivot right 25%"));
+            break;
+        case 'd':
+            setMotorVolts(1.5, 3.0);
+            Serial.println(F("curve left"));
+            break;
+        case 'e':
+            setMotorVolts(3.0, 1.5);
+            Serial.println(F("curve right"));
+            break;
+        case 'f':
+            setMotorVolts(4.5, 3.0);
+            Serial.println(F("big curve right"));
+            break;
+        default:
+            setMotorVolts(0, 0);
+            break;
     }
 
     uint32_t endTime = millis() + 2000;

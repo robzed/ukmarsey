@@ -68,22 +68,22 @@ void pwmSetup(int frequency = PWM_488_HZ)
 {
     switch (frequency)
     {
-    case PWM_31_KHZ:
-        // Divide by 1. frequency = 31.25 kHz;
-        bitClear(TCCR1B, CS11);
-        bitSet(TCCR1B, CS10);
-        break;
-    case PWM_3900_HZ:
-        // Divide by 8. frequency = 3.91 kHz;
-        bitSet(TCCR1B, CS11);
-        bitClear(TCCR1B, CS10);
-        break;
-    case PWM_488_HZ:
-    default:
-        // Divide by 64. frequency = 488Hz;
-        bitSet(TCCR1B, CS11);
-        bitSet(TCCR1B, CS10);
-        break;
+        case PWM_31_KHZ:
+            // Divide by 1. frequency = 31.25 kHz;
+            bitClear(TCCR1B, CS11);
+            bitSet(TCCR1B, CS10);
+            break;
+        case PWM_3900_HZ:
+            // Divide by 8. frequency = 3.91 kHz;
+            bitSet(TCCR1B, CS11);
+            bitClear(TCCR1B, CS10);
+            break;
+        case PWM_488_HZ:
+        default:
+            // Divide by 64. frequency = 488Hz;
+            bitSet(TCCR1B, CS11);
+            bitSet(TCCR1B, CS10);
+            break;
     }
 }
 
