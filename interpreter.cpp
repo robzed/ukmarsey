@@ -1216,6 +1216,7 @@ void parse_cmd()
 #define CTRL_C 0x03
 #define BACKSPACE 0x08
 #define CTRL_X 0x18
+static char last_NL = 0;        // tracks NL changes
 
 /** @brief  Command line interpreter.
  *  @return Void.
@@ -1229,6 +1230,8 @@ void interpreter()
         serial_capture_read_buff[serial_capture_read_index++] = inChar;
 #endif
 
+        // At the moment we treat space as a special character and ignore than.
+        // In future we might want to change that
         if (inChar > ' ')
         {
             if (interpreter_echo)
@@ -1245,25 +1248,49 @@ void interpreter()
         }
         else
         {
-            // if the incoming character is a newline interpret it
-            if (inChar == '\n')
+            // if the incoming character is a newline of some sort ... interpret it
+            if (inChar == '\n' or inChar == '\r')
             {
-                if (interpreter_echo)
+
+                if (inputIndex) // characters in the input buffer - process them
                 {
-                    Serial.write(inChar);
-                }
-                if (inputIndex)
-                {
+                    if (interpreter_echo)
+                    {
+                        Serial.println();
+                    }
                     inputString[inputIndex] = 0; // zero terminate
                     parse_cmd();
                     inputIndex = 0;
-                    break; // go back to loop() once we've processed one command to run other controllers. One command at a time only!
                 }
                 else
                 {
-                    // what do we want to print here? OK for V0?
-                    ok();
+                    // Here comes some complicated code to deal with CR or LF or CRLF line endings without giving a double OK for CRLF
+                    //
+                    // There has been two line returns (CR or LF) in a row (we know this because of inputIndex==0) ... is one of them a CRLF or LFCR pair?
+                    //
+                    // So we need to check it wasn't a different one so we can ignore CRLF (or LFCR) pairs.
+
+                    //Serial.write(last_NL+'A'-1);
+                    //Serial.write(inChar+'A'-1);
+                    if (last_NL == 0 or inChar == last_NL)
+                    {
+                        if (interpreter_echo)
+                        {
+                            Serial.println();
+                        }
+                        // what do we want to print here? OK for V0?
+                        ok();
+                    }
+                    else
+                    {
+                        // we ignored a CR or LF. We shouldn't ignore the next one
+                        inChar = 0;
+                    }
                 }
+                // This makes sure we track CR or LF as the accpeting character
+                // But this also ensures a change from, say, LFCR to CR will do the right thing
+                last_NL = inChar;
+                break; // go back to loop() once we've processed one command to run other loop things. One command at a time only!
             }
             else if (inChar == CTRL_X or inChar == CTRL_C)
             {
