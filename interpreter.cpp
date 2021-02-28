@@ -1259,7 +1259,7 @@ void parse_cmd()
 #define CTRL_C 0x03
 #define BACKSPACE 0x08
 #define CTRL_X 0x18
-static char last_NL = 0;        // tracks NL changes
+static char last_NL = 0; // tracks NL changes
 
 /** @brief  Command line interpreter.
  *  @return Void.
