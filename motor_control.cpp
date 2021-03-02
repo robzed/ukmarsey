@@ -54,6 +54,7 @@ float rot_set_speed;
 float rot_volts;
 
 bool flag_controllers_use_ff = true;
+bool flag_controllers_enabled = true;
 
 PID fwd_controller(&robot_velocity, &fwd_volts, &fwd_set_speed, fwd_kp, fwd_ki, fwd_kd);
 PID rot_controller(&robot_omega, &rot_volts, &rot_set_speed, rot_kp, rot_ki, rot_kd);
@@ -137,7 +138,10 @@ void update_motors()
         right_volts += rot_ff;
     }
 
-    setMotorVolts(left_volts, right_volts);
+    if(flag_controllers_enabled)
+    {
+        setMotorVolts(left_volts, right_volts);
+    }
     // setMotorVolts(1.4, 1.4);
     // setMotorVolts(0, 0);
 };
@@ -196,4 +200,19 @@ void setMotorVolts(float left, float right)
 {
     setLeftMotorVolts(left);
     setRightMotorVolts(right);
+}
+
+void disable_controllers()
+{
+    fwd_controller.SetMode(MANUAL); // lower processing power during interrupt, but still
+    rot_controller.SetMode(MANUAL);
+    flag_controllers_enabled = false;
+}
+
+void enable_controllers()
+{
+    // Make sure the controllers are well behaved before starting them again
+    fwd_controller.SetMode(AUTOMATIC);
+    rot_controller.SetMode(AUTOMATIC);
+    flag_controllers_enabled = true;
 }

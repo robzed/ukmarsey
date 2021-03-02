@@ -315,7 +315,7 @@ int8_t print_switches()
  */
 int8_t motor_test()
 {
-
+    disable_controllers();
     char function = inputString[1];
 
     switch (function)
@@ -634,6 +634,7 @@ int8_t analogue_control()
  */
 int8_t motor_control()
 {
+    disable_controllers();
     int motor = decode_input_value(1);
     if (motor >= 0)
     {
@@ -742,6 +743,7 @@ int8_t encoder_values()
  */
 int8_t motor_control_dual_voltage()
 {
+    disable_controllers();
     float motor_left = decode_input_value_float(1);
     if (inputString[inputIndex] == ',')
     {
@@ -994,8 +996,11 @@ int8_t pinMode_command()
  */
 int8_t stop_motors_and_everything_command()
 {
+    disable_controllers();
     setMotorVolts(0, 0);
     // add action stop here as well
+
+    return T_OK;
 }
 
 /** @brief  Prints the sensors (in various formats)

@@ -78,6 +78,8 @@ void setLeftMotorPWM(int pwm);
 void setRightMotorPWM(int pwm);
 void motorSetup();
 void update_motors();
+void enable_controllers();
+void disable_controllers();
 
 // internal use
 #define MEASURE_TIMING 0
