@@ -92,6 +92,27 @@ Examples:
     E1      Echo input back (for humans with serial terminals)
     E0      Don't echo input back (for machines, or for use with Arduino Serial monitor)
 
+### Speed control commands
+
+| Cmd | Params            | Action    |
+|:---:|-------------------|-----------|
+|  T  | Tv,w or Dv or T,w | Set speed (v) in mm/s and/or rotation (w) in degree/s |
+
+NOTE: Using this command with 'eu' allows mid-level control of the Robot.
+
+
+Examples:
+
+    T20     Move forward at 20 millimeters per second
+    T-20    Move backward at -20 millimeters per second
+    T,11    Rotate anticlockwise at 11 degrees per second
+    T,-45   Rotate clockwise at 45 degrees per second
+    T20,11  Move forward at 20 millimeters per second while rotating anticlockwise at 
+    T0,0    Stop (both speed and rotation)
+    T       Set speed to zero, leave rotation the same value
+    T,      Set rotation to zero, leave speed the same value
+
+
 ### Low Level I/O Control Commands
 
 | Cmd | Params     | Action    |
@@ -103,6 +124,11 @@ Examples:
 |  P  | Pp=d       | PinMode - Set up GPIO pins; p is pin, d is I(input) or O(output) or U(Pull Up Input)  |
 
 Regarding analogue readings, (A command), these are read off interrupts, so can be up to 2ms old.
+
+M - PWM values are low level control of the motor input. 255 represents full voltage - whatever level that is.
+
+N - Set the voltage to the motor. Voltage levels are gneerated via PWM, after scaling for the battery level. This gives a more consistent result than raw PWM values, because it doesn't result in variation due to battery level.
+
 
 Examples:
 
@@ -124,7 +150,7 @@ Write to a PWM output. NOTE: PWM use digital I/O numbering! Range 0..255.
 
     A9=255          write PWM pin 3, with 255.
 
-Output a motor PWM duty cycle from the range 0..1023. (Or 0..99 or whatever range is agreed)
+Output a motor PWM duty cycle from the range 0..255.
 
     M1=45           returns nothing
     M1=255          full PWM forwards left motor
@@ -174,7 +200,8 @@ Reading an encoder counter might be more involved. It is the total so far and th
 | ea | print wheel current info (all) - Format 'encoder-sum,distance,encoder-difference,angle' |
 | e  | Old command for 'ea' command, still supported for backward compatability |
 | er | print wheel current info (raw format) - Format 'encoder-sum,encoder-difference'|
-| eu | print wheel cujrent info (unit format) - Format 'distance,angle' where distance is mm, angle is degrees |
+| eu | print wheel current info (unit format) - Format 'distance,angle' where distance is mm, angle is degrees |
+| es | print speed (mm/s) and rotation speed (degrees/s)
 | r | print encoder setup - Format 'mm-per-count,degrees-per-count' | 
 
 NOTE: 'r' command allows decoding 'er' into distances/angles on the host, rather than taking time to print floating values.

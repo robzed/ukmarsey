@@ -107,7 +107,6 @@ void motorSetup()
     rot_controller.SetMode(AUTOMATIC); // turns on the controller. Set to manual for off.
 }
 
-//TODO: if controllers can be disabled, we can apply fixed voltage/pwm to motors
 void update_motors()
 {
     rot_controller.Compute();

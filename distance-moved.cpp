@@ -168,6 +168,7 @@ int8_t print_encoder_setup()
     Serial.print(MM_PER_COUNT, 5);
     Serial.print(comma);
     Serial.println(DEG_PER_COUNT, 5);
+    return T_OK;
 }
 
 // command 'z'
@@ -180,6 +181,7 @@ int8_t zero_encoders()
         robot_distance = 0;
         robot_angle = 0;
     }
+    return T_OK;
 }
 
 // command 'e'
@@ -209,6 +211,12 @@ bool print_encoders(char select)
         Serial.print(robot_distance);
         Serial.print(comma);
         Serial.println(robot_angle);
+    }
+    else if (select == 's')
+    {
+        Serial.print(robot_velocity);
+        Serial.print(comma);
+        Serial.println(robot_omega);
     }
     else
     {

@@ -998,6 +998,12 @@ int8_t stop_motors_and_everything_command()
 {
     disable_controllers();
     setMotorVolts(0, 0);
+
+    // not strictly necessary, because we've disabled the
+    // controller - but we do this anyway
+    fwd_set_speed = 0;
+    rot_set_speed = 0;
+
     // add action stop here as well
 
     return T_OK;
@@ -1092,6 +1098,38 @@ void print_serial_capture_read_buff()
 }
 #endif
 
+int8_t set_target_speed()
+{
+    int target_fwd_speed_in_mm_per_second;
+    int target_rotational_speed_in_degrees_per_second;
+
+    if(inputString[1] == ',')
+    {
+        // rotation speed only
+        target_rotational_speed_in_degrees_per_second = decode_input_value_signed(2);
+        rot_set_speed = target_rotational_speed_in_degrees_per_second;
+    }
+    else
+    {
+        target_fwd_speed_in_mm_per_second = decode_input_value_signed(1);
+        if (inputString[inputIndex] == ',')
+        {
+            fwd_set_speed = target_fwd_speed_in_mm_per_second;
+            target_rotational_speed_in_degrees_per_second = decode_input_value_signed(inputIndex + 1);
+            rot_set_speed = target_rotational_speed_in_degrees_per_second;
+        }
+        else // no comma
+        {
+            // forward only
+            fwd_set_speed = target_fwd_speed_in_mm_per_second;
+        }
+    }
+
+    // make sure the controller is enabled
+    enable_controllers();
+    return T_OK;
+}
+
 int8_t not_implemented()
 {
     interpreter_error(T_UNKNOWN_COMMAND, inputString);
@@ -1154,7 +1192,7 @@ const PROGMEM fptr PROGMEM cmd2[] =
         not_implemented,               // 'Q'
         not_implemented,               // 'R'
         print_sensors_control_command, // 'S'
-        not_implemented,               // 'T'
+        set_target_speed,              // 'T'
         not_implemented,               // 'U'
         verbose_control,               // 'V'
         not_implemented,               // 'W'
