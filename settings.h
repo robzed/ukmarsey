@@ -1,26 +1,38 @@
+/*
+ * File: settings.h                                                                      *
+ * Project: ukmarsey                                                                     *
+ * File Created: Tuesday, 2nd March 2021 2:41:08 pm                                      *
+ * Author: Peter Harrison                                                                *
+ * -----                                                                                 *
+ * Last Modified: Thursday, 4th March 2021 3:01:10 pm                                    *
+ * Modified By: Peter Harrison                                                           *
+ * -----                                                                                 *
+ * Copyright 2017 - 2021 Peter harrison, Helicron                                        *
+ * -----                                                                                 *
+ * MIT License                                                                           *
+ *                                                                                       *
+ * Copyright (c) 2021 Peter harrison                                                     *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of       *
+ * this software and associated documentation files (the "Software"), to deal in         *
+ * the Software without restriction, including without limitation the rights to          *
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies         *
+ * of the Software, and to permit persons to whom the Software is furnished to do        *
+ * so, subject to the following conditions:                                              *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all        *
+ * copies or substantial portions of the Software.                                       *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR            *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,              *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE           *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER                *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,         *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE         *
+ * SOFTWARE.                                                                             *
+ */
+
 /***********************************************************************
- * Created by Peter Harrison on 2019-06-10.
- * Copyright (c) 2019 Peter Harrison
- *
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without l> imitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
  *
  * Macros derived from
  * https://stackoverflow.com/questions/201593/is-there-a-simple-way-to-convert-c-enum-to-string/238157#238157
@@ -39,7 +51,7 @@
 #include <Arduino.h>
 
 /***
- * The revision number can be used to indicate a change to the settins
+ * The revision number can be used to indicate a change to the settings
  * structure. For example a type change for a variable or the addition or
  * deletion of a variable.
  *
@@ -54,12 +66,13 @@
  * Another reason for a change in the revision might be for a codebase that
  * runs on a similar but different target.
  *
- * The only safe approach when that happens is to resto overwrite any settings
+ * The only safe approach when that happens is to overwrite any settings
  * stored in EEPROM with the compiled defaults and load the working settings
  * with those values.
  *
  * NOTE: this means that any custom values in EEPROM will be lost.
  */
+const int SETTINGS_REVISION = 1009;
 
 /***
  * The address of the copy stored in EEPROM must be fixed. Although the size of
@@ -78,11 +91,11 @@ const int SETTING_MAX_SIZE = 64;
  */
 enum TypeName : uint8_t
 {
-    T_char,
     T_bool,
+    T_int,
+    T_uint16_t,
     T_uint32_t,
     T_float,
-    T_int,
 };
 
 // clang-format off
@@ -91,19 +104,17 @@ enum TypeName : uint8_t
  * of the form
  *    ACTION( type, name, default)  \
  * where
- *    type is any valid C/C++ type
+ *    type is any valid C/C++ type - but make sure there is an entry in TypeName
  *    name is a legal C/C++ identifier
  *    default is the value stored in flash as the default
  *
  * This list will be used to generate structures and populate them autumatically
  * at build time.
  *
- * NOTE: if the structure is changes, update SETTINGS_REVISION
+ * NOTE: if the structure is changed, update SETTINGS_REVISION
+ *
+ * This is a multi-line macro. do not leave off the trailing backslash
  */
-// TODO: Many, or all, of these are going to be robot specific
-// TODO: use macros efined in the robot_config.h file for the values.
-// TODO: should the revision be a value separate form the actual parameters?
-const int SETTINGS_REVISION = 1005;
 #define SETTINGS_PARAMETERS(ACTION)             \
     ACTION(int, revision, SETTINGS_REVISION)    \
     ACTION(float, fwd_kp, 0.010)                \
@@ -114,7 +125,7 @@ const int SETTINGS_REVISION = 1005;
     ACTION(float, rot_kd, 0.000)                \
     ACTION(float, k_velocity_ff, (1.0 / 280.0)) \
     ACTION(float, k_bias_ff, (23.0 / 280.0))    \
-
+\
 
 /***
  * These macros are going to be used to generate individual entries in
@@ -123,17 +134,16 @@ const int SETTINGS_REVISION = 1005;
  * The macro name will be substituted for the string 'ACTION' in the list above
  *
  */
-#define MAKE_STRINGS(CTYPE, VAR, VALUE) const PROGMEM char s_##VAR[] = #VAR;
-#define MAKE_NAMES(CTYPE, VAR, VALUE) s_##VAR,
-#define MAKE_TYPES(CTYPE, VAR, VALUE) T_##CTYPE,
-#define MAKE_DEFAULTS(CTYPE, VAR, VALUE) .VAR = VALUE,
-#define MAKE_STRUCT(CTYPE, VAR, VALUE) CTYPE VAR;
-#define MAKE_POINTERS(CTYPE, VAR, VALUE) reinterpret_cast<void *>(&settings.VAR),
-#define MAKE_CONFIG_ENTRY(CTYPE, VAR, VALUE) {#VAR, T_##CTYPE, reinterpret_cast<void *>(&config.VAR)},
+#define MAKE_STRINGS(       CTYPE,  VAR,   VALUE) const PROGMEM char s_##VAR[] = #VAR;
+#define MAKE_NAMES(         CTYPE,  VAR,   VALUE) s_##VAR,
+#define MAKE_TYPES(         CTYPE,  VAR,   VALUE) T_##CTYPE,
+#define MAKE_DEFAULTS(      CTYPE,  VAR,   VALUE) .VAR = VALUE,
+#define MAKE_STRUCT(        CTYPE,  VAR,   VALUE) CTYPE VAR;
+#define MAKE_POINTERS(      CTYPE,  VAR,   VALUE) reinterpret_cast<void *>(&settings.VAR),
+#define MAKE_CONFIG_ENTRY(  CTYPE,  VAR,   VALUE) {#VAR,T_##CTYPE,reinterpret_cast<void *>(&config.VAR)},
 
 // clang-format on
 
-//
 /***
  * define the structure that holds the settings
  *
@@ -151,41 +161,49 @@ struct Settings
     SETTINGS_PARAMETERS(MAKE_STRUCT)
 };
 
-/***
- * Now declare the two global instances of the settings
- */
+// Now declare the  global instances of the settings data
 extern Settings settings;       // the global working copy in RAM
 extern const Settings defaults; // The coded-in defaults in flash
+// and the supprting structures
 extern void *const variablePointers[] PROGMEM;
 extern const TypeName variableType[] PROGMEM;
-const int get_settings_count();
-int restore_default_settings();
 
+const int get_settings_count();
+
+// Some support utilities
+uint16_t hash16(const char *string);
+uint8_t crc8(uint8_t *data, unsigned int size);
+
+int get_setting_name(int i, char *s);
+void print_setting_name(int i);
+void print_setting_type(const int i);
+void print_setting_value(const int i, const int dp = 4);
+void print_setting_details(const int i, const int dp = 4);
+
+// reading and writing EEPROM settings values and defaults
+int restore_default_settings();
 void save_settings_to_eeprom();
 void load_settings_from_eeprom(bool verbose = false);
 
+// send one setting to the serial device in the form '$n=xxx'
+void print_setting(const int i, const int dp = 4);
+
 // send all to the serial device. sets displayed decimals
-void dump_settings(const int dp = 2);
+void dump_settings(const int dp = 4);
 
-// send one setting to the serial device
-void print_setting(const int i, const int dp = 2);
-
-// write a setting by index number
+// write a value to a setting by index number
 int write_setting(const int i, const char *valueString);
 /***
  * The templated version executes much faster because there are
- * no calls to the ascci_to_xxx converters.
+ * no calls to the ascii_to_xxx converters.
  *
  * If the string converting version is never called, you will
  * save about 1k of flash. Unless you use atof() or atoi() elsewhere.
+ *
  */
 template <class T>
 int write_setting(const int i, const T value)
 {
-    if ((i == 0) or (i >= get_settings_count()))
-    {
-        return -1; // cannot change settings version
-    }
     void *ptr = (void *)pgm_read_word_near(variablePointers + i);
     switch (pgm_read_byte_near(variableType + i))
     {
@@ -195,11 +213,11 @@ int write_setting(const int i, const T value)
         case T_bool:
             *reinterpret_cast<bool *>(ptr) = value;
             break;
-        case T_char:
-            *reinterpret_cast<char *>(ptr) = value;
-            break;
         case T_uint32_t:
             *reinterpret_cast<uint32_t *>(ptr) = value;
+            break;
+        case T_uint16_t:
+            *reinterpret_cast<uint16_t *>(ptr) = value;
             break;
         case T_int:
             *reinterpret_cast<int *>(ptr) = value;

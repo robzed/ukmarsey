@@ -1,32 +1,41 @@
-/***********************************************************************
- * Created by Peter Harrison on 2019-06-10.
- * Copyright (c) 2019 Peter Harrison
- *
- *
- * Permission is hereby granted, free of charge, to any person obtaining a
- * copy of this software and associated documentation files (the
- * "Software"), to deal in the Software without restriction, including
- * without l> imitation the rights to use, copy, modify, merge, publish,
- * distribute, sublicense, and/or sell copies of the Software, and to
- * permit persons to whom the Software is furnished to do so, subject to
- * the following conditions:
- *
- * The above copyright notice and this permission notice shall be included
- * in all copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
- * OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
- * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
- * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY
- * CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT,
- * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
- * SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- *
- **************************************************************************/
+/*
+ * File: settings.cpp                                                                    *
+ * Project: settings-test                                                                *
+ * File Created: Tuesday, 2nd March 2021 2:41:08 pm                                      *
+ * Author: Peter Harrison                                                                *
+ * -----                                                                                 *
+ * Last Modified: Thursday, 4th March 2021 2:25:14 pm                                    *
+ * Modified By: Peter Harrison                                                           *
+ * -----                                                                                 *
+ * Copyright 2017 - 2021 Peter harrison, Helicron                                        *
+ * -----                                                                                 *
+ * MIT License                                                                           *
+ *                                                                                       *
+ * Copyright (c) 2021 Peter harrison                                                     *
+ *                                                                                       *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of       *
+ * this software and associated documentation files (the "Software"), to deal in         *
+ * the Software without restriction, including without limitation the rights to          *
+ * use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies         *
+ * of the Software, and to permit persons to whom the Software is furnished to do        *
+ * so, subject to the following conditions:                                              *
+ *                                                                                       *
+ * The above copyright notice and this permission notice shall be included in all        *
+ * copies or substantial portions of the Software.                                       *
+ *                                                                                       *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR            *
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,              *
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE           *
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER                *
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,         *
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE         *
+ * SOFTWARE.                                                                             *
+ */
 
 #include "settings.h"
 #include "EEPROM.h"
 #include <Arduino.h>
+#include <util/crc16.h>
 // TODO: read and write the setting in EEPROM
 
 // create arrays holding the details of each setting in flash
@@ -119,7 +128,11 @@ void dump_settings(const int dp)
     Serial.println();
     for (int i = 0; i < get_settings_count(); i++)
     {
-        print_setting(i, dp);
+        Serial.print('$');
+        Serial.print(i);
+        Serial.print('=');
+        print_setting_value(i, dp);
+        Serial.println();
     }
 }
 
@@ -153,17 +166,49 @@ void load_settings_from_eeprom(bool verbose)
 }
 
 /***
+ * be sure the buffer has enough space
+ */
+int get_setting_name(int i, char *s)
+{
+    // Necessary casts and dereferencing,
+    strncpy_P(s, (char *)pgm_read_word(&(variableString[i])), 31);
+    return 0;
+}
+void print_setting(int i, const int dp)
+{
+    if (i >= get_settings_count())
+    {
+        return;
+    }
+    Serial.print('$');
+    Serial.print(i);
+    Serial.print('=');
+    print_setting_value(i, dp);
+}
+
+void print_setting_details(const int i, const int dp)
+{
+    print_setting_type(i);
+    Serial.print(' ');
+    print_setting_name(i);
+    Serial.print(' ');
+    Serial.print('=');
+    Serial.print(' ');
+    print_setting_value(i, dp);
+}
+
+/***
  * Utility function to send details of a single settings variable over
  * the serial device.
  *
  * The variable is identified by its index, i.
  */
-void print_setting(const int i, const int dp)
+void print_setting_value(const int i, const int dp)
 {
-    Serial.print('$');
-    Serial.print(i);
-    // use '=' as a separator so that we can just stream the output back in if desired
-    Serial.print('=');
+    if (i >= get_settings_count())
+    {
+        return;
+    }
     void *ptr = (void *)pgm_read_word_near(variablePointers + i);
     switch (pgm_read_byte_near(variableType + i))
     {
@@ -171,13 +216,13 @@ void print_setting(const int i, const int dp)
             Serial.print(*reinterpret_cast<float *>(ptr), dp);
             break;
         case T_bool:
-            Serial.print((*reinterpret_cast<bool *>(ptr)) ? F("true") : F("false"));
-            break;
-        case T_char:
-            Serial.print(*reinterpret_cast<char *>(ptr));
+            Serial.print((*reinterpret_cast<bool *>(ptr)) ? 1 : 0);
             break;
         case T_uint32_t:
             Serial.print(*reinterpret_cast<uint32_t *>(ptr));
+            break;
+        case T_uint16_t:
+            Serial.print(*reinterpret_cast<uint16_t *>(ptr));
             break;
         case T_int:
             Serial.print(*reinterpret_cast<int *>(ptr));
@@ -185,13 +230,43 @@ void print_setting(const int i, const int dp)
         default:
             Serial.println(F(" unknown type"));
     }
+}
+
+void print_setting_name(int i)
+{
+    if (i >= get_settings_count())
+    {
+        return;
+    }
     char buffer[32];
-    Serial.print(' ');
-    //TODO: need to make sure the next character is handled by the setting methods as a comment
-    Serial.print('#');
     strncpy_P(buffer, (char *)pgm_read_word(&(variableString[i])), 31); // Necessary casts and dereferencing,
     Serial.print(buffer);
-    Serial.println();
+}
+
+void print_setting_type(const int i)
+{
+    if (i >= get_settings_count())
+    {
+        return;
+    }
+    switch (pgm_read_byte_near(variableType + i))
+    {
+        case T_float:
+            Serial.print(F("float"));
+            break;
+        case T_bool:
+            Serial.print(F("bool"));
+            break;
+        case T_uint32_t:
+            Serial.print(F("uint32_t"));
+            break;
+        case T_uint16_t:
+            Serial.print(F("uint16_t"));
+            break;
+        case T_int: // fall through for ints
+        default:
+            Serial.print(F("int"));
+    }
 }
 
 /***
@@ -203,6 +278,10 @@ void print_setting(const int i, const int dp)
  */
 int write_setting(const int i, const char *valueString)
 {
+    if (i >= get_settings_count())
+    {
+        return -1;
+    }
     void *ptr = (void *)pgm_read_word_near(variablePointers + i);
     switch (pgm_read_byte_near(variableType + i))
     {
@@ -211,9 +290,6 @@ int write_setting(const int i, const char *valueString)
             break;
         case T_bool:
             *reinterpret_cast<bool *>(ptr) = atoi(valueString) ? true : false;
-            break;
-        case T_char:
-            *reinterpret_cast<char *>(ptr) = valueString[0];
             break;
         case T_uint32_t:
             *reinterpret_cast<uint32_t *>(ptr) = atoi(valueString);
@@ -235,4 +311,73 @@ int restore_default_settings()
 {
     memcpy_P(&settings, &defaults, sizeof(defaults));
     return 0;
+}
+
+/***
+ * A simple 16 bit hash function for strings (null terminated character arrays).
+ *
+ * This can be used if needed to create a lookup table for settings names
+ * if other search methods prove too slow. For this purpose, each settings
+ * identfier can be converted to a 16 bit hash vales and the resulting array
+ * stored in RAM.
+ *
+ * Note that setting names are stored in Flash memory where this code cannot
+ * normally see them. Instead, when building the hash table, use the
+ * get_setting_name() function to copy each name into a temporary buffer
+ * before calculating the hash.
+ *
+ * Note that the user will need to find a way to deal with collisions. That is,
+ * there will be more than one string that can generate a given hash. With more
+ * that 65,000 hash values, the risk should be low. In practice, it would be
+ * easier to test all the strings that are to be used and change any that cause
+ * collisions rather than add a way to deal with the collisions.
+ *
+ * When a setting is requested by name, the supplied name is also converted to a
+ * hash and the table can be searched for a corresponding value.
+ *
+ * If the hashes are stored in the same order as the settings then the index of
+ * the matching hash is also the index of the setting in the relevant tables.
+ *
+ * This method consumes 2 bytes of RAM for every setting entry and so it may not
+ * be worth the cost unless speed is very important.
+ *
+ * For a cost of an additional byte, the hash table could hold both the hash and
+ * the setting index. Then, if the hash table were sorted, a fast binary search
+ * could be used to locate the corresponding settings variable.
+ *
+ * It is entirely possible that an 8 bit hash is sufficient for small applications.
+ */
+
+uint16_t hash16(const char *string)
+{
+    // http://www.cse.yorku.ca/~oz/hash.html
+    uint16_t hash = 5381;
+    char c;
+
+    while ((c = *string++) != '\0')
+    {
+        hash = (hash * 33) + c;
+    }
+    return hash;
+}
+
+/***
+ * A basic 8 bit CRC check that can be used to validate blocks of
+ * memory. These may be commands passed back and forth or the values
+ * stored in the settings objects.
+ *
+ * One use might be to compare the default values hard-coded into
+ * the firmware with those stored in EEPROM.
+ *
+ */
+uint8_t crc8(uint8_t *data, unsigned int size)
+{
+    uint8_t checksum = 0;
+    while (size--)
+    {
+        checksum = (checksum << 1) | (checksum >> 7);
+        checksum += *data;
+        data++;
+    }
+    return checksum;
 }
