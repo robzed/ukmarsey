@@ -150,7 +150,7 @@ void update_motors()
         right_volts += rot_ff;
     }
 
-    if(flag_controllers_enabled)
+    if (flag_controllers_enabled)
     {
         setMotorVolts(left_volts, right_volts);
     }

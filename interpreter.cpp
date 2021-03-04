@@ -884,7 +884,7 @@ int8_t set_target_speed()
     int target_fwd_speed_in_mm_per_second;
     int target_rotational_speed_in_degrees_per_second;
 
-    if(inputString[1] == ',')
+    if (inputString[1] == ',')
     {
         // rotation speed only
         target_rotational_speed_in_degrees_per_second = decode_input_value_signed(2);
@@ -910,7 +910,6 @@ int8_t set_target_speed()
     enable_controllers();
     return T_OK;
 }
-
 
 int execute_settings_command(char *line)
 {
@@ -994,7 +993,6 @@ int8_t system_command()
 {
     return execute_settings_command(inputString);
 }
-
 
 int8_t not_implemented()
 {

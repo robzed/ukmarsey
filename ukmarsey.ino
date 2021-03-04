@@ -56,30 +56,5 @@ void setup()
 
 void loop()
 {
-    // fwd_set_speed = 500.0;
-    // rot_set_speed = 0;
-    // handy for simple continuous tests
-    // if (millis() > report_time_trigger)
-    // {
-    //     report_time_trigger += REPORTING_INTERVAL;
-    //     Stopwatch sw;
-    //     Serial.print(millis());
-    //     Serial.print(' ');
-    //     Serial.print(fwd_set_speed);
-    //     Serial.print(' ');
-    //     Serial.print(rot_set_speed);
-    //     Serial.print(' ');
-    //     Serial.print(robot_velocity);
-    //     Serial.print(' ');
-    //     Serial.print(robot_omega);
-    //     Serial.print(' ');
-    //     Serial.print(fwd_volts);
-    //     Serial.print(' ');
-    //     Serial.print(rot_volts); // placeholder for controller voltage
-    //     Serial.print(' ');
-    //     Serial.print(sw.elapsed_time());
-    //     Serial.println();
-    // }
-
     interpreter();
 }
