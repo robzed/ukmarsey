@@ -107,15 +107,7 @@ void motorSetup()
     setMotorVolts(0, 0);
     fwd_controller.SetOutputLimits(-6.0, 6.0);
     fwd_controller.SetMode(AUTOMATIC); // turns on the controller. Set to manual for off.
-    Serial.println("Motors");
-    Serial.println(fwd_controller.GetKp(), 3);
-    Serial.println(fwd_controller.GetKi(), 3);
-    Serial.println(fwd_controller.GetKd(), 3);
     fwd_controller.SetTunings(settings.fwd_kp, settings.fwd_ki, settings.fwd_kd);
-    Serial.println();
-    Serial.println(fwd_controller.GetKp(), 3);
-    Serial.println(fwd_controller.GetKi(), 3);
-    Serial.println(fwd_controller.GetKd(), 3);
     rot_controller.SetOutputLimits(-6.0, 6.0);
     rot_controller.SetMode(AUTOMATIC); // turns on the controller. Set to manual for off.
     rot_controller.SetTunings(settings.rot_kp, settings.rot_ki, settings.rot_kd);
