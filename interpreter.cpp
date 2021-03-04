@@ -938,12 +938,7 @@ int execute_settings_command(char *line)
                 // list the settings names and types?
                 // or send them as a C declaration?
                 // or a JSON object ...
-
-                for (int i = 0; i < get_settings_count(); i++)
-                {
-                    print_setting_details(i);
-                    Serial.println(';');
-                }
+                dump_settings_detail();
                 return T_OK;
                 break;
         }

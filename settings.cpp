@@ -4,7 +4,7 @@
  * File Created: Tuesday, 2nd March 2021 2:41:08 pm                                      *
  * Author: Peter Harrison                                                                *
  * -----                                                                                 *
- * Last Modified: Thursday, 4th March 2021 3:09:30 pm                                    *
+ * Last Modified: Thursday, 4th March 2021 10:12:01 pm                                   *
  * Modified By: Peter Harrison                                                           *
  * -----                                                                                 *
  * Copyright 2017 - 2021 Peter harrison, Helicron                                        *
@@ -136,6 +136,16 @@ void dump_settings(const int dp)
     }
 }
 
+void dump_settings_detail(const int dp)
+{
+    Serial.println();
+    for (int i = 0; i < get_settings_count(); i++)
+    {
+        print_setting_details(i, dp);
+        Serial.println(';');
+    }
+}
+
 void reset_eeprom_settings_to_defaults()
 {
     restore_default_settings();
@@ -160,6 +170,7 @@ void load_settings_from_eeprom(bool verbose)
         if (verbose)
         {
             Serial.println(F("settings updated."));
+            dump_settings_detail();
         }
         reset_eeprom_settings_to_defaults();
     }

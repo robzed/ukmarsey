@@ -4,7 +4,7 @@
  * File Created: Tuesday, 2nd March 2021 2:41:08 pm                                      *
  * Author: Peter Harrison                                                                *
  * -----                                                                                 *
- * Last Modified: Thursday, 4th March 2021 3:24:38 pm                                    *
+ * Last Modified: Thursday, 4th March 2021 10:11:13 pm                                   *
  * Modified By: Peter Harrison                                                           *
  * -----                                                                                 *
  * Copyright 2017 - 2021 Peter harrison, Helicron                                        *
@@ -191,6 +191,7 @@ void print_setting(const int i, const int dp = DEFAULT_DECIMAL_PLACES);
 
 // send all to the serial device. sets displayed decimals
 void dump_settings(const int dp = DEFAULT_DECIMAL_PLACES);
+void dump_settings_detail(const int dp = DEFAULT_DECIMAL_PLACES);
 
 // write a value to a setting by index number
 int write_setting(const int i, const char *valueString);
