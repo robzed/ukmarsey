@@ -3,11 +3,14 @@
 
 #include "pid_v1.h"
 #include "robot_config.h"
+#include "settings.h"
 #include "switches.h"
 #include "tests.h"
 #include "interpreter.h"
 #include <Arduino.h>
 #include <wiring_private.h>
+
+#define NEW_SETTINGS
 
 //
 // provided by systick.cpp

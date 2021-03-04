@@ -33,6 +33,7 @@
 */
 
 #include "public.h"
+#include "settings.h"
 #include "stopwatch.h"
 #include <Arduino.h>
 const int REPORTING_INTERVAL = 10;
@@ -45,11 +46,11 @@ void setup()
     pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(115200);
     Serial.println(F("Hello from ukmarsey"));
+    load_settings_from_eeprom();
     setup_systick();
     sensors_control_setup();
     setup_encoders();
     motorSetup();
-    init_stored_parameters();
     report_time_trigger += REPORTING_INTERVAL;
 }
 

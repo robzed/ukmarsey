@@ -162,10 +162,8 @@ void print_setting(const int i, const int dp)
 {
     Serial.print('$');
     Serial.print(i);
-
-    Serial.print(' ');
-    // Serial.print('=');
-    // Serial.print('=');
+    // use '=' as a separator so that we can just stream the output back in if desired
+    Serial.print('=');
     void *ptr = (void *)pgm_read_word_near(variablePointers + i);
     switch (pgm_read_byte_near(variableType + i))
     {
@@ -189,6 +187,7 @@ void print_setting(const int i, const int dp)
     }
     char buffer[32];
     Serial.print(' ');
+    //TODO: need to make sure the next character is handled by the setting methods as a comment
     Serial.print('#');
     strncpy_P(buffer, (char *)pgm_read_word(&(variableString[i])), 31); // Necessary casts and dereferencing,
     Serial.print(buffer);

@@ -60,7 +60,6 @@
  *
  * NOTE: this means that any custom values in EEPROM will be lost.
  */
-const int SETTINGS_REVISION = 1002;
 
 /***
  * The address of the copy stored in EEPROM must be fixed. Although the size of
@@ -101,16 +100,21 @@ enum TypeName : uint8_t
  *
  * NOTE: if the structure is changes, update SETTINGS_REVISION
  */
-#define SETTINGS_PARAMETERS(ACTION)                \
-  ACTION(  int,         revision,    SETTINGS_REVISION)        \
-  ACTION(  float,       MaxSpeed,    123.45)     \
-  ACTION(  float,       MaxAccel,     23.456)    \
-  ACTION(  float,       MaxOmega,     34.567)    \
-  ACTION(  float,       MinOmega,     34.567)    \
-  ACTION(  uint32_t,    maxTime,     123456)     \
-  ACTION(  int,         RunCount,    0)        \
-  ACTION(  bool,        JapanRules,  true)       \
-\
+// TODO: Many, or all, of these are going to be robot specific
+// TODO: use macros efined in the robot_config.h file for the values.
+// TODO: should the revision be a value separate form the actual parameters?
+const int SETTINGS_REVISION = 1005;
+#define SETTINGS_PARAMETERS(ACTION)             \
+    ACTION(int, revision, SETTINGS_REVISION)    \
+    ACTION(float, fwd_kp, 0.010)                \
+    ACTION(float, fwd_ki, 0.500)                \
+    ACTION(float, fwd_kd, 0.000)                \
+    ACTION(float, rot_kp, 0.010)                \
+    ACTION(float, rot_ki, 0.500)                \
+    ACTION(float, rot_kd, 0.000)                \
+    ACTION(float, k_velocity_ff, (1.0 / 280.0)) \
+    ACTION(float, k_bias_ff, (23.0 / 280.0))    \
+
 
 /***
  * These macros are going to be used to generate individual entries in
@@ -119,13 +123,13 @@ enum TypeName : uint8_t
  * The macro name will be substituted for the string 'ACTION' in the list above
  *
  */
-#define MAKE_STRINGS(       CTYPE,  VAR,   VALUE) const PROGMEM char s_##VAR[] = #VAR;
-#define MAKE_NAMES(         CTYPE,  VAR,   VALUE) s_##VAR,
-#define MAKE_TYPES(         CTYPE,  VAR,   VALUE) T_##CTYPE,
-#define MAKE_DEFAULTS(      CTYPE,  VAR,   VALUE) .VAR = VALUE,
-#define MAKE_STRUCT(        CTYPE,  VAR,   VALUE) CTYPE VAR;
-#define MAKE_POINTERS(      CTYPE,  VAR,   VALUE) reinterpret_cast<void *>(&settings.VAR),
-#define MAKE_CONFIG_ENTRY(  CTYPE,  VAR,   VALUE) {#VAR,T_##CTYPE,reinterpret_cast<void *>(&config.VAR)},
+#define MAKE_STRINGS(CTYPE, VAR, VALUE) const PROGMEM char s_##VAR[] = #VAR;
+#define MAKE_NAMES(CTYPE, VAR, VALUE) s_##VAR,
+#define MAKE_TYPES(CTYPE, VAR, VALUE) T_##CTYPE,
+#define MAKE_DEFAULTS(CTYPE, VAR, VALUE) .VAR = VALUE,
+#define MAKE_STRUCT(CTYPE, VAR, VALUE) CTYPE VAR;
+#define MAKE_POINTERS(CTYPE, VAR, VALUE) reinterpret_cast<void *>(&settings.VAR),
+#define MAKE_CONFIG_ENTRY(CTYPE, VAR, VALUE) {#VAR, T_##CTYPE, reinterpret_cast<void *>(&config.VAR)},
 
 // clang-format on
 
@@ -178,6 +182,10 @@ int write_setting(const int i, const char *valueString);
 template <class T>
 int write_setting(const int i, const T value)
 {
+    if ((i == 0) or (i >= get_settings_count()))
+    {
+        return -1; // cannot change settings version
+    }
     void *ptr = (void *)pgm_read_word_near(variablePointers + i);
     switch (pgm_read_byte_near(variableType + i))
     {
