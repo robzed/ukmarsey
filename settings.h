@@ -4,7 +4,7 @@
  * File Created: Tuesday, 2nd March 2021 2:41:08 pm                                      *
  * Author: Peter Harrison                                                                *
  * -----                                                                                 *
- * Last Modified: Thursday, 4th March 2021 3:01:10 pm                                    *
+ * Last Modified: Thursday, 4th March 2021 3:24:38 pm                                    *
  * Modified By: Peter Harrison                                                           *
  * -----                                                                                 *
  * Copyright 2017 - 2021 Peter harrison, Helicron                                        *
@@ -48,6 +48,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include "public.h"
 #include <Arduino.h>
 
 /***
@@ -177,8 +178,8 @@ uint8_t crc8(uint8_t *data, unsigned int size);
 int get_setting_name(int i, char *s);
 void print_setting_name(int i);
 void print_setting_type(const int i);
-void print_setting_value(const int i, const int dp = 4);
-void print_setting_details(const int i, const int dp = 4);
+void print_setting_value(const int i, const int dp = DEFAULT_DECIMAL_PLACES);
+void print_setting_details(const int i, const int dp = DEFAULT_DECIMAL_PLACES);
 
 // reading and writing EEPROM settings values and defaults
 int restore_default_settings();
@@ -186,10 +187,10 @@ void save_settings_to_eeprom();
 void load_settings_from_eeprom(bool verbose = false);
 
 // send one setting to the serial device in the form '$n=xxx'
-void print_setting(const int i, const int dp = 4);
+void print_setting(const int i, const int dp = DEFAULT_DECIMAL_PLACES);
 
 // send all to the serial device. sets displayed decimals
-void dump_settings(const int dp = 4);
+void dump_settings(const int dp = DEFAULT_DECIMAL_PLACES);
 
 // write a value to a setting by index number
 int write_setting(const int i, const char *valueString);

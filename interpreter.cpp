@@ -36,6 +36,7 @@
 #include "interpreter.h"
 #include "digitalWriteFast.h"
 #include "public.h"
+#include "read-number.h"
 #include "settings.h"
 #include "switches.h"
 #include "tests.h"
@@ -646,50 +647,6 @@ int8_t motor_control_dual_voltage()
     }
     return T_OK;
 }
-/*----------------------------------------------------------------*/
-/** @brief Reads and writes stored parameters
- *  @return Void.
- */
-int8_t stored_parameter_control()
-{
-    int param_number = decode_input_value(1);
-    if (param_number >= 0 and param_number < get_settings_count())
-    {
-        if (inputString[inputIndex] == '=')
-        {
-            float param = decode_input_value_float(inputIndex + 1);
-            write_setting(param_number, param);
-        }
-        else // read param
-        {
-            print_setting(param_number, floating_decimal_places);
-        }
-    }
-    else
-    {
-        if (inputString[1] == 'a')
-        {
-            dump_settings(floating_decimal_places);
-        }
-        else if (inputString[1] == 'd')
-        {
-            restore_default_settings();
-        }
-        else
-        {
-            return T_OUT_OF_RANGE;
-        }
-    }
-    return T_OK;
-}
-
-/** @brief Reads the parameters into RAM. If Magic number not found will default all parameters.
- *  @return Void.
- */
-void init_stored_parameters()
-{
-    load_settings_from_eeprom();
-}
 
 /*----------------------------------------------------------------*/
 
@@ -753,7 +710,7 @@ int8_t echo_command()
     int param = inputString[1];
     if (param == 'F')
     {
-        Serial.println(decode_input_value_float(2), floating_decimal_places);
+        Serial.println(decode_input_value_float(2), DEFAULT_DECIMAL_PLACES);
     }
     else if (param == 'U')
     {
@@ -769,7 +726,7 @@ int8_t echo_command()
     }
     else
     {
-        Serial.println(decode_input_value_float(1), floating_decimal_places);
+        Serial.println(decode_input_value_float(1), DEFAULT_DECIMAL_PLACES);
     }
     return T_OK;
 }
@@ -884,7 +841,7 @@ int8_t print_bat()
     }
     else
     {
-        Serial.println(battery_voltage, floating_decimal_places);
+        Serial.println(battery_voltage, DEFAULT_DECIMAL_PLACES);
     }
     return T_OK;
 }
@@ -954,6 +911,91 @@ int8_t set_target_speed()
     return T_OK;
 }
 
+
+int execute_settings_command(char *line)
+{
+    // we already know that line[0] == '$'
+    if (line[1] == '\0')
+    {
+        return T_OK;
+    }
+    if (line[2] == '\0')
+    { // one of the single character commands
+        switch (line[1])
+        {
+            case '$':
+                dump_settings(5);
+                return T_OK;
+                break;
+            case '#':
+                restore_default_settings();
+                return T_OK;
+                break;
+            case '@':
+                load_settings_from_eeprom();
+                return T_OK;
+                break;
+            case '!':
+                save_settings_to_eeprom();
+                return T_OK;
+                break;
+            case '?':
+                // could be used by host to populate its data structures
+                // list the settings names and types?
+                // or send them as a C declaration?
+                // or a JSON object ...
+
+                for (int i = 0; i < get_settings_count(); i++)
+                {
+                    print_setting_details(i);
+                    Serial.println(';');
+                }
+                return T_OK;
+                break;
+        }
+    }
+
+    //OK - so it must be a parameter fetch/update
+    uint8_t pos = 1; // the first character [0] is already known
+    // get the parameter index
+    int index;
+    if (!read_integer(line, &pos, &index))
+    {
+        // This could be the place to trigger a string search
+        return T_UNEXPECTED_TOKEN;
+    }
+    if (index < 0 or index >= get_settings_count())
+    {
+        return T_OUT_OF_RANGE;
+    }
+
+    // There is a parameter index, now see if this is an assignment
+    if (line[pos++] != '=')
+    {
+        print_setting(index, 3); // no, just report the value
+        Serial.println();
+        return T_OK;
+    }
+
+    // It was an assignment so get the value
+    float value;
+    if (!read_float(line, &pos, &value))
+    {
+        return T_OUT_OF_RANGE;
+    }
+    // Any remaining characters are ignored
+
+    // Everything must have worked. Woot!
+    write_setting(index, value);
+    return T_OK;
+}
+
+int8_t system_command()
+{
+    return execute_settings_command(inputString);
+}
+
+
 int8_t not_implemented()
 {
     interpreter_error(T_UNKNOWN_COMMAND, inputString);
@@ -968,7 +1010,7 @@ const PROGMEM fptr PROGMEM cmd2[] =
         not_implemented,               // '!'
         not_implemented,               // '"'
         not_implemented,               // '#'
-        stored_parameter_control,      // '$'
+        system_command,                // '$'
         not_implemented,               // '%'
         not_implemented,               // '&'
         not_implemented,               // '''

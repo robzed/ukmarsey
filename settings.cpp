@@ -1,10 +1,10 @@
 /*
  * File: settings.cpp                                                                    *
- * Project: settings-test                                                                *
+ * Project: ukmarsey                                                                     *
  * File Created: Tuesday, 2nd March 2021 2:41:08 pm                                      *
  * Author: Peter Harrison                                                                *
  * -----                                                                                 *
- * Last Modified: Thursday, 4th March 2021 2:25:14 pm                                    *
+ * Last Modified: Thursday, 4th March 2021 3:09:30 pm                                    *
  * Modified By: Peter Harrison                                                           *
  * -----                                                                                 *
  * Copyright 2017 - 2021 Peter harrison, Helicron                                        *

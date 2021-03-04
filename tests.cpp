@@ -36,50 +36,14 @@
 #include "interpreter.h"
 #include "stopwatch.h"
 #include "switches.h"
-#define MAX_DIGITS 10
-int32_t read_integer(const char *line, int *pos, int *value)
-{
-    char *ptr = (char *)line + *pos;
-    char c = *ptr++;
-    bool is_minus = false;
-    if (c == '-')
-    {
-        is_minus = true;
-        c = *ptr++;
-    }
-    else if (c == '+')
-    {
-        c = *ptr++;
-    }
-    int32_t number = 0;
-    uint8_t digit_count = 0;
-    while (c >= '0' and c <= '9')
-    {
-        digit_count++;
-        if (digit_count <= MAX_DIGITS)
-        {
-            number = 10 * number + (c - '0'); // number*10 + c
-        }
-        c = *ptr++;
-    }
-    *pos = ptr - line - 1;
-    if (digit_count == 0)
-    {
-        return false;
-    }
-    else
-    {
-        *value = is_minus ? -number : number;
-        return true;
-    }
-}
+#include "read-number.h"
 
 int8_t cmd_test_runner()
 {
     Stopwatch sw;
     int test;
-    int index = 1;
     test = decode_input_value(1);
+    // int index = 1;
     // bool ok = read_integer(inputString, &index, &test);
     Serial.print(F("TEST: "));
     Serial.println(test);

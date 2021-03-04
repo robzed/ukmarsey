@@ -3,7 +3,6 @@
 
 #include "pid_v1.h"
 #include "robot_config.h"
-#include "settings.h"
 #include "switches.h"
 #include "tests.h"
 #include "interpreter.h"
@@ -99,6 +98,17 @@ typedef unsigned time_measure_t;
 #endif
 
 // Other constants
-const int floating_decimal_places = 3;
+const int DEFAULT_DECIMAL_PLACES = 3;
 
+// These are the error codes produced by commands to pass into interpreter error.
+enum
+{
+    T_SILENT_ERROR = -1, // Special error code designed for ?, h and unimplemented commands that report their own errors.
+    T_OK = 0,            // Normal 'no error' return code.
+    T_OUT_OF_RANGE = 1,
+    T_READ_NOT_SUPPORTED = 2,
+    T_LINE_TOO_LONG = 3,
+    T_UNKNOWN_COMMAND = 4,
+    T_UNEXPECTED_TOKEN = 5
+};
 #endif
