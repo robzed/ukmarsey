@@ -49,7 +49,9 @@ enum
     T_UNKNOWN_COMMAND = 4,
     T_UNEXPECTED_TOKEN = 5
 };
-
+#define MAX_INPUT_SIZE 14
+extern char inputString[MAX_INPUT_SIZE]; // a String to hold incoming data
+extern int inputIndex;                   // where we are on the input
 void interpreter();
 void init_stored_parameters();
 float get_float_param(int param_index);
