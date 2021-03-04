@@ -164,11 +164,6 @@ int8_t reset_state()
         void (*resetFunc)(void) = 0; // declare reset fuction at address 0
         resetFunc();
     }
-    else if (function == '?')
-    {
-        extern uint8_t PoR_status;
-        Serial.println(PoR_status);
-    }
     else
     {
         // We should reset all state here. At the moment there isn't any.

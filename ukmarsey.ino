@@ -38,11 +38,10 @@
 #include <Arduino.h>
 const int REPORTING_INTERVAL = 10;
 uint32_t report_time_trigger;
-uint8_t PoR_status = 0;
+
+// TODO: we probably need to deal properly with different types of reset
 void setup()
 {
-    PoR_status = MCUSR; // is this erased by bootloader?
-    MCUSR = 0;
     pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(115200);
     Serial.println(F("Hello from ukmarsey"));
