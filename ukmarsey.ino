@@ -44,7 +44,7 @@ void setup()
 {
     pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(115200);
-    Serial.println(F("Hello from ukmarsey"));
+    Serial.println(F("\nHello from ukmarsey"));
     load_settings_from_eeprom();
     setup_systick();
     sensors_control_setup();
