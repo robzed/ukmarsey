@@ -830,7 +830,6 @@ int8_t stop_motors_and_everything_command()
     rot_set_speed = 0;
 
     // add action stop here as well
-
     return T_OK;
 }
 

@@ -134,7 +134,6 @@ void test_controllers()
     delay(100);
     uint32_t tick = millis() + 10;
     Stopwatch sw;
-    uint32_t start_time = millis();
     while (not button_pressed() && sw.split() < (5 * ONE_SECOND))
     {
         if (millis() > tick)
