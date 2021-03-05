@@ -32,11 +32,11 @@
   SOFTWARE.
 */
 #include "tests.h"
-#include "public.h"
 #include "interpreter.h"
+#include "public.h"
+#include "read-number.h"
 #include "stopwatch.h"
 #include "switches.h"
-#include "read-number.h"
 
 int8_t cmd_test_runner()
 {
@@ -48,7 +48,14 @@ int8_t cmd_test_runner()
     Serial.print(F("TEST: "));
     Serial.println(test);
     Serial.println(sw.split());
-    // test_controllers();
+    switch (test)
+    {
+        case 1:
+            test_controllers();
+            break;
+        default:
+            break;
+    }
     return T_OK;
 }
 
@@ -81,6 +88,7 @@ void log_controller_data()
  */
 void test_controllers()
 {
+    enable_controllers();
     Serial.print(F("CONTROLLER TEST - "));
     bool was_using_ff = flag_controllers_use_ff;
     if (readFunctionSwitch() & 0x01)
@@ -116,6 +124,8 @@ void test_controllers()
     fwd_set_speed = 0;
     rot_set_speed = 0;
     flag_controllers_use_ff = was_using_ff;
+    disable_controllers();
+    setMotorVolts(0, 0);
 };
 
 void test_fwd_feedforward(){
