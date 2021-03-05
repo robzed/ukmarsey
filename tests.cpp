@@ -31,12 +31,12 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-#include "tests.h"
 #include "interpreter.h"
 #include "public.h"
 #include "read-number.h"
 #include "stopwatch.h"
 #include "switches.h"
+#include "tests.h"
 
 int8_t cmd_test_runner()
 {
