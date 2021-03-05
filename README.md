@@ -127,7 +127,7 @@ Regarding analogue readings, (A command), these are read off interrupts, so can 
 
 M - PWM values are low level control of the motor input. 255 represents full voltage - whatever level that is.
 
-N - Set the voltage to the motor. Voltage levels are gneerated via PWM, after scaling for the battery level. This gives a more consistent result than raw PWM values, because it doesn't result in variation due to battery level.
+N - Set the voltage to the motor. Voltage levels are generated via PWM, after scaling for the battery level. This gives a more consistent result than raw PWM values, because it doesn't result in variation due to battery level.
 
 
 Examples:
