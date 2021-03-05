@@ -42,7 +42,7 @@ These can be configured in the file 'robot_config.h'. See that file and make app
 
 # Summary of Interpreter Usage
 
-NOTICE: This document reflects version 1.2 of the interpreter.
+NOTICE: This document reflects version 1.4 of the interpreter.
 
 ## Serial Connection and Command Entry
 
