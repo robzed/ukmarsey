@@ -50,6 +50,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#include "robot_config.h"
 #include "public.h"
 #include <Arduino.h>
 
@@ -120,14 +121,14 @@ enum TypeName : uint8_t
  */
 #define SETTINGS_PARAMETERS(ACTION)             \
     ACTION(int, revision, SETTINGS_REVISION)    \
-    ACTION(float, fwd_kp, 0.010)                \
-    ACTION(float, fwd_ki, 0.500)                \
-    ACTION(float, fwd_kd, 0.000)                \
-    ACTION(float, rot_kp, 0.010)                \
-    ACTION(float, rot_ki, 0.500)                \
-    ACTION(float, rot_kd, 0.000)                \
-    ACTION(float, k_velocity_ff, (1.0 / 280.0)) \
-    ACTION(float, k_bias_ff, (23.0 / 280.0))    \
+    ACTION(float, fwd_kp,        FWD_KP  )      \
+    ACTION(float, fwd_ki,        FWD_KI  )      \
+    ACTION(float, fwd_kd,        FWD_KD  )      \
+    ACTION(float, rot_kp,        ROT_KP  )      \
+    ACTION(float, rot_ki,        ROT_KI  )      \
+    ACTION(float, rot_kd,        ROT_KD  )      \
+    ACTION(float, k_velocity_ff, SPEED_FF)      \
+    ACTION(float, k_bias_ff,     BIAS_FF )      \
 \
 
 /***

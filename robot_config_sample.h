@@ -61,4 +61,17 @@ const float MAX_MOTOR_VOLTS = 6.0f;
 
 const float LOOP_FREQUENCY = 500.0;                //Hz
 const float LOOP_INTERVAL = 1.0f / LOOP_FREQUENCY; //seconds
+
+
+// Motor controller constants
+// These are the defaults that will be loaded into settings
+const float SPEED_FF = (1.0 / 280.0);
+const float BIAS_FF = (23.0 / 280.0);
+const float FWD_KP = 0.010;
+const float FWD_KI = 0.500;
+const float FWD_KD = 0.000;
+const float ROT_KP = 0.010;
+const float ROT_KI = 0.500;
+const float ROT_KD = 0.010;
+
 #endif
