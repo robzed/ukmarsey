@@ -36,132 +36,21 @@
 #include "interpreter.h"
 #include "digitalWriteFast.h"
 #include "public.h"
+#include "read-number.h"
+#include "settings.h"
 #include "switches.h"
 #include "tests.h"
 #include <Arduino.h>
-#include <EEPROM.h>
+
 /*
  * Small command line interpreter
  */
 
-#define MAX_INPUT_SIZE 14
-static char inputString[MAX_INPUT_SIZE]; // a String to hold incoming data
-static int inputIndex = 0;               // where we are on the input
+// TODO: have CLI treat '#' as a comment character and drop remaining line
+
+char inputString[MAX_INPUT_SIZE]; // a String to hold incoming data
+int inputIndex = 0;               // where we are on the input
 static bool interpreter_echo = true;
-
-//
-// There are (NUM_STORED_PARAMS+2) * 4 bytes stored in EEPROM. NOTE: The last one is a magic number to detect an uninitialised EEPROM.
-//
-#define NUM_STORED_PARAMS 16
-
-float stored_params[NUM_STORED_PARAMS];
-static const float stored_parameters_default_values[NUM_STORED_PARAMS] = {
-
-    // Index: Usage
-    0.0F, //  0: undefined
-    0.0F, //  1: undefined
-    0.0F, //  2: undefined
-    0.0F, //  3: undefined
-
-    0.0F, //  4: undefined
-    0.0F, //  5: undefined
-    0.0F, //  6: undefined
-    0.0F, //  7: undefined
-
-    0.0F, //  8: undefined
-    0.0F, //  9: undefined
-    0.0F, // 10: undefined
-    0.0F, // 11: undefined
-
-    0.0F, // 12: undefined
-    0.0F, // 13: undefined
-    0.0F, // 14: undefined
-    0.0F, // 15: undefined
-
-};
-
-#define NUMBER_OF_BITFIELD_STORED_PARAMS 32
-static const uint32_t bitfield_default_values =
-    // Default 0UL/1UL  Index: Usage
-    (0UL << 31) + // 131: undefined
-    (0UL << 30) + // 130: undefined
-    (0UL << 29) + // 129: undefined
-    (0UL << 28) + // 128: undefined
-    (0UL << 27) + // 127: undefined
-    (0UL << 26) + // 126: undefined
-    (0UL << 25) + // 125: undefined
-    (0UL << 24) + // 124: undefined
-
-    (0UL << 23) + // 123: undefined
-    (0UL << 22) + // 122: undefined
-    (0UL << 21) + // 121: undefined
-    (0UL << 20) + // 120: undefined
-    (0UL << 19) + // 119: undefined
-    (0UL << 18) + // 118: undefined
-    (0UL << 17) + // 117: undefined
-    (0UL << 16) + // 116: undefined
-
-    (0UL << 15) + // 115: undefined
-    (0UL << 14) + // 114: undefined
-    (0UL << 13) + // 113: undefined
-    (0UL << 12) + // 112: undefined
-    (0UL << 11) + // 111: undefined
-    (0UL << 10) + // 110: undefined
-    (0UL << 9) +  // 109: undefined
-    (0UL << 8) +  // 108: undefined
-
-    (0UL << 7) + // 107: undefined
-    (0UL << 6) + // 106: undefined
-    (0UL << 5) + // 105: undefined
-    (0UL << 4) + // 104: undefined
-    (0UL << 3) + // 103: undefined
-    (0UL << 2) + // 102: undefined
-    (0UL << 1) + // 101: undefined
-    (0UL);       // 100: undefined
-//
-// actual data storage
-//
-uint32_t bitfield_stored_params = bitfield_default_values;
-
-// Addresses
-#define BITFIELD_ADDRESS ((NUM_STORED_PARAMS + 1) * 4)
-#define MAGIC_ADDRESS (BITFIELD_ADDRESS + sizeof(bitfield_stored_params))
-
-//
-// Version number for parameter configuration in EEPROM
-//
-// If the parameter configuration in EEPROM changes, increase this number
-// and new versions will get a clean set of defaults.
-#define PARAMETER_EEPROM_VERSION 1
-
-// Magic to detect uninitialised space
-#define MAGIC_NUMBER ((0x00CAFE00) ^ (PARAMETER_EEPROM_VERSION))
-
-/** @brief  Access a stored parameter
- *  @param  Index of parameter
- *  @return stored_param, or 0 if that parameter doesn't exist.
- */
-float get_float_param(int param_index)
-{
-    if (param_index < 0 or param_index > NUM_STORED_PARAMS)
-    {
-        return 0;
-    }
-    return stored_params[param_index];
-}
-
-/** @brief  Access a stored bool parameter
- *  @param  Index of parameter
- *  @return stored_param, or false if that parameter doesn't exist.
- */
-bool get_bool_param(int param_index)
-{
-    if (param_index < 100 or param_index > NUMBER_OF_BITFIELD_STORED_PARAMS)
-    {
-        return false;
-    }
-    return bitfield_stored_params & (1 << (param_index - 100));
-}
 
 // ------------------------------------------
 // These are the types
@@ -274,11 +163,6 @@ int8_t reset_state()
     {
         void (*resetFunc)(void) = 0; // declare reset fuction at address 0
         resetFunc();
-    }
-    else if (function == '?')
-    {
-        extern uint8_t PoR_status;
-        Serial.println(PoR_status);
     }
     else
     {
@@ -759,114 +643,7 @@ int8_t motor_control_dual_voltage()
     return T_OK;
 }
 
-/** @brief Reads and writes stored parameters
- *  @return Void.
- */
-int8_t stored_parameter_control()
-{
-    int param_number = decode_input_value(1);
-    if (param_number >= 0 and param_number < NUM_STORED_PARAMS)
-    {
-        if (inputString[inputIndex] == '=')
-        {
-            // write param
-            //
-            float param = decode_input_value_float(inputIndex + 1);
-            stored_params[param_number] = param;
-            EEPROM.put(param_number * 4, param);
-        }
-        else // read param
-        {
-            Serial.println(stored_params[param_number], floating_decimal_places);
-        }
-    }
-    else if (param_number >= 100 and param_number < (100 + NUMBER_OF_BITFIELD_STORED_PARAMS))
-    {
-        uint8_t shift = param_number - 100;
-        if (inputString[inputIndex] == '=')
-        {
-            uint32_t mask = 1UL << shift;
-            uint32_t bit_value = decode_input_value(inputIndex + 1);
-            if (bit_value)
-            {
-                bitfield_stored_params |= mask;
-            }
-            else
-            {
-                bitfield_stored_params &= ~mask;
-            }
-            EEPROM.put(BITFIELD_ADDRESS, bitfield_stored_params);
-        }
-        else
-        {
-            Serial.println((bitfield_stored_params >> shift) & 1);
-        }
-    }
-    else
-    {
-        if (inputString[1] == 'a')
-        {
-            for (int i = 0; i < NUM_STORED_PARAMS; i++)
-            {
-                Serial.println(stored_params[i], floating_decimal_places);
-            }
-        }
-        else if (inputString[1] == 'b')
-        {
-            for (int i = 0; i < NUMBER_OF_BITFIELD_STORED_PARAMS; i++)
-            {
-                Serial.println((bitfield_stored_params & (1UL << i)) ? 1 : 0);
-            }
-        }
-        else if (inputString[1] == 'd')
-        {
-            const float *p = stored_parameters_default_values;
-            for (int i = 0; i < NUM_STORED_PARAMS; i++)
-            {
-                EEPROM.put(i * 4, *p);
-                stored_params[i] = *p++;
-            }
-            EEPROM.put(BITFIELD_ADDRESS, bitfield_default_values);
-            bitfield_stored_params = bitfield_default_values;
-        }
-        else
-        {
-            return T_OUT_OF_RANGE;
-        }
-    }
-    return T_OK;
-}
-
-/** @brief Reads the parameters into RAM. If Magic number not found will default all parameters.
- *  @return Void.
- */
-void init_stored_parameters()
-{
-    uint32_t magic = 0;
-    EEPROM.get(MAGIC_ADDRESS, magic);
-    if (magic != MAGIC_NUMBER)
-    {
-        Serial.println("@Defaulting Params");
-        // default values here
-        const float *p = stored_parameters_default_values;
-        for (int i = 0; i < NUM_STORED_PARAMS; i++)
-        {
-            // we use write here, not update
-            EEPROM.put(i * 4, *p++);
-        }
-        EEPROM.put(BITFIELD_ADDRESS, bitfield_default_values);
-        // finally write magic back
-        EEPROM.put(MAGIC_ADDRESS, MAGIC_NUMBER);
-    }
-
-    for (int i = 0; i < NUM_STORED_PARAMS; i++)
-    {
-        float f;
-        EEPROM.get(i * 4, f);
-        stored_params[i] = f;
-    }
-    EEPROM.get(BITFIELD_ADDRESS, bitfield_stored_params);
-}
+/*----------------------------------------------------------------*/
 
 /** @brief Turns command line interpreter verbose error messages on and off
  *  @return Void.
@@ -928,7 +705,7 @@ int8_t echo_command()
     int param = inputString[1];
     if (param == 'F')
     {
-        Serial.println(decode_input_value_float(2), floating_decimal_places);
+        Serial.println(decode_input_value_float(2), DEFAULT_DECIMAL_PLACES);
     }
     else if (param == 'U')
     {
@@ -944,7 +721,7 @@ int8_t echo_command()
     }
     else
     {
-        Serial.println(decode_input_value_float(1), floating_decimal_places);
+        Serial.println(decode_input_value_float(1), DEFAULT_DECIMAL_PLACES);
     }
     return T_OK;
 }
@@ -1005,7 +782,6 @@ int8_t stop_motors_and_everything_command()
     rot_set_speed = 0;
 
     // add action stop here as well
-
     return T_OK;
 }
 
@@ -1060,7 +836,7 @@ int8_t print_bat()
     }
     else
     {
-        Serial.println(battery_voltage, floating_decimal_places);
+        Serial.println(battery_voltage, DEFAULT_DECIMAL_PLACES);
     }
     return T_OK;
 }
@@ -1103,7 +879,7 @@ int8_t set_target_speed()
     int target_fwd_speed_in_mm_per_second;
     int target_rotational_speed_in_degrees_per_second;
 
-    if(inputString[1] == ',')
+    if (inputString[1] == ',')
     {
         // rotation speed only
         target_rotational_speed_in_degrees_per_second = decode_input_value_signed(2);
@@ -1130,6 +906,84 @@ int8_t set_target_speed()
     return T_OK;
 }
 
+int execute_settings_command(char *line)
+{
+    // we already know that line[0] == '$'
+    if (line[1] == '\0')
+    {
+        return T_OK;
+    }
+    if (line[2] == '\0')
+    { // one of the single character commands
+        switch (line[1])
+        {
+            case '$':
+                dump_settings(5);
+                return T_OK;
+                break;
+            case '#':
+                restore_default_settings();
+                return T_OK;
+                break;
+            case '@':
+                load_settings_from_eeprom();
+                return T_OK;
+                break;
+            case '!':
+                save_settings_to_eeprom();
+                return T_OK;
+                break;
+            case '?':
+                // could be used by host to populate its data structures
+                // list the settings names and types?
+                // or send them as a C declaration?
+                // or a JSON object ...
+                dump_settings_detail();
+                return T_OK;
+                break;
+        }
+    }
+
+    //OK - so it must be a parameter fetch/update
+    uint8_t pos = 1; // the first character [0] is already known
+    // get the parameter index
+    int index;
+    if (!read_integer(line, &pos, &index))
+    {
+        // This could be the place to trigger a string search
+        return T_UNEXPECTED_TOKEN;
+    }
+    if (index < 0 or index >= get_settings_count())
+    {
+        return T_OUT_OF_RANGE;
+    }
+
+    // There is a parameter index, now see if this is an assignment
+    if (line[pos++] != '=')
+    {
+        print_setting(index, 3); // no, just report the value
+        Serial.println();
+        return T_OK;
+    }
+
+    // It was an assignment so get the value
+    float value;
+    if (!read_float(line, &pos, &value))
+    {
+        return T_OUT_OF_RANGE;
+    }
+    // Any remaining characters are ignored
+
+    // Everything must have worked. Woot!
+    write_setting(index, value);
+    return T_OK;
+}
+
+int8_t system_command()
+{
+    return execute_settings_command(inputString);
+}
+
 int8_t not_implemented()
 {
     interpreter_error(T_UNKNOWN_COMMAND, inputString);
@@ -1144,7 +998,7 @@ const PROGMEM fptr PROGMEM cmd2[] =
         not_implemented,               // '!'
         not_implemented,               // '"'
         not_implemented,               // '#'
-        stored_parameter_control,      // '$'
+        system_command,                // '$'
         not_implemented,               // '%'
         not_implemented,               // '&'
         not_implemented,               // '''
@@ -1259,7 +1113,7 @@ void parse_cmd()
 #define CTRL_C 0x03
 #define BACKSPACE 0x08
 #define CTRL_X 0x18
-static char last_NL = 0;        // tracks NL changes
+static char last_NL = 0; // tracks NL changes
 
 /** @brief  Command line interpreter.
  *  @return Void.

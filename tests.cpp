@@ -31,17 +31,31 @@
   OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
   SOFTWARE.
 */
-#include "tests.h"
+#include "interpreter.h"
 #include "public.h"
+#include "read-number.h"
 #include "stopwatch.h"
 #include "switches.h"
+#include "tests.h"
 
 int8_t cmd_test_runner()
 {
-    int test = decode_input_value(1);
+    Stopwatch sw;
+    int test;
+    test = decode_input_value(1);
+    // int index = 1;
+    // bool ok = read_integer(inputString, &index, &test);
     Serial.print(F("TEST: "));
     Serial.println(test);
-    test_controllers();
+    Serial.println(sw.split());
+    switch (test)
+    {
+        case 1:
+            test_controllers();
+            break;
+        default:
+            break;
+    }
     return T_OK;
 }
 
@@ -74,6 +88,7 @@ void log_controller_data()
  */
 void test_controllers()
 {
+    enable_controllers();
     Serial.print(F("CONTROLLER TEST - "));
     bool was_using_ff = flag_controllers_use_ff;
     if (readFunctionSwitch() & 0x01)
@@ -91,7 +106,6 @@ void test_controllers()
     delay(100);
     uint32_t tick = millis() + 10;
     Stopwatch sw;
-    uint32_t start_time = millis();
     while (not button_pressed() && sw.split() < (5 * ONE_SECOND))
     {
         if (millis() > tick)
@@ -110,6 +124,8 @@ void test_controllers()
     fwd_set_speed = 0;
     rot_set_speed = 0;
     flag_controllers_use_ff = was_using_ff;
+    disable_controllers();
+    setMotorVolts(0, 0);
 };
 
 void test_fwd_feedforward(){

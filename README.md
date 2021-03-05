@@ -1,9 +1,9 @@
 # UKMARSEY Command Language
 
-This is a real-time command language for low level I/O micros of mobile robots, and first with the UKMARSBOT Robot. 
+This is a real-time command language for low level I/O micros of mobile robots, and first with the UKMARSBOT Robot.
 
-The commands are terse but intended to be entered either by human via a 
-terminal or via machine, e.g. a Pi Zero. It's intention is to allow real-time 
+The commands are terse but intended to be entered either by human via a
+terminal or via machine, e.g. a Pi Zero. It's intention is to allow real-time
 command loops of low level operations, or high-level control for less experienced users.
 
 NOTE: Originally this project was intended as a wall follower for the UKMARSBOT robot, but it only got as far as a hardware test command line via a simple command line interpreter before it was repurposed.
@@ -21,7 +21,7 @@ This project is licensed under the MIT license.
 
 Loads into Arduino via serial lead from the Arduino IDE. You can issue commands to get the robot to do things.
 
-As well as directly commanding the robot over the serial port, it's designed to be controlled from a host CPU which can be anything 
+As well as directly commanding the robot over the serial port, it's designed to be controlled from a host CPU which can be anything
 but we've been using it with the Raspberry Pi.
 
 There is some more information about development environments in [Code Development](Documentation/code_development.md).
@@ -54,7 +54,7 @@ Once connected you should get a prompt like on reset:
 
 No spaces, tabs or other control characters (below value 32) are allowed in commands, except for those mentioned below in 'Special Control Characters' below, and their use is undefined and may change in future versions of the interpreter. (Technically UTF-8 characters are ok, but none are currently used in commands).
 
-All serial commands are case sensitive. Each command needs to have a LF (10, 0x0D) at the end of it. 
+All serial commands are case sensitive. Each command needs to have a LF (10, 0x0D) at the end of it.
 
 Values are in decimal, but if the value is out of range then interpreter will either issue an error, ignore extra values or interpret this in an undefined way. This last two options are considered undefined operation - and future changes of the interpreter might change the behaviour. Examples are D11= (no value), D11=2 (out of range setting of an I/O port, might throw an error.), D11=100 (out of range, might ignore 00) or D1=-3 (unexpected minus, probably error).
 
@@ -62,9 +62,9 @@ Any commands that return values is done on a seperate line per command. The ends
 
 ## Special Control Characters
 
-* Control-X (0x18) - Soft-Reset - same as Control-C, but stops motors, and any active commands. (Same as 'x' command). 
+* Control-X (0x18) - Soft-Reset - same as Control-C, but stops motors, and any active commands. (Same as 'x' command).
 * Control-C (0x03) - Abort entry of line. NOTICE: Character subsequent to this character will be treated as the start of a new line.
-* Line Feed (LF, 0x10) - Finish line entry and send to the interpreter. 
+* Line Feed (LF, 0x10) - Finish line entry and send to the interpreter.
 * Carriage Return (CR, 0x13) - Ignored by interpreter.
 * Backspace (0x08) - Removes one character from input buffer, assuming input buffer has any characters in. Generates "\x08 \x08" which should step back, erase, then step back. However on some serial terminal emulators this might need to be enabled (e.g. on CoolTerm this option is 'Handle BS and Del Characters').
 
@@ -77,7 +77,7 @@ Note: 'x' command stops the motors in the case of runaway, but requires a newlin
 
 | Cmd | Action    |
 |:---:|-----------|
-| ^ | reset state - writes RST in reply. | 
+| ^ | reset state - writes RST in reply. |
 | ^^ | processor reset |
 | v | show version |
 | V | Verbose error code, 2=extra verbose (default), 1=verbose, 0=numeric - see 'Interpreter errors'.  |
@@ -107,7 +107,7 @@ Examples:
     T-20    Move backward at -20 millimeters per second
     T,11    Rotate anticlockwise at 11 degrees per second
     T,-45   Rotate clockwise at 45 degrees per second
-    T20,11  Move forward at 20 millimeters per second while rotating anticlockwise at 
+    T20,11  Move forward at 20 millimeters per second while rotating anticlockwise at
     T0,0    Stop (both speed and rotation)
     T       Set speed to zero, leave rotation the same value
     T,      Set rotation to zero, leave speed the same value
@@ -120,7 +120,7 @@ Examples:
 |  D  | Dp or Dp=n | Set or read digital pin |
 |  A  | Aa or Ap=n | Read analogue pin, or write PWM pin |
 |  M  | Mm=p       | Motor control, using PWM value. 1 = left motor, 0 or 2 = right motor. PWM value -255 to 255, with 0 as stop. |
-|  N  | Nm,n       | Dual motor control specifying a battery voltage | 
+|  N  | Nm,n       | Dual motor control specifying a battery voltage |
 |  P  | Pp=d       | PinMode - Set up GPIO pins; p is pin, d is I(input) or O(output) or U(Pull Up Input)  |
 
 Regarding analogue readings, (A command), these are read off interrupts, so can be up to 2ms old.
@@ -158,12 +158,12 @@ Output a motor PWM duty cycle from the range 0..255.
     M2=-128         Half PWM backwards, right motor
     M0=128          Right motor
 
-N command also controls the motors, however it's referenced to battery which means we can avoid differnt speeds as the battery discharges - and instead specify voltages rather than PWM (which is in fact a proportion of the current battery voltage). The general format is 'Nf,g' where f and g are signed floats representing voltage levels, negative backwards, positive forward. 
+N command also controls the motors, however it's referenced to battery which means we can avoid differnt speeds as the battery discharges - and instead specify voltages rather than PWM (which is in fact a proportion of the current battery voltage). The general format is 'Nf,g' where f and g are signed floats representing voltage levels, negative backwards, positive forward.
 
     N3.5,-3.5       Left motor 3.5 volts, right motor backwards 3.5 volts
     N0,0            Stop both motors
 
-The advantage of this command is that it will go the same speed regardless of battery level, assuming you keep values to the range underneath the minimum battery voltage expected. 
+The advantage of this command is that it will go the same speed regardless of battery level, assuming you keep values to the range underneath the minimum battery voltage expected.
 
 The Pin mode commands allows the user to configure pins.
 
@@ -196,13 +196,13 @@ Reading an encoder counter might be more involved. It is the total so far and th
 | Cz | Same as C, but also zeros encoders immediately after reading |
 | Ch | Same as C, but values in Hex |
 | ChZ| Same as Ch, but also zeros encoders immediately after reading |
-| z | zero wheel encoder counters. No return. | 
+| z | zero wheel encoder counters. No return. |
 | ea | print wheel current info (all) - Format 'encoder-sum,distance,encoder-difference,angle' |
 | e  | Old command for 'ea' command, still supported for backward compatability |
 | er | print wheel current info (raw format) - Format 'encoder-sum,encoder-difference'|
 | eu | print wheel current info (unit format) - Format 'distance,angle' where distance is mm, angle is degrees |
 | es | print speed (mm/s) and rotation speed (degrees/s)
-| r | print encoder setup - Format 'mm-per-count,degrees-per-count' | 
+| r | print encoder setup - Format 'mm-per-count,degrees-per-count' |
 
 NOTE: 'r' command allows decoding 'er' into distances/angles on the host, rather than taking time to print floating values.
 
@@ -229,9 +229,9 @@ Examples:
 
 ### Sensor Processing commands
 
-It's sometimes necessary, with Infra-red sensors, to read the IR sensor 'dark', turn on IR illumination, take another IR sensor reading ('light') then turn the IR illumination off. 
+It's sometimes necessary, with Infra-red sensors, to read the IR sensor 'dark', turn on IR illumination, take another IR sensor reading ('light') then turn the IR illumination off.
 
-These commands provide the ability to specify up to three output ports for IR illumination, and read up to size sensors. 
+These commands provide the ability to specify up to three output ports for IR illumination, and read up to size sensors.
 
 By default this is set up to read A0, A1, A2, A3 as sensors and use D12 to turn on the IR illumination with a logic 1 , which will work for the standard line and wall followers of the UKMARSBot (although the wall follower doesn't use A3).
 
@@ -274,66 +274,28 @@ Examples of Emitter control:
 
 ### Parameter Commands
 
-Parameters select specific characteristics of high level commands. They are stored in EEPROM so are preserved on power off, especially for human users. 
+Parameters select specific characteristics of high level commands. They are stored in EEPROM so are preserved on power off, especially for human users. Parameters hold values such as the current tuning constants for controllers.
+
+There are three sets of parameters available stored in different locations:
+
+ * FLASH - the defaults hard coded into the firmware when it was build. They cannot be changed by the code.
+ * RAM - the current working versions. These are the settings used by the robot when running and will be lost after a reset.
+ * EEPROM - Held in non-volatile memory, these will survive reset and will normally be read into the RAM settings at reset. Users must manually store settings to EEPROM if they are to be retained over a reset.
 
 | Cmd | Action    |
-|:---:|-----------|
-| $*n* | Read parameter *n* |    
+|:---|-----------|
+| $*n*  | Read parameter *n* |
 | $*n*=*f* | Write parameter *n* with value *f*. E.g. $0=1.1 |
-| $a   | Read all floating parameters seperate lines per parameter. |
-| $b   | Read all boolean (bit) parameters, as 32 seperate lines. |
-| $d   | Default all parameters. |
-
-NOTE: $a and $b will incur serial buffering and block until complete 
-
-Currently all parameters are floating point values. 
-
-A List of specific usage of each parameters is here.
-
-| Param | Action    |
-|:-----:|-----------|
-| 0 | *Undefined* |
-| 1 | *Undefined*  |
-| 2 | *Undefined*  |
-| 3 | *Undefined*  |
-| 4 | *Undefined*  |
-| 5 | *Undefined*  |
-| 6 | *Undefined*  |
-| 7 | *Undefined*  |
-| 8 | *Undefined*  |
-| 9 | *Undefined*  |
-| 10 | *Undefined*  |
-| 11 | *Undefined*  |
-| 12 | *Undefined*  |
-| 13 | *Undefined*  |
-| 14 | *Undefined*  |
-| 15 | *Undefined*  |
-
-There are also 32 boolean ('bit') parameters. The first 16 are listed here. Current all are undefined.
-
-| Param | Action    |
-|:-----:|-----------|
-| 100 | *Undefined* |
-| 101 | *Undefined*  |
-| 102 | *Undefined*  |
-| 103 | *Undefined*  |
-| 104 | *Undefined*  |
-| 105 | *Undefined*  |
-| 106 | *Undefined*  |
-| 107 | *Undefined*  |
-| 108 | *Undefined*  |
-| 109 | *Undefined*  |
-| 110 | *Undefined*  |
-| 111 | *Undefined*  |
-| 112 | *Undefined*  |
-| 113 | *Undefined*  |
-| 114 | *Undefined*  |
-| 115 | *Undefined*  |
+| $$   | display values of all settings in RAM|
+| $?   | Display a detailed list of the working settings as a C declaration |
+| $@   | Load all saved settings from EEPROM |
+| $!   | Store current working settings to EEPROM |
+| $#   | Restore defaults hard-coded in firmware |
 
 
 ### High Level I/O Control
- 
-(to be added) 
+
+(to be added)
 
 ### General Commands
 
@@ -342,11 +304,11 @@ There are also 32 boolean ('bit') parameters. The first 16 are listed here. Curr
 | l |  (lower case L) Led on/off, l0 = led off, l1 = led on. (Short version of D13=x) |
 | ? | just prints 'OK' |
 | h | just prints 'OK' |
-| s | shows the state of the switches. Returns a single number. NOTE: the Button is '16', and overrides the 4 switches | 
+| s | shows the state of the switches. Returns a single number. NOTE: the Button is '16', and overrides the 4 switches |
 | b | shows the voltage of the battery. Example return '7.421' |
 | bi | Shows the voltage of the battery in millivolts. Example: '7421' |
 | bh | Shows the voltage of the battery in millivolts in hex format |
-| m | motor tests (see below) | 
+| m | motor tests (see below) |
 | x | Motor stop (no parameters, no return.) - and cancels any actions |
 
 
@@ -377,14 +339,14 @@ m = motor tests, runs for 2 seconds or until button is pressed.
 
 ## Resetting and getting the Pi in sync with the Arduino.
 
-Send Control-C (or Control-X) followed by ^ repeatedly with a 20ms gap until you receive a RST message. Then try ? and v looking at the responses. If they don't succeeed, then repeat the entire sequence. 
+Send Control-C (or Control-X) followed by ^ repeatedly with a 20ms gap until you receive a RST message. Then try ? and v looking at the responses. If they don't succeeed, then repeat the entire sequence.
 
-This is under review. 
+This is under review.
 
 
 ## Interpreter Errors
 
-Interpreter error text strings (verbose on) are not defined to be stable across versions. Numeric error codes (verbose off) will be stable across releases as far as possible. 
+Interpreter error text strings (verbose on) are not defined to be stable across versions. Numeric error codes (verbose off) will be stable across releases as far as possible.
 
 NOTE: All error messages (both verbose text and numeric are preceeded by '@Error:' as the first characters on the line, except for verbose error for OK, which appears simply as 'OK' on the line.
 
@@ -453,19 +415,19 @@ https://github.com/micromouseonline/ukmarsbot-line-follower-basic
 
 It bares some resemblance in some places to G-code (and implementations like grbl), but does not attempt to maintain any G-code compatability, since really G-code is targetted at CNC not really at self-moving small robots.
 
-Since this runs on an ATMEG328P Arduino Nano, there is not much Flash or RAM, so things like help and extended error messages have been minimised. 
+Since this runs on an ATMEG328P Arduino Nano, there is not much Flash or RAM, so things like help and extended error messages have been minimised.
 
 We aim to have shortened the amount of bytes requiring to be transmitted in order to maximise the bandwidth across the serial link, while still allowing for easy human entry via a text terminal.
 
 
 # Dev Notes
 
-## ADC 
+## ADC
 There are three subsystems running all the time currently on the system tick interrupt that runs every 2ms: battery reading, function switch reading and update sensors control. The analogue command (e.g. A0) uses these subsystems to read the ADCs (partially to avoid conflicts since there is only one ADC unit).
 
 ## Serial Buffering
 
-The Arduino Nano has a 64 byte input buffer and a 64 byte output buffer. Transmission to and from the Arduino needs to be carefully designed not to overrun these buffers. 
+The Arduino Nano has a 64 byte input buffer and a 64 byte output buffer. Transmission to and from the Arduino needs to be carefully designed not to overrun these buffers.
 
 If you overrun the 64 byte output buffer the print commands will start waiting inside the Arduino Nano (the commands will take longer to complete). The could cause several affects - once of which could potentially be commands stacking up in the input buffer. It only requires, for instance perhaps three 'Sr' commands to cause the output buffer to be filled.
 
@@ -481,6 +443,6 @@ One such baud rate table for the AVR on the Arduino Nano includes: https://trols
 
 Remeber to add on the error rate of the other side as well - whehter that be a Rasberry Pi, USB-Serial converter, or other serial port. Sometimes you can get lucky. If they are both, say +3% of the target, then the baud rates will match. But a -2.5% on one end, and a +2.5% on the other end gives 5% error, and this will cause problems. (Although errors rates up to 5% would theoretically work before it meets an edge, the reality of sampling mechanisms, slew rate and other factors means that realistic error rates are well under half of this.)
 
-Sometimes these cannot be simply looked up from microcontroller or microprocessor data sheets - crystals tend to be accurate, but devices with resonators or internal RC oscillators tend to have large tolerance between devices themselves - and this needs to be taken into account. 
+Sometimes these cannot be simply looked up from microcontroller or microprocessor data sheets - crystals tend to be accurate, but devices with resonators or internal RC oscillators tend to have large tolerance between devices themselves - and this needs to be taken into account.
 
 
