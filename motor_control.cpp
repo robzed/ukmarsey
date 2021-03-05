@@ -106,10 +106,10 @@ void motorSetup()
 
     setMotorVolts(0, 0);
     fwd_controller.SetOutputLimits(-6.0, 6.0);
-    fwd_controller.SetMode(AUTOMATIC); // turns on the controller. Set to manual for off.
+    fwd_controller.SetMode(MANUAL); // turns on the controller. Set to manual for off.
     fwd_controller.SetTunings(settings.fwd_kp, settings.fwd_ki, settings.fwd_kd);
     rot_controller.SetOutputLimits(-6.0, 6.0);
-    rot_controller.SetMode(AUTOMATIC); // turns on the controller. Set to manual for off.
+    rot_controller.SetMode(MANUAL); // turns on the controller. Set to manual for off.
     rot_controller.SetTunings(settings.rot_kp, settings.rot_ki, settings.rot_kd);
 }
 
@@ -118,7 +118,6 @@ void update_motors()
 {
     rot_controller.Compute();
     fwd_controller.Compute();
-    // assume both motors behave the same
 
     float left_volts = 0;
     float right_volts = 0;
@@ -132,8 +131,7 @@ void update_motors()
     if (flag_controllers_use_ff)
     {
         float fwd_ff = fwd_set_speed * settings.k_velocity_ff;
-        float rot_ff = rot_set_speed * (WHEEL_SEPARATION / (2 * 57.29)) * settings.k_velocity_ff;
-        // rot_ff = 0;
+        float rot_ff = rot_set_speed * (WHEEL_SEPARATION * PI / 360.0) * settings.k_velocity_ff;
 
         left_volts += fwd_ff;
         right_volts += fwd_ff;
@@ -146,8 +144,6 @@ void update_motors()
     {
         setMotorVolts(left_volts, right_volts);
     }
-    // setMotorVolts(1.4, 1.4);
-    // setMotorVolts(0, 0);
 };
 
 void setLeftMotorPWM(int pwm)
