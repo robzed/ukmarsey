@@ -111,4 +111,10 @@ enum
     T_UNKNOWN_COMMAND = 4,
     T_UNEXPECTED_TOKEN = 5
 };
+
+#define EXPECTED_ROBOT_CONFIG_VERSION 2
+#if ROBOT_CONFIG_VERSION != EXPECTED_ROBOT_CONFIG_VERSION
+#error "robot_config.h is the wrong version - have you updated robot_config.h from robot_config_sample.h?"
+#endif
+
 #endif

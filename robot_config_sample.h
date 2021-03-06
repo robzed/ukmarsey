@@ -73,4 +73,6 @@ const float ROT_KP = 0.010;
 const float ROT_KI = 0.500;
 const float ROT_KD = 0.010;
 
+#define EXPECTED_ROBOT_CONFIG_VERSION 2
+
 #endif
