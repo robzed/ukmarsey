@@ -151,6 +151,8 @@ int8_t led()
     return T_OK;
 }
 
+int8_t stop_motors_and_everything_command();
+
 /** @brief  Reset the robot state to a known value
  *          NOTE: Does not reset $ parameters.
  *  @param
@@ -161,14 +163,19 @@ int8_t reset_state()
     char function = inputString[1];
     if (function == '^')
     {
-        void (*resetFunc)(void) = 0; // declare reset fuction at address 0
+        void (*resetFunc)(void) = 0; // declare reset function at address 0
         resetFunc();
     }
     else
     {
+        stop_motors_and_everything_command();
+
         // We should reset all state here. At the moment there isn't any.
         Serial.println(F("RST"));
+
         // Reset the actual state
+        verbose_errors = TEXT_VERBOSE;
+        interpreter_echo = true;
     }
     return T_OK;
 }
