@@ -33,7 +33,11 @@
 */
 #include "digitalWriteFast.h"
 #include "hardware_pins.h"
-#include "public.h"
+#include "systick.h"
+#include "sensors_control.h"
+#include "distance-moved.h"
+#include "profile.h"
+#include "motors.h"
 #include <Arduino.h>
 #include <pins_arduino.h>
 #include <wiring_private.h>
@@ -89,12 +93,21 @@ void setup_systick()
 ISR(TIMER2_COMPA_vect, ISR_NOBLOCK)
 {
     // digitalWriteFast(LED_BUILTIN, 1);
+    // grab the encoder values first because they will continue to change
+    update_encoders();
+    update_battery_voltage();
+
     battery_voltage = raw_BatteryVolts_adcValue * (2.0 * 5.0 / 1024.0);
-    update_encoders(); //
-    // calculate values, errors and flags from sensor
-    // update system controllers
-    update_motors();
-    // upddate switch debounce if needed
+
+    forward.update();
+    rotation.update();
+#ifdef STEERING_CONTROL_IN_LOW_LEVEL_MCU_ENABLE
+    g_cross_track_error = update_wall_sensors();
+    g_steering_adjustment = calculate_steering_adjustment(g_cross_track_error);
+    update_motor_controllers(g_steering_adjustment);
+#else
+    update_motor_controllers(0);
+#endif
 
     // digitalWriteFast(LED_BUILTIN, 0);
     start_sensor_cycle();

@@ -1,5 +1,5 @@
 /*
- * Switches. Read and test the on-board function switches and button
+ * Generic sensor system (under development).
 
    ukmarsey is a machine and human command-based Robot Low-level I/O platform initially targetting UKMARSBot
    For more information see:
@@ -32,60 +32,41 @@
   SOFTWARE.
 */
 
-#include <Arduino.h>
-#include "switches.h"
-#include "sensors_control.h"
+#ifndef SENSORS_CONTROL_H_
+#define SENSORS_CONTROL_H_
 
-/** @brief  Convert the switch ADC reading into a switch reading.
- *  @return integer in range 0..16
- */
-int readFunctionSwitch()
-{
-    const int adcReading[] = {660, 647, 630, 614, 590, 570, 545, 522, 461,
-                              429, 385, 343, 271, 212, 128, 44, 0};
+void start_sensor_cycle();
+void sensors_control_setup();
+void print_sensors_control(char mode);
+extern char emitter_on;
+void update_battery_voltage();
 
-    if (Switch_ADC_value > 800)
-    {
-        return 16;
-    }
-    for (int i = 0; i < 16; i++)
-    {
-        if (Switch_ADC_value > (adcReading[i] + adcReading[i + 1]) / 2)
-        {
-            return i;
-        }
-    }
-    // TODO: should there be a more informative error value?
-    return 15; // should never get here... but if we do show 15
-}
+// ADC channels
+extern volatile int raw_BatteryVolts_adcValue;
+extern volatile float battery_voltage;
+extern volatile float g_battery_scale; // adjusts PWM for voltage changes
+extern volatile int Switch_ADC_value;
 
-/** @brief  Test the user pushbutton
- *  There is no debouncing so take care
- *  @return boolean
- */
-bool button_pressed()
-{
-    return readFunctionSwitch() == 16;
-}
+extern volatile int gSensorA0_dark;
+extern volatile int gSensorA1_dark;
+extern volatile int gSensorA2_dark;
+extern volatile int gSensorA3_dark;
+extern volatile int gSensorA4_dark;
+extern volatile int gSensorA5_dark;
 
-void wait_for_button_press()
-{
-    while (not button_pressed())
-    {
-        delay(10);
-    }
-}
+extern volatile int gSensorA0_light;
+extern volatile int gSensorA1_light;
+extern volatile int gSensorA2_light;
+extern volatile int gSensorA3_light;
+extern volatile int gSensorA4_light;
+extern volatile int gSensorA5_light;
 
-void wait_for_button_release()
-{
-    while (button_pressed())
-    {
-        delay(10);
-    }
-}
-
-void wait_for_button_click()
-{
-    wait_for_button_press();
-    wait_for_button_release();
-}
+/*** steering variables ***/
+#ifdef STEERING_CONTROL_IN_LOW_LEVEL_MCU_ENABLE
+extern bool g_steering_enabled;
+extern volatile float g_cross_track_error;
+extern volatile float g_steering_adjustment;
+#else
+const bool g_steering_enabled = false;
+#endif
+#endif /* SENSORS_CONTROL_H_ */

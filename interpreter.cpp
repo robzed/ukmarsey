@@ -35,11 +35,15 @@
 */
 #include "interpreter.h"
 #include "digitalWriteFast.h"
-#include "public.h"
 #include "read-number.h"
 #include "settings.h"
 #include "switches.h"
 #include "tests.h"
+#include "motors.h"
+#include "profile.h"
+#include "distance-moved.h"
+#include "sensors_control.h"
+#include "misc_definitions.h"
 #include <Arduino.h>
 
 /*
@@ -200,13 +204,20 @@ int8_t print_switches()
     return T_OK;
 }
 
+// helper function
+static void setMotorVolts(float left, float right)
+{
+    set_left_motor_volts(left);
+    set_right_motor_volts(right);
+}
+
 /** @brief  Select one of several hardware motor tests.
  *  @param
  *  @return void
  */
 int8_t motor_test()
 {
-    disable_controllers();
+    disable_motor_controllers();
     char function = inputString[1];
 
     switch (function)
@@ -525,7 +536,7 @@ int8_t analogue_control()
  */
 int8_t motor_control()
 {
-    disable_controllers();
+    disable_motor_controllers();
     int motor = decode_input_value(1);
     if (motor >= 0)
     {
@@ -536,11 +547,11 @@ int8_t motor_control()
             int motorPWM = decode_input_value_signed(inputIndex + 1);
             if (motor == 1)
             {
-                setLeftMotorPWM(motorPWM);
+                set_left_motor_pwm(motorPWM);
             }
             else
             {
-                setRightMotorPWM(motorPWM);
+                set_right_motor_pwm(motorPWM);
             }
         }
         else // read motor
@@ -634,7 +645,7 @@ int8_t encoder_values()
  */
 int8_t motor_control_dual_voltage()
 {
-    disable_controllers();
+    disable_motor_controllers();
     float motor_left = decode_input_value_float(1);
     if (inputString[inputIndex] == ',')
     {
@@ -780,13 +791,14 @@ int8_t pinMode_command()
  */
 int8_t stop_motors_and_everything_command()
 {
-    disable_controllers();
-    setMotorVolts(0, 0);
+    disable_motor_controllers();
+    stop_motors();
 
     // not strictly necessary, because we've disabled the
     // controller - but we do this anyway
-    fwd_set_speed = 0;
-    rot_set_speed = 0;
+    forward.reset();
+    rotation.reset();
+    reset_motor_controllers();
 
     // add action stop here as well
     return T_OK;
@@ -883,6 +895,9 @@ void print_serial_capture_read_buff()
 
 int8_t set_target_speed()
 {
+    // @TODO: Add set_target_speed or similar function back in!
+}
+#if 0
     int target_fwd_speed_in_mm_per_second;
     int target_rotational_speed_in_degrees_per_second;
 
@@ -909,9 +924,10 @@ int8_t set_target_speed()
     }
 
     // make sure the controller is enabled
-    enable_controllers();
+    enable_motor_controllers();
     return T_OK;
 }
+#endif
 
 int execute_settings_command(char *line)
 {

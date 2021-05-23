@@ -32,7 +32,6 @@
   SOFTWARE.
 */
 #include "interpreter.h"
-#include "public.h"
 #include "read-number.h"
 #include "stopwatch.h"
 #include "switches.h"
@@ -63,6 +62,7 @@ int8_t cmd_test_runner()
 
 void log_controller_data()
 {
+#if 0
     Serial.print(millis());
     Serial.print(' ');
     Serial.print(fwd_set_speed);
@@ -77,6 +77,7 @@ void log_controller_data()
     Serial.print(' ');
     Serial.print(rot_volts); // placeholder for controller voltage
     Serial.println();
+#endif
 }
 
 /***
@@ -88,6 +89,7 @@ void log_controller_data()
  */
 void test_controllers()
 {
+#if 0
     enable_controllers();
     Serial.print(F("CONTROLLER TEST - "));
     bool was_using_ff = flag_controllers_use_ff;
@@ -126,6 +128,7 @@ void test_controllers()
     flag_controllers_use_ff = was_using_ff;
     disable_controllers();
     setMotorVolts(0, 0);
+#endif
 };
 
 void test_fwd_feedforward(){

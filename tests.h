@@ -36,7 +36,6 @@
 #define TESTS_H
 
 #include <Arduino.h>
-#include "public.h"
 
 /***
  * All the tests in this module are normally run via calls to this function

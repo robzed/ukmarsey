@@ -35,9 +35,10 @@
 
 #include "digitalWriteFast.h"
 #include "hardware_pins.h"
-#include "public.h"
 #include "robot_config.h"
 #include "stopwatch.h"
+#include "distance-moved.h"
+#include "interpreter.h"
 #include <Arduino.h>
 #include <util/atomic.h>
 
@@ -72,8 +73,8 @@ float robot_omega;    // deg/s
  *
  */
 
-static volatile int encoder_left_count;  // Updated by pin change interrupts. Reset every loop interval.
-static volatile int encoder_right_count; // Updated by pin change interrupts. Reset every loop interval.
+static volatile int encoder_left_counter;  // Updated by pin change interrupts. Reset every loop interval.
+static volatile int encoder_right_counter; // Updated by pin change interrupts. Reset every loop interval.
 
 void setup_encoders()
 {
@@ -87,7 +88,7 @@ void setup_encoders()
         bitSet(EICRA, ISC00);
         // enable the interrupt
         bitSet(EIMSK, INT0);
-        encoder_left_count = 0;
+        encoder_left_counter = 0;
         // right
         pinMode(ENCODER_RIGHT_CLK, INPUT);
         pinMode(ENCODER_RIGHT_B, INPUT);
@@ -96,7 +97,7 @@ void setup_encoders()
         bitSet(EICRA, ISC10);
         // enable the interrupt
         bitSet(EIMSK, INT1);
-        encoder_right_count = 0;
+        encoder_right_counter = 0;
     }
     zero_encoders();
 }
@@ -112,10 +113,10 @@ void update_encoders()
     // Make sure values don't change while being read. Be quick.
     ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
     {
-        left_count = encoder_left_count;
-        right_count = encoder_right_count;
-        encoder_left_count = 0;
-        encoder_right_count = 0;
+        left_count = encoder_left_counter;
+        right_count = encoder_right_counter;
+        encoder_left_counter = 0;
+        encoder_right_counter = 0;
     }
 
     encoder_right_total += right_count;
@@ -135,12 +136,12 @@ void update_encoders()
 // Interrupt called every time there is a change on the left encoder
 ISR(INT0_vect)
 {
-    static bool oldA = 0;
-    static bool oldB = 0;
+    static bool oldA = false;
+    static bool oldB = false;
     bool newB = digitalReadFast(ENCODER_LEFT_B);
     bool newA = digitalReadFast(ENCODER_LEFT_CLK) ^ newB;
     int delta = ENCODER_LEFT_POLARITY * ((oldA ^ newB) - (newA ^ oldB));
-    encoder_left_count += delta;
+    encoder_left_counter += delta;
     oldA = newA;
     oldB = newB;
 }
@@ -148,12 +149,12 @@ ISR(INT0_vect)
 // Interrupt called every time there is a change on the right encoder
 ISR(INT1_vect)
 {
-    static bool oldA = 0;
-    static bool oldB = 0;
+    static bool oldA = false;
+    static bool oldB = false;
     bool newB = digitalReadFast(ENCODER_RIGHT_B);
     bool newA = digitalReadFast(ENCODER_RIGHT_CLK) ^ newB;
     int delta = ENCODER_RIGHT_POLARITY * ((oldA ^ newB) - (newA ^ oldB));
-    encoder_right_count += delta;
+    encoder_right_counter += delta;
     oldA = newA;
     oldB = newB;
 }

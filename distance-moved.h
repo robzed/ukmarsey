@@ -1,5 +1,6 @@
 /*
- * Switches. Read and test the on-board function switches and button
+ * distance-moved - provides encoder interrupts to measure distance moved
+ * usually by encoders on the motor shafts.
 
    ukmarsey is a machine and human command-based Robot Low-level I/O platform initially targetting UKMARSBot
    For more information see:
@@ -32,60 +33,22 @@
   SOFTWARE.
 */
 
-#include <Arduino.h>
-#include "switches.h"
-#include "sensors_control.h"
+#ifndef DISTANCE_MOVED_H_
+#define DISTANCE_MOVED_H_
 
-/** @brief  Convert the switch ADC reading into a switch reading.
- *  @return integer in range 0..16
- */
-int readFunctionSwitch()
-{
-    const int adcReading[] = {660, 647, 630, 614, 590, 570, 545, 522, 461,
-                              429, 385, 343, 271, 212, 128, 44, 0};
+void setup_encoders();
+int8_t print_encoder_setup();
+int8_t zero_encoders();
+void update_encoders();
+bool print_encoders(char select);
 
-    if (Switch_ADC_value > 800)
-    {
-        return 16;
-    }
-    for (int i = 0; i < 16; i++)
-    {
-        if (Switch_ADC_value > (adcReading[i] + adcReading[i + 1]) / 2)
-        {
-            return i;
-        }
-    }
-    // TODO: should there be a more informative error value?
-    return 15; // should never get here... but if we do show 15
-}
+extern float robot_velocity;
+extern float robot_omega;
 
-/** @brief  Test the user pushbutton
- *  There is no debouncing so take care
- *  @return boolean
- */
-bool button_pressed()
-{
-    return readFunctionSwitch() == 16;
-}
+extern float robot_distance;
+extern float robot_angle;
 
-void wait_for_button_press()
-{
-    while (not button_pressed())
-    {
-        delay(10);
-    }
-}
+extern int32_t encoder_left_total;
+extern int32_t encoder_right_total;
 
-void wait_for_button_release()
-{
-    while (button_pressed())
-    {
-        delay(10);
-    }
-}
-
-void wait_for_button_click()
-{
-    wait_for_button_press();
-    wait_for_button_release();
-}
+#endif /* DISTANCE_MOVED_H_ */

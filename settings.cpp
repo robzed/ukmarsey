@@ -148,11 +148,6 @@ void dump_settings_detail(const int dp)
     }
 }
 
-void reset_eeprom_settings_to_defaults()
-{
-    restore_default_settings();
-    save_settings_to_eeprom();
-}
 
 void save_settings_to_eeprom()
 {
@@ -171,10 +166,10 @@ void load_settings_from_eeprom(bool verbose)
     {
         if (verbose)
         {
-            Serial.println(F("settings updated."));
-            dump_settings_detail();
+            Serial.println(F("@Defaulting Params"));
+            //dump_settings_detail();
         }
-        reset_eeprom_settings_to_defaults();
+        restore_default_settings();
     }
 }
 
@@ -323,6 +318,7 @@ int write_setting(const int i, const char *valueString)
 int restore_default_settings()
 {
     memcpy_P(&settings, &defaults, sizeof(defaults));
+    save_settings_to_eeprom();
     return 0;
 }
 

@@ -32,12 +32,14 @@
   SOFTWARE.
 */
 
-#include "public.h"
 #include "settings.h"
 #include "stopwatch.h"
+#include "sensors_control.h"
+#include "motors.h"
+#include "distance-moved.h"
+#include "systick.h"
+#include "interpreter.h"
 #include <Arduino.h>
-const int REPORTING_INTERVAL = 10;
-uint32_t report_time_trigger;
 
 // TODO: we probably need to deal properly with different types of reset
 void setup()
@@ -47,10 +49,11 @@ void setup()
     Serial.println(F("\nHello from ukmarsey"));
     load_settings_from_eeprom();
     setup_systick();
-    sensors_control_setup();
+    //enable_sensors();
+    setup_motors();
     setup_encoders();
-    motorSetup();
-    report_time_trigger += REPORTING_INTERVAL;
+    sensors_control_setup();
+    //disable_sensors();
 }
 
 void loop()

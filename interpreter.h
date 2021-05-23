@@ -45,4 +45,16 @@ void interpreter();
 
 int decode_input_value(int index);
 
+// These are the error codes produced by commands to pass into interpreter error.
+enum
+{
+    T_SILENT_ERROR = -1, // Special error code designed for ?, h and unimplemented commands that report their own errors.
+    T_OK = 0,            // Normal 'no error' return code.
+    T_OUT_OF_RANGE = 1,
+    T_READ_NOT_SUPPORTED = 2,
+    T_LINE_TOO_LONG = 3,
+    T_UNKNOWN_COMMAND = 4,
+    T_UNEXPECTED_TOKEN = 5
+};
+
 #endif /* INTERPRETER_H_ */

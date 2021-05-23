@@ -51,8 +51,8 @@
 #define SETTINGS_H
 
 #include "robot_config.h"
-#include "public.h"
-#include <Arduino.h>
+#include "misc_definitions.h"
+#include <stdint.h>
 
 /***
  * The revision number can be used to indicate a change to the settings
@@ -76,7 +76,7 @@
  *
  * NOTE: this means that any custom values in EEPROM will be lost.
  */
-const int SETTINGS_REVISION = 1009;
+const int SETTINGS_REVISION = 1010;
 
 /***
  * The address of the copy stored in EEPROM must be fixed. Although the size of
@@ -121,15 +121,28 @@ enum TypeName : uint8_t
  */
 #define SETTINGS_PARAMETERS(ACTION)             \
     ACTION(int, revision, SETTINGS_REVISION)    \
-    ACTION(float, fwd_kp,        FWD_KP  )      \
-    ACTION(float, fwd_ki,        FWD_KI  )      \
-    ACTION(float, fwd_kd,        FWD_KD  )      \
-    ACTION(float, rot_kp,        ROT_KP  )      \
-    ACTION(float, rot_ki,        ROT_KI  )      \
-    ACTION(float, rot_kd,        ROT_KD  )      \
-    ACTION(float, k_velocity_ff, SPEED_FF)      \
-    ACTION(float, k_bias_ff,     BIAS_FF )      \
+    ACTION(uint16_t, flags,          0                    ) \
+    ACTION(float, fwdKP ,            FWD_KP               ) \
+    ACTION(float, fwdKD ,            FWD_KD               ) \
+    ACTION(float, rotKP ,            ROT_KP               ) \
+    ACTION(float, rotKD ,            ROT_KD               ) \
+    ACTION(float, steering_KP,       STEERING_KP          ) \
+    ACTION(float, steering_KD,       STEERING_KD          ) \
+    ACTION(float, mouseRadius,       MOUSE_RADIUS         ) \
+    ACTION(int,   left_calibration,  LEFT_CALIBRATION     ) \
+    ACTION(int,   front_calibration, FRONT_CALIBRATION    ) \
+    ACTION(int,   right_calibration, RIGHT_CALIBRATION    ) \
+    ACTION(float, left_adjust,       LEFT_SCALE           ) \
+    ACTION(float, front_adjust,      FRONT_SCALE          ) \
+    ACTION(float, right_adjust,      RIGHT_SCALE          ) \
+    ACTION(int,   left_threshold,    LEFT_THRESHOLD       ) \
+    ACTION(int,   front_threshold,   FRONT_THRESHOLD      ) \
+    ACTION(int,   right_threshold,   RIGHT_THRESHOLD      ) \
+    ACTION(int,   left_nominal,      LEFT_NOMINAL         ) \
+    ACTION(int,   front_nominal,     FRONT_NOMINAL        ) \
+    ACTION(int,   right_nominal,     RIGHT_NOMINAL        ) \
 \
+
 
 /***
  * These macros are going to be used to generate individual entries in

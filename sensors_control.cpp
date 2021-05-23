@@ -33,9 +33,11 @@
 */
 #include "digitalWriteFast.h"
 #include "hardware_pins.h"
-#include "public.h"
+#include "sensors_control.h"
 #include <Arduino.h>
 #include <util/atomic.h>
+#include <wiring_private.h>
+
 /***
  * Global variables
  */
@@ -61,6 +63,8 @@ volatile int gSensorA5_light;
 
 volatile int raw_BatteryVolts_adcValue;
 volatile float battery_voltage;
+volatile float g_battery_scale;
+
 volatile int Switch_ADC_value;
 const float batteryDividerRatio = 2.0f;
 
@@ -84,6 +88,17 @@ void analogueSetup()
     bitSet(ADCSRA, ADPS2);
     bitClear(ADCSRA, ADPS1);
     bitSet(ADCSRA, ADPS0);
+}
+
+/*
+ * Update battery voltage calculates the battery voltage and also
+ * the scale factor used in the motor control
+ *
+ */
+void update_battery_voltage()
+{
+    battery_voltage = raw_BatteryVolts_adcValue * (2.0 * 5.0 / 1024.0);
+    g_battery_scale = 255.0 / battery_voltage;
 }
 
 /***
