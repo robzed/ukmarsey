@@ -33,6 +33,7 @@
 #include "motors.h"
 #include "digitalWriteFast.h"
 //#include "encoders.h"
+#include "distance-moved.h"
 #include "profile.h"
 #include "sensors_control.h"
 #include "settings.h"
@@ -85,8 +86,7 @@ void setup_motors()
 
 float position_controller()
 {
-    // @TODO: UNCOMMENT THIS LINE ROB !!!!!!!!!!!
-    //s_fwd_error += forward.increment() - robot_fwd_increment();
+    s_fwd_error += forward.increment() - robot_fwd_increment();
     float diff = s_fwd_error - s_old_fwd_error;
     s_old_fwd_error = s_fwd_error;
     float output = settings.fwdKP * s_fwd_error + settings.fwdKD * diff;
@@ -95,8 +95,7 @@ float position_controller()
 
 float angle_controller(float steering_adjustment)
 {
-    // @TODO: UNCOMMENT THIS LINE ROB !!!!!!!!!!!
-    //s_rot_error += rotation.increment() - robot_rot_increment();
+    s_rot_error += rotation.increment() - robot_rot_increment();
     if (g_steering_enabled)
     {
         s_rot_error += steering_adjustment;

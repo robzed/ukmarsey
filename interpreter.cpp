@@ -190,7 +190,7 @@ int8_t reset_state()
  */
 int8_t show_version()
 {
-    Serial.println(F("v1.4"));
+    Serial.println(F("v1.5"));
     return T_OK;
 }
 
@@ -574,30 +574,14 @@ int8_t encoder_values()
     int motor = decode_input_value(1);
     if (motor >= 0)
     {
-        if (inputString[inputIndex] == '=')
+        // read motor
+        if (motor == 1)
         {
-            // write encoder
-            //
-            int32_t param = decode_input_value_signed(inputIndex + 1);
-            if (motor == 1)
-            {
-                encoder_left_total = param;
-            }
-            else
-            {
-                encoder_right_total = param;
-            }
+            Serial.println(encoder_left_total());
         }
-        else // read motor
+        else
         {
-            if (motor == 1)
-            {
-                Serial.println(encoder_left_total);
-            }
-            else
-            {
-                Serial.println(encoder_right_total);
-            }
+            Serial.println(encoder_right_total());
         }
     }
     else
@@ -606,12 +590,11 @@ int8_t encoder_values()
         if (c == 'h')
         {
             // read both encoder values ahead of time so print time doesn't offset.
-            int32_t left = encoder_left_total;
-            int32_t right = encoder_right_total;
+            int32_t left = encoder_left_total();
+            int32_t right = encoder_right_total();
             if (inputString[2] == 'z')
             {
-                encoder_left_total = 0;
-                encoder_right_total = 0;
+                reset_encoders();
             }
 
             Serial.print(left, HEX);
@@ -621,12 +604,11 @@ int8_t encoder_values()
         else if (c == 0 or c == 'z')
         {
             // read both encoder values ahead of time so print time doesn't offset.
-            int32_t left = encoder_left_total;
-            int32_t right = encoder_right_total;
+            int32_t left = encoder_left_total();
+            int32_t right = encoder_right_total();
             if (c == 'z')
             {
-                encoder_left_total = 0;
-                encoder_right_total = 0;
+                reset_encoders();
             }
             Serial.print(left);
             Serial.print(",");
@@ -705,7 +687,7 @@ int8_t emitter_control()
     int param = decode_input_value(1);
     if (param == 0 or param == 1)
     {
-        emitter_on = param;
+        emitter_on(param);
     }
     else
     {

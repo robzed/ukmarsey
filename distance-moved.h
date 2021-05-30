@@ -36,19 +36,23 @@
 #ifndef DISTANCE_MOVED_H_
 #define DISTANCE_MOVED_H_
 
+#include <stdint.h>
+
+uint32_t encoder_left_total();
+uint32_t encoder_right_total();
+
+void reset_encoders();
 void setup_encoders();
-int8_t print_encoder_setup();
-int8_t zero_encoders();
 void update_encoders();
+
+float robot_fwd_increment();
+float robot_rot_increment();
+
+float robot_position();
+float robot_angle();
+
+int8_t print_encoder_setup();
 bool print_encoders(char select);
-
-extern float robot_velocity;
-extern float robot_omega;
-
-extern float robot_distance;
-extern float robot_angle;
-
-extern int32_t encoder_left_total;
-extern int32_t encoder_right_total;
+int8_t zero_encoders();
 
 #endif /* DISTANCE_MOVED_H_ */

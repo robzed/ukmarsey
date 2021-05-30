@@ -38,7 +38,7 @@
 void start_sensor_cycle();
 void sensors_control_setup();
 void print_sensors_control(char mode);
-extern char emitter_on;
+void emitter_on(bool state);
 void update_battery_voltage();
 
 // ADC channels

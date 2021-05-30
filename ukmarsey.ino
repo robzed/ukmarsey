@@ -39,16 +39,20 @@
 #include "distance-moved.h"
 #include "systick.h"
 #include "interpreter.h"
+#include "hardware_pins.h"
 #include <Arduino.h>
 
 // TODO: we probably need to deal properly with different types of reset
 void setup()
 {
-    pinMode(LED_BUILTIN, OUTPUT);
     Serial.begin(115200);
     Serial.println(F("\nHello from ukmarsey"));
     load_settings_from_eeprom();
     setup_systick();
+    pinMode(USER_IO, OUTPUT);
+    pinMode(EMITTER_A, OUTPUT);
+    pinMode(EMITTER_B, OUTPUT);
+    pinMode(LED_BUILTIN, OUTPUT);
     //enable_sensors();
     setup_motors();
     setup_encoders();

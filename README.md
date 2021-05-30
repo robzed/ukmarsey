@@ -42,7 +42,7 @@ These can be configured in the file 'robot_config.h'. See that file and make app
 
 # Summary of Interpreter Usage
 
-NOTICE: This document reflects version 1.4 of the interpreter.
+NOTICE: This document reflects version 1.5 of the interpreter.
 
 ## Serial Connection and Command Entry
 
@@ -191,22 +191,22 @@ Reading an encoder counter might be more involved. It is the total so far and th
 |:---:|-----------|
 | C0 | Read right wheel counter, also possible to use C2 |
 | C1 | Read Left wheel counter. Might return the left wheel counter as '-3752901'. |
-| C*n*=*m* | Set the Wheel count value, usually. e.g. C1=0 where n=1 and m=0. |
 | C  | Alone with no parameters - prints both encoders as 'left,right' |
-| Cz | Same as C, but also zeros encoders immediately after reading |
+| Cz | Same as C, but also zeros encoders immediately after reading. See warning. |
 | Ch | Same as C, but values in Hex |
-| ChZ| Same as Ch, but also zeros encoders immediately after reading |
-| z | zero wheel encoder counters. No return. |
+| ChZ| Same as Ch, but also zeros encoders immediately after reading. See warning. |
+| z | zero wheel encoder counters. No return. See Warning.|
 | ea | print wheel current info (all) - Format 'encoder-sum,distance,encoder-difference,angle' |
 | e  | Old command for 'ea' command, still supported for backward compatability |
 | er | print wheel current info (raw format) - Format 'encoder-sum,encoder-difference'|
 | eu | print wheel current info (unit format) - Format 'distance,angle' where distance is mm, angle is degrees |
-| es | print speed (mm/s) and rotation speed (degrees/s)
+| es | print speed (mm/s) and rotation speed (degrees/s). Note: instant estimates only - use measurements over longer periods for better results. |
 | r | print encoder setup - Format 'mm-per-count,degrees-per-count' |
 
+Warning: Zeroing encoders while speed/rotation control commands are working is a bad idea and will likely lead to unexpected operation.
+ 
 NOTE: 'r' command allows decoding 'er' into distances/angles on the host, rather than taking time to print floating values.
 
-Setting a counter using 'C' command is usually to zero but could be any legal value. Therefore a quick 'z' command is provided.
 
 Examples:
     C
@@ -240,7 +240,7 @@ By default this is set up to read A0, A1, A2, A3 as sensors and use D12 to turn 
 |  S  | Read sensors - gives difference between dark and light - which is what you normal what you need |
 |  Sr | Read sensors 'raw' format - dark values then light values seperated by commas. |
 |  Sh | As per S, but in hex from 0-FF without commas. You can get more data samples per second in this format. |
-|  *  | Enable/Disable emitter LED Control. Used to save power. |
+|  *  | Enable/Disable emitter LED Control. Used to save power. *0 and *1 |
 
 NOTE: Sh values are divided by 4 (lose bottom 2 bits), capped at 255 (FF). The bottom bits are generally noise anyway. Use this if the transfer time is more important than resolution.
 

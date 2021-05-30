@@ -156,7 +156,14 @@ void updateFunctionSwitch()
     Switch_ADC_value = analogRead(FUNCTION_PIN);
 }
 
-char emitter_on = 1;
+static uint8_t private_emitter_on = 1;
+
+void emitter_on(bool state)
+{
+    private_emitter_on = false;
+    // turn off led
+    digitalWriteFast(EMITTER, 0); // make sure LED is off - otherwise we could have a burnt out LED
+}
 
 void sensors_control_setup()
 {
@@ -341,7 +348,7 @@ ISR(ADC_vect)
         case 8:
             gSensorA5_dark = get_adc_result();
             // got all the dark ones so light them up
-            if (emitter_on)
+            if (private_emitter_on)
             {
                 digitalWriteFast(EMITTER, 1);
             }
@@ -373,7 +380,7 @@ ISR(ADC_vect)
             break;
         case 15:
             gSensorA5_light = get_adc_result();
-            if (emitter_on)
+            if (private_emitter_on)
             {
                 digitalWriteFast(EMITTER, 0);
             }
