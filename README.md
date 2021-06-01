@@ -305,6 +305,29 @@ There are three sets of parameters available stored in different locations:
 | $!   | Store current working settings to EEPROM |
 | $#   | Restore defaults hard-coded in firmware |
 
+#### List of parameters
+
+     0 ACTION(int, revision, SETTINGS_REVISION)                \ used for tracking settings revision
+     1 ACTION(uint16_t, flags,          0                    ) \ not used yet
+     2 ACTION(float, fwdKP ,            FWD_KP               ) \ used by position controller
+     3 ACTION(float, fwdKD ,            FWD_KD               ) \ used by position controller
+     4 ACTION(float, rotKP ,            ROT_KP               ) \ used by rotation controller
+     5 ACTION(float, rotKD ,            ROT_KD               ) \ used by rotation controller
+     6 ACTION(float, steering_KP,       STEERING_KP          ) \ not used set
+     7 ACTION(float, steering_KD,       STEERING_KD          ) \ not used yet
+     8 ACTION(float, mouseRadius,       MOUSE_RADIUS         ) \ not used yet
+     9 ACTION(int,   left_calibration,  LEFT_CALIBRATION     ) \ not used yet
+    10 ACTION(int,   front_calibration, FRONT_CALIBRATION    ) \ not used yet
+    11 ACTION(int,   right_calibration, RIGHT_CALIBRATION    ) \ not used yet
+    12 ACTION(float, left_adjust,       LEFT_SCALE           ) \ not used yet
+    13 ACTION(float, front_adjust,      FRONT_SCALE          ) \ not used yet
+    14 ACTION(float, right_adjust,      RIGHT_SCALE          ) \ not used yet
+    15 ACTION(int,   left_threshold,    LEFT_THRESHOLD       ) \ not used yet
+    16 ACTION(int,   front_threshold,   FRONT_THRESHOLD      ) \ not used yet
+    17 ACTION(int,   right_threshold,   RIGHT_THRESHOLD      ) \ not used yet
+    18 ACTION(int,   left_nominal,      LEFT_NOMINAL         ) \ not used yet
+    19 ACTION(int,   front_nominal,     FRONT_NOMINAL        ) \ not used yet
+    20 ACTION(int,   right_nominal,     RIGHT_NOMINAL        ) \ not used yet
 
 ### High Level I/O Control
 
