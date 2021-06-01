@@ -875,41 +875,102 @@ void print_serial_capture_read_buff()
 }
 #endif
 
-int8_t set_target_speed()
+int8_t tracking_steering_adjustment()
 {
-    // @TODO: Add set_target_speed or similar function back in!
+    float tracking = decode_input_value_float(1);
+    g_steering_adjustment = tracking;
+    return T_OK;
 }
-#if 0
-    int target_fwd_speed_in_mm_per_second;
-    int target_rotational_speed_in_degrees_per_second;
 
-    if (inputString[1] == ',')
+int8_t position_speed_move()
+{
+    char c = inputString[1];
+    if (c == '?')
     {
-        // rotation speed only
-        target_rotational_speed_in_degrees_per_second = decode_input_value_signed(2);
-        rot_set_speed = target_rotational_speed_in_degrees_per_second;
+        forward.is_finished();
+    }
+    else if (c == 'z')
+    {
+        forward.reset();
+    }
+    else // 1,2,3,4
+    {
+        float distance = decode_input_value_float(1);
+        if (inputString[inputIndex] != ',')
+        {
+            return T_UNEXPECTED_TOKEN;
+        }
+        float topSpeed = decode_input_value_float(inputIndex + 1);
+        if (inputString[inputIndex] != ',')
+        {
+            return T_UNEXPECTED_TOKEN;
+        }
+        float finalSpeed = decode_input_value_float(inputIndex + 1);
+        if (inputString[inputIndex] != ',')
+        {
+            return T_UNEXPECTED_TOKEN;
+        }
+        float acceleration = decode_input_value_float(inputIndex + 1);
+        forward.start(distance, topSpeed, finalSpeed, acceleration);
+    }
+    return T_OK;
+}
+
+int8_t rotation_move()
+{
+    char c = inputString[1];
+    if (c == '?')
+    {
+        rotation.is_finished();
+    }
+    else if (c == 'z')
+    {
+        rotation.reset();
+    }
+    else // 1,2,3,4
+    {
+        float distance = decode_input_value_float(1);
+        if (inputString[inputIndex] != ',')
+        {
+            return T_UNEXPECTED_TOKEN;
+        }
+        float topSpeed = decode_input_value_float(inputIndex + 1);
+        if (inputString[inputIndex] != ',')
+        {
+            return T_UNEXPECTED_TOKEN;
+        }
+        float finalSpeed = decode_input_value_float(inputIndex + 1);
+        if (inputString[inputIndex] != ',')
+        {
+            return T_UNEXPECTED_TOKEN;
+        }
+        float acceleration = decode_input_value_float(inputIndex + 1);
+        rotation.start(distance, topSpeed, finalSpeed, acceleration);
+    }
+    return T_OK;
+}
+
+int8_t motor_control_control()
+{
+    char c = inputString[1];
+    if (c == '1')
+    {
+        enable_motor_controllers();
+    }
+    else if (c == '0')
+    {
+        disable_motor_controllers();
+    }
+    else if (c == 'z')
+    {
+        reset_motor_controllers();
     }
     else
     {
-        target_fwd_speed_in_mm_per_second = decode_input_value_signed(1);
-        if (inputString[inputIndex] == ',')
-        {
-            fwd_set_speed = target_fwd_speed_in_mm_per_second;
-            target_rotational_speed_in_degrees_per_second = decode_input_value_signed(inputIndex + 1);
-            rot_set_speed = target_rotational_speed_in_degrees_per_second;
-        }
-        else // no comma
-        {
-            // forward only
-            fwd_set_speed = target_fwd_speed_in_mm_per_second;
-        }
+        return T_UNEXPECTED_TOKEN;
     }
-
-    // make sure the controller is enabled
-    enable_motor_controllers();
     return T_OK;
 }
-#endif
 
 int execute_settings_command(char *line)
 {
@@ -1049,9 +1110,9 @@ const PROGMEM fptr PROGMEM cmd2[] =
         not_implemented,               // 'O'
         pinMode_command,               // 'P'
         not_implemented,               // 'Q'
-        not_implemented,               // 'R'
+        rotation_move,                 // 'R'
         print_sensors_control_command, // 'S'
-        set_target_speed,              // 'T'
+        tracking_steering_adjustment,  // 'T'       // used to be old motor controller
         not_implemented,               // 'U'
         verbose_control,               // 'V'
         not_implemented,               // 'W'
@@ -1070,7 +1131,7 @@ const PROGMEM fptr PROGMEM cmd2[] =
         not_implemented,                    // '`'
         not_implemented,                    // 'a'
         print_bat,                          // 'b'
-        not_implemented,                    // 'c'
+        motor_control_control,              // 'c'
         not_implemented,                    // 'd'
         print_encoders_command,             // 'e'
         not_implemented,                    // 'f'
@@ -1083,7 +1144,7 @@ const PROGMEM fptr PROGMEM cmd2[] =
         motor_test,                         // 'm'
         not_implemented,                    // 'n'
         not_implemented,                    // 'o'
-        not_implemented,                    // 'p'
+        position_speed_move,                // 'p'
         cmd_test_runner,                    // 'q'
         print_encoder_setup,                // 'r'
         print_switches,                     // 's'

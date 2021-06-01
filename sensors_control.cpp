@@ -68,6 +68,8 @@ volatile float g_battery_scale;
 volatile int Switch_ADC_value;
 const float batteryDividerRatio = 2.0f;
 
+volatile float g_steering_adjustment;
+
 /** @brief change the ADC prescaler to give a suitable conversion rate
  *
  * The default for the Arduino is to give a slow ADC clock for maximum

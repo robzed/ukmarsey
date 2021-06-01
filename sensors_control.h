@@ -67,6 +67,7 @@ extern bool g_steering_enabled;
 extern volatile float g_cross_track_error;
 extern volatile float g_steering_adjustment;
 #else
-const bool g_steering_enabled = false;
+const bool g_steering_enabled = true;
+extern volatile float g_steering_adjustment;
 #endif
 #endif /* SENSORS_CONTROL_H_ */

@@ -106,7 +106,7 @@ ISR(TIMER2_COMPA_vect, ISR_NOBLOCK)
     g_steering_adjustment = calculate_steering_adjustment(g_cross_track_error);
     update_motor_controllers(g_steering_adjustment);
 #else
-    update_motor_controllers(0);
+    update_motor_controllers(g_steering_adjustment);
 #endif
 
     // digitalWriteFast(LED_BUILTIN, 0);

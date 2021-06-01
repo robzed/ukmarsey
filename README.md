@@ -92,25 +92,38 @@ Examples:
     E1      Echo input back (for humans with serial terminals)
     E0      Don't echo input back (for machines, or for use with Arduino Serial monitor)
 
-### Speed control commands
+### High level control commands
 
-| Cmd | Params            | Action    |
-|:---:|-------------------|-----------|
-|  T  | Tv,w or Dv or T,w | Set speed (v) in mm/s and/or rotation (w) in degree/s |
+| Cmd | Params| Action    |
+|:---:|--|---------|
+| c1 |  | enable the motor controllers |
+| c0 | | disable the motor controllers |
+| cz | | reset the motor controllers |
+|  |   |  |
+|  |   | POSITION/SPEED MOVE| 
+| p | pd,t,f,a | start positon profile d=distance,t=topSpeed,f=finalSpeed,a=acceleration. Distance is in mm, speeds are in mm/s, acceleration in mm/s/s |
+| p? | | has the position profile finished? |
+| pz | | reset the position profile |
+|    | |   |
+|    | | ROTATION MOVE |
+| R | Rd,t,f,a | start rotation profile d=distance,t=topSpeed,f=finalSpeed,a=acceleration. Distance is in degrees, speeds are in degrees/second, acceleration in degrees/sec/sec |
+| R?  | | has the rotation profile finished? |
+| Rz | | reset the rotation profile |
+|    | |   |
+|    | | TRACKING |
+| T  | Tn | n = tracking/steering adjustment, 0=no adjustment. Used to steer away with walls with a PD controller. This is output of that controller. Applied every cycle until changed. | 
 
-NOTE: Using this command with 'eu' allows mid-level control of the Robot.
 
+NOTE: Using these command allows mid-level control of the Robot.
+
+Combining position with rotation gives smooth curves. Rotation alone will be in-place. If final velocity is not zero robot keeps moving.
 
 Examples:
 
-    T20     Move forward at 20 millimeters per second
-    T-20    Move backward at -20 millimeters per second
-    T,11    Rotate anticlockwise at 11 degrees per second
-    T,-45   Rotate clockwise at 45 degrees per second
-    T20,11  Move forward at 20 millimeters per second while rotating anticlockwise at
-    T0,0    Stop (both speed and rotation)
-    T       Set speed to zero, leave rotation the same value
-    T,      Set rotation to zero, leave speed the same value
+    p100,100,50,400    move 100mm, at 300mm/s finally slowing to 50mm/s with a maximum acceleration of 400mm/s^2
+    T1.02              Add error to tracking/steering.
+
+
 
 
 ### Low Level I/O Control Commands
