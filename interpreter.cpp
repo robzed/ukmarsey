@@ -190,7 +190,7 @@ int8_t reset_state()
  */
 int8_t show_version()
 {
-    Serial.println(F("v1.5"));
+    Serial.println(F("v1.6"));
     return T_OK;
 }
 

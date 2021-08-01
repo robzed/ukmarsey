@@ -162,7 +162,7 @@ static uint8_t private_emitter_on = 1;
 
 void emitter_on(bool state)
 {
-    private_emitter_on = false;
+    private_emitter_on = state;
     // turn off led
     digitalWriteFast(EMITTER, 0); // make sure LED is off - otherwise we could have a burnt out LED
 }
